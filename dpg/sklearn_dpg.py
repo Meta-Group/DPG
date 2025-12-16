@@ -15,6 +15,7 @@ from sklearn.base import is_classifier, is_regressor
 
 from .core import DecisionPredicateGraph
 from .visualizer import plot_dpg
+from .utils import get_dpg_edge_metrics, clustering
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
 
@@ -75,8 +76,8 @@ def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np
 def test_dpg(datasets: str,
              target_column: Optional[str] = None,
              n_learners: int = 5,
-             perc_var: float = 0.001,
-             decimal_threshold: int = 2,
+             perc_var: float = 0.00000001,
+             decimal_threshold: int = 3,
              n_jobs: int = -1,
              model_name: str = 'RandomForestClassifier',
              file_name: Optional[str] = None,
@@ -84,7 +85,10 @@ def test_dpg(datasets: str,
              save_plot_dir: str = "examples/",
              attribute: Optional[str] = None,
              communities: bool = False,
-             class_flag: bool = False) -> Tuple[pd.DataFrame, dict]:
+             clusters_flag: bool = False,
+             threshold_clusters:float = None,
+             class_flag: bool = False,
+             seed:int = 160898) -> Tuple[pd.DataFrame, dict]:
     
     """
     Unified function to train models and extract DPG for both standard and custom datasets.
@@ -107,7 +111,7 @@ def test_dpg(datasets: str,
     
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(
-        data, target, test_size=0.3, random_state=42
+        data, target, test_size=0.3, random_state=seed
     )
     
     # Initialize model
@@ -123,7 +127,7 @@ def test_dpg(datasets: str,
     
     model = model_classes[model_name](
         n_estimators=n_learners,
-        random_state=42,
+        random_state=seed,
         n_jobs=n_jobs
     )
     
@@ -169,8 +173,15 @@ def test_dpg(datasets: str,
         print("Warning: Insufficient nodes for DPG analysis")
         return None, None
     
+    class_nodes = {i[0] : i[1] for i in nodes_list if 'Class' in i[1]}
+    
+    if clusters_flag:
+        clusters, node_prob, confidence = clustering(dpg_model, class_nodes, threshold_clusters)
+    else:
+        clusters = node_prob = confidence = None
 
     df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
+    df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
     df_dpg = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
     
     # Plot if requested
@@ -180,17 +191,20 @@ def test_dpg(datasets: str,
             os.path.splitext(ntpath.basename(datasets))[0] 
             if '.' in datasets else datasets
         )
-        plot_name += f"_{model_name}_l{n_learners}_pv{perc_var}_t{decimal_threshold}"
+        plot_name +=  f"_{model_name}_l{n_learners}_pv{perc_var}_t{decimal_threshold}_{seed}"
         
         plot_dpg(
             plot_name,
             dot,
             df,
+            df_edges,
             df_dpg,
             save_dir=save_plot_dir,
             attribute=attribute,
             communities=communities,
+            clusters=clusters,
+            threshold_clusters=threshold_clusters,
             class_flag=class_flag
         )
     
-    return df, df_dpg
+    return df, df_edges, df_dpg, clusters, node_prob, confidence
