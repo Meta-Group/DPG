@@ -1,4 +1,5 @@
 import os
+import re
 from graphviz import Source
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -14,7 +15,7 @@ from graphviz import Source
 
 Image.MAX_IMAGE_PIXELS = 500000000  # Adjust based on your needs
 
-def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, communities=False, class_flag=False):
+def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribute=None, communities=False, clusters=None, threshold_clusters=None, class_flag=False):
     """
     Plots a Decision Predicate Graph (DPG) with various customization options.
 
@@ -33,7 +34,7 @@ def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, c
     """
     print("Plotting DPG...")
     # Basic color scheme if no attribute or communities are specified
-    if attribute is None and not communities:
+    if attribute is None and not communities and clusters is None:
         for index, row in df.iterrows():
             if 'Class' in row['Label']:
                 change_node_color(dot, row['Node'], "#{:02x}{:02x}{:02x}".format(157, 195, 230))  # Light blue for class nodes
@@ -42,7 +43,7 @@ def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, c
 
 
     # Color nodes based on a specific attribute
-    elif attribute is not None and not communities:
+    elif attribute is not None and not communities and clusters is None:
         colormap = cm.Blues  # Choose a colormap
         norm = None
 
@@ -66,7 +67,7 @@ def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, c
     
 
     # Color nodes based on community detection
-    elif communities and attribute is None:
+    elif communities and attribute is None and clusters is None:
         colormap = cm.YlOrRd  # Choose a colormap
         
         # Highlight class nodes if class_flag is True
@@ -92,13 +93,80 @@ def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, c
         plot_name = plot_name + "_communities"
     
 
+    elif attribute is None and not communities and clusters is not None:
+        colormap = cm.get_cmap('tab20')  # Choose a colormap
+        
+        # Highlight class nodes if class_flag is True
+        if class_flag:
+            for index, row in df.iterrows():
+                if 'Class' in row['Label']:
+                    change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+            df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
+        
+        node_to_cluster = {}
+        
+        for clabel, node_list in clusters.items():
+            for node_id in node_list:
+                node_to_cluster[str(node_id)] = clabel
+
+        df['Cluster'] = df['Node'].astype(str).map(lambda n: node_to_cluster.get(n, 'ambiguous'))
+
+        unique_clusters = sorted([c for c in df['Cluster'].unique() if c != 'ambiguous'])
+        cluster_to_idx = {lab: i for i, lab in enumerate(unique_clusters)}
+        ambiguous_idx = len(unique_clusters)
+        cluster_to_idx['ambiguous'] = ambiguous_idx
+
+        n_colors = max(1, len(cluster_to_idx))
+        palette_rgba = [colormap(i / max(1, n_colors - 1)) for i in range(n_colors)]
+        palette_hex = ["#{:02x}{:02x}{:02x}".format(int(r*255), int(g*255), int(b*255))
+                    for (r, g, b, _) in palette_rgba]
+
+        if 'ambiguous' in cluster_to_idx:
+            palette_hex[cluster_to_idx['ambiguous']] = '#bdbdbd'  # grigio chiaro
+
+        for i, row in df.iterrows():
+            idx = cluster_to_idx.get(row['Cluster'], cluster_to_idx['ambiguous'])
+            color = palette_hex[idx]
+            change_node_color(dot, row['Node'], color)
+
+        plot_name = plot_name + f"_clusters_{threshold_clusters}"
+
+
     else:
         raise AttributeError("The plot can show the basic plot, communities or a specific node-metric")
+
+
+    # Highlight edges
+    colormap_edge = cm.Greys  # Colormap edges
+    max_edge_value = df_edges['Weight'].max()
+    min_edge_value = df_edges['Weight'].min()
+    norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
+    for index, row in df_edges.iterrows():
+        edge_value = row['Weight']
+        color = colormap_edge(norm_edge(edge_value))
+        color_hex = "#{:02x}{:02x}{:02x}".format(int(color[0]*255),
+                                                    int(color[1]*255),
+                                                    int(color[2]*255))
+        penwidth = 1 + 3 * norm_edge(edge_value)
+
+        change_edge_color(dot, row['Source_id'], row['Target_id'], new_color=color_hex, new_width = penwidth)
+
+    # Convert to scientific notation
+    # def to_sci_notation(match):
+    #     num = float(match.group(1))
+    #     return f'label="{num:.2e}"'
+    # pattern = r'label=([0-9]+\.?[0-9]*)'
+    # for i in range(len(dot.body)):
+    #     dot.body[i] = re.sub(pattern, to_sci_notation, dot.body[i])
+        # if "->" in dot.body[i]:
+        #     dot.body[i] = re.sub(r'\s*label="[^"]*"', '', dot.body[i])
+    
 
     # Highlight class nodes
     highlight_class_node(dot)
 
     # Render the graph and display it
+    dot.render("temp/" + plot_name, format="pdf")
     graph = Source(dot.source, format="png")
     graph.render("temp/" + plot_name + "_temp", view=False)
 
@@ -120,9 +188,11 @@ def plot_dpg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, c
     os.makedirs(save_dir, exist_ok=True)
     plt.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=300)
     #plt.show()
-
+    graph_pdf_path = os.path.join("temp", plot_name + "_graph.pdf")
+    plt.savefig(graph_pdf_path, format="pdf", bbox_inches="tight", dpi=300)
+    
     # Clean up temporary files
-    delete_folder_contents("temp")
+    # delete_folder_contents("temp")
 
 def change_node_color(dot, node_id, fillcolor):
     r, g, b = int(fillcolor[1:3], 16), int(fillcolor[3:5], 16), int(fillcolor[5:7], 16)
@@ -181,3 +251,26 @@ def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=Non
 
     # Clean up temporary files
     delete_folder_contents("temp")
+
+
+def change_edge_color(graph, source_id, target_id, new_color, new_width):
+    """
+    Changes the color and dimension (penwidth) of a specified edge in the Graphviz Digraph.
+
+    Args:
+        graph: A Graphviz Digraph object.
+        source_id: The source node of the edge.
+        target_id: The target node of the edge.
+        new_color: The new color to be applied to the edge.
+        new_width: The new penwidth (edge thickness) to be applied.
+
+    Returns:
+        None
+    """
+    # Look for the existing edge in the graph body
+    for i, line in enumerate(graph.body):
+        if f'{source_id} -> {target_id}' in line:
+            # Modify the existing edge attributes to include both color and penwidth
+            new_line = line.rstrip().replace(']', f' color="{new_color}" penwidth="{new_width}"]')
+            graph.body[i] = new_line
+            break

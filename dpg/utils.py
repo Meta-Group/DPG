@@ -2,6 +2,9 @@ import os
 import shutil
 import yaml
 from graphviz import Digraph
+import networkx as nx
+import pandas as pd
+import numpy as np
 
 
 def highlight_class_node(dot):
@@ -113,3 +116,194 @@ def delete_folder_contents(folder_path):
         except Exception as e:
             # Print an error message if the deletion fails
             print(f'Failed to delete {item_path}. Reason: {e}')
+
+
+
+def get_dpg_edge_metrics(dpg_model, nodes_list):
+    """
+    Extracts metrics from the edges of a DPG model, including:
+    - Edge Load Centrality
+    - Trophic Differences
+    
+    Args:
+    dpg_model: A NetworkX graph representing the DPG.
+    nodes_list: A list of nodes where each node is a tuple. The first element is the node identifier and the second is the node label.
+
+    Returns:
+    df: A pandas DataFrame containing the metrics for each edge in the DPG.
+    """
+    
+
+    # Calculate edge weights (assuming edges have 'weight' attribute)
+    edge_weights = nx.get_edge_attributes(dpg_model, 'weight')
+    
+    # Aggiungi le etichette dei nodi
+    edge_data_with_labels = []
+    for u, v in dpg_model.edges():
+        # Ottieni le etichette per i nodi coinvolti nell'arco
+        u_label = next((label for node, label in nodes_list if node == u), None)
+        v_label = next((label for node, label in nodes_list if node == v), None)
+        
+        # Ottieni gli identificativi (ID) per i nodi coinvolti nell'arco
+        u_id = next((node for node, label in nodes_list if node == u), None)
+        v_id = next((node for node, label in nodes_list if node == v), None)
+        
+        # Aggiungi i dati per l'arco con le etichette e gli ID
+        edge_data_with_labels.append([f"{u}-{v}",  
+                                     edge_weights.get((u, v), 0),
+                                     u_label, v_label, u_id, v_id])
+    
+    # Crea un DataFrame con gli archi, le etichette e gli ID
+    df_edges_with_labels = pd.DataFrame(edge_data_with_labels, columns=["Edge", "Weight", 
+                                                                        "Node_u_label", "Node_v_label", "Source_id", "Target_id"])
+    
+
+    # Restituisci il DataFrame risultante
+    return df_edges_with_labels
+
+
+def clustering(dpg_model, class_nodes, threshold = None):
+    
+    classes = sorted(set(class_nodes.values()))
+    class_by_node = dict(class_nodes)
+    class_set = set(class_by_node.keys())
+
+    nodes = list(dpg_model.nodes())
+    n = len(nodes)
+    
+    idx = {idx_node : node for node, idx_node in enumerate(nodes)}
+    
+    # P
+    P = np.zeros((n, n), dtype = float)
+    for node in nodes:
+        i = idx[node]
+        if node in class_set:
+            P[i, i] = 1.0
+            continue
+
+        out_edges = list(dpg_model.out_edges(node, data=True))
+        
+        weight_sum = 0
+
+        for out_node, in_node, weight in out_edges:
+            weight_sum += weight.get('weight', 1)
+
+        if weight_sum > 0:
+            for out_node, in_node, weight in out_edges:
+                j = idx[in_node]
+                P[i, j] = weight.get('weight', 1) / weight_sum
+        else:
+            P[i, i] = 1.0
+    
+    # Order to obtain Q and R
+    transient = []
+    absorbing = []
+    for node in nodes:
+        if node not in class_set:
+            transient.append(node)
+        elif node in class_set:
+            absorbing.append(node)
+
+    t = len(transient)
+
+    perm = transient + absorbing
+    
+    perm_idx = [idx[node] for node in perm]
+    
+    Pp = P[perm_idx][:, perm_idx]
+
+    Q = Pp[:t, :t]
+    R = Pp[:t, t:]
+
+    # N
+    I = np.eye(t)
+    N = np.linalg.solve(I - Q, I)
+
+    # Absorbing probability for each node
+    B = N @ R
+
+    # ----- #
+    class_labels = [class_by_node[node] for node in absorbing]
+
+    class_to_cols = {}
+    for class_index in range(len(absorbing)):
+        label = class_labels[class_index]
+        if label not in class_to_cols:
+            class_to_cols[label] = []
+        class_to_cols[label].append(class_index)
+    
+    # Distribution for transient nodes
+    node_probs = {}
+
+    for index_row in range(len(transient)):
+        node = transient[index_row]
+
+        probs = {}
+        for label in classes:
+            probs[label] = 0.0
+        
+        # sum columns for class
+        for label in classes:
+            cols = class_to_cols.get(label, [])
+            total = 0.0
+            for index_col in cols:
+                total += B[index_row, index_col]
+            probs[label] = total
+
+        node_probs[node] = probs
+    
+    # Distribution for absorbing nodes
+    for node in absorbing:
+        probs = {}
+        for label in classes:
+            probs[label] = 0.0
+        probs[class_nodes[node]] = 1.0
+        
+        node_probs[node] = probs
+
+    # Clusters
+    clusters = {}
+    for label in classes:
+        clusters[label] = []
+    
+    if threshold is not None:
+        clusters['Ambiguous'] = []
+
+    confidence = {}
+
+    for node in nodes:
+        probs = node_probs[node]
+
+        top_label = None
+        top_prob = -1.0
+        second_top_prob = -1.0
+
+        # Top probability and cluster identification
+        for label in classes:
+            prob = probs[label]
+            if prob > top_prob:
+                top_prob = prob
+                top_label = label
+
+        # Second top probability
+        for label in classes:
+            prob = probs[label]
+            if label != top_label and prob > second_top_prob:
+                second_top_prob = prob
+
+        margin = top_prob - (second_top_prob if second_top_prob >= 0.0 else 0.0)
+
+        confidence[node] = margin
+
+        
+        if threshold is None:
+            clusters[top_label].append(node)
+
+        else:
+            if top_prob > threshold:       
+                clusters[top_label].append(node)     
+            else:
+                clusters['Ambiguous'].append(node)
+
+
+    return clusters, node_probs, confidence
