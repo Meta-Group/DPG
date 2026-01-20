@@ -34,7 +34,7 @@ class DecisionPredicateGraph:
         decimal_threshold: Rounding precision for feature values
         n_jobs: Number of parallel jobs (-1 for all cores)
     """
-    def __init__(self, model, feature_names, target_names=None, config_file="config.yaml"):
+    def __init__(self, model, feature_names, target_names=None, config_file="config.yaml", dpg_config=None):
         """
         Initialize DPG converter with model and configuration.
         
@@ -42,11 +42,15 @@ class DecisionPredicateGraph:
             model: Tree ensemble model with estimators_ attribute
             feature_names: List of feature names
             target_names: Optional list of target class names
-            config_file: Path to YAML config file
+            config_file: Path to YAML config file (fallback if dpg_config not provided)
+            dpg_config: Optional dict with DPG config parameters (overrides config_file)
         """
-        # Load configuration
-        with open(config_file) as f:
-            config = yaml.safe_load(f)
+        # Load configuration from file or use provided config
+        if dpg_config is not None:
+            config = dpg_config
+        else:
+            with open(config_file) as f:
+                config = yaml.safe_load(f)
         
         # Input validation
         if not hasattr(model, 'estimators_'):
@@ -56,11 +60,32 @@ class DecisionPredicateGraph:
         
         # Initialize attributes
         self.model = model
-        self.feature_names = feature_names 
+        self.feature_names = feature_names
         self.target_names = target_names #TODO create "Class as class name"
-        self.perc_var = config['dpg']['default']['perc_var']
-        self.decimal_threshold = config['dpg']['default']['decimal_threshold']
-        self.n_jobs = config['dpg']['default']['n_jobs'] 
+        
+        # Get config values - config must be provided
+        dpg_config_section = config.get('dpg', {})
+        if not dpg_config_section:
+            raise DPGError("DPG config section not found in provided config")
+        
+        default_config = dpg_config_section.get('default', {})
+        if not default_config:
+            raise DPGError("DPG default config section not found")
+        
+        self.perc_var = default_config.get('perc_var')
+        self.decimal_threshold = default_config.get('decimal_threshold')
+        self.n_jobs = default_config.get('n_jobs')
+        
+        # Validate required config values
+        if self.perc_var is None:
+            raise DPGError("perc_var not found in DPG config")
+        if self.decimal_threshold is None:
+            raise DPGError("decimal_threshold not found in DPG config")
+        if self.n_jobs is None:
+            raise DPGError("n_jobs not found in DPG config")
+        
+        # Store visualization config for use by utils
+        self.visualization_config = dpg_config_section.get('visualization', {})
 
     def fit(self, X_train):
         """
@@ -245,11 +270,32 @@ class DecisionPredicateGraph:
         Returns:
             graphviz.Digraph: Visualizable graph
         """
+        # Get visualization config
+        viz_config = self.visualization_config
+        graph_attrs = viz_config.get('graph_attrs', {})
+        node_attrs = viz_config.get('node_attrs', {})
+        
+        # Build graph_attr dict
+        final_graph_attr = {
+            "bgcolor": graph_attrs.get('bgcolor'),
+            "rankdir": graph_attrs.get('rankdir'),
+            "overlap": "false",
+            "fontsize": "20"
+        }
+        
+        # Build node_attr dict
+        final_node_attr = {
+            "shape": node_attrs.get('shape')
+        }
+        
+        # Get fillcolor for regular nodes
+        default_fillcolor = node_attrs.get('fillcolor')
+        
         dot = graphviz.Digraph(
             "dpg",
             engine="dot",
-            graph_attr={"bgcolor": "white", "rankdir": "R", "overlap": "false", "fontsize": "20"},
-            node_attr={"shape": "box"},
+            graph_attr=final_graph_attr,
+            node_attr=final_node_attr,
         )
         added_nodes = set()
         for k, v in sorted(dfg.items(), key=lambda item: item[1]):
@@ -260,7 +306,7 @@ class DecisionPredicateGraph:
                         label=activity,
                         style="filled",
                         fontsize="20",
-                        fillcolor="#ffc3c3",
+                        fillcolor=default_fillcolor,
                     )
                     added_nodes.add(activity)
             dot.edge(
