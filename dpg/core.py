@@ -15,6 +15,13 @@ from joblib import Parallel, delayed
 from typing import List, Dict, Union
 from sklearn.base import is_classifier, is_regressor
 
+# Handle OmegaConf DictConfig if available
+try:
+    from omegaconf import DictConfig, OmegaConf
+    HAS_OMEGACONF = True
+except ImportError:
+    HAS_OMEGACONF = False
+
 from sklearn.ensemble import (AdaBoostRegressor, RandomForestRegressor, ExtraTreesRegressor)
 
 class DPGError(Exception):
@@ -34,7 +41,7 @@ class DecisionPredicateGraph:
         decimal_threshold: Rounding precision for feature values
         n_jobs: Number of parallel jobs (-1 for all cores)
     """
-    def __init__(self, model, feature_names, target_names=None, config_file="config.yaml"):
+    def __init__(self, model, feature_names, target_names=None, config_file="config.yaml", dpg_config=None):
         """
         Initialize DPG converter with model and configuration.
         
@@ -42,11 +49,22 @@ class DecisionPredicateGraph:
             model: Tree ensemble model with estimators_ attribute
             feature_names: List of feature names
             target_names: Optional list of target class names
-            config_file: Path to YAML config file
+            config_file: Path to YAML config file (fallback if dpg_config not provided)
+            dpg_config: Optional dict with DPG config parameters (overrides config_file)
         """
-        # Load configuration
-        with open(config_file) as f:
-            config = yaml.safe_load(f)
+        # Load configuration from file or use provided config
+        if dpg_config is not None:
+            config = dpg_config
+        else:
+            with open(config_file) as f:
+                config = yaml.safe_load(f)
+        
+        # Convert OmegaConf DictConfig to regular dict if needed
+        if HAS_OMEGACONF and isinstance(config, DictConfig):
+            config = OmegaConf.to_container(config, resolve=True)
+        # Handle dict-like objects that have to_dict() method (like custom DictConfig)
+        elif hasattr(config, 'to_dict'):
+            config = config.to_dict()
         
         # Input validation
         if not hasattr(model, 'estimators_'):
@@ -56,11 +74,33 @@ class DecisionPredicateGraph:
         
         # Initialize attributes
         self.model = model
-        self.feature_names = feature_names 
+        self.feature_names = feature_names
         self.target_names = target_names #TODO create "Class as class name"
-        self.perc_var = config['dpg']['default']['perc_var']
-        self.decimal_threshold = config['dpg']['default']['decimal_threshold']
-        self.n_jobs = config['dpg']['default']['n_jobs'] 
+        
+        # Get config values - config must be provided
+        dpg_config_section = config.get('dpg', {})
+        if not dpg_config_section:
+            raise DPGError("DPG config section not found in provided config")
+        
+        default_config = dpg_config_section.get('default', {})
+        if not default_config:
+            raise DPGError("DPG default config section not found")
+        
+        self.perc_var = default_config.get('perc_var')
+        self.decimal_threshold = default_config.get('decimal_threshold')
+        self.n_jobs = default_config.get('n_jobs')
+        
+        # Validate required config values
+        if self.perc_var is None:
+            raise DPGError("perc_var not found in DPG config")
+        if self.decimal_threshold is None:
+            raise DPGError("decimal_threshold not found in DPG config")
+        if self.n_jobs is None:
+            raise DPGError("n_jobs not found in DPG config")
+        
+        print(f"DPG initialized with perc_var={self.perc_var}, decimal_threshold={self.decimal_threshold}, n_jobs={self.n_jobs}")
+        # Store visualization config for use by utils
+        self.visualization_config = dpg_config_section.get('visualization', {})
 
     def fit(self, X_train):
         """
@@ -217,32 +257,22 @@ class DecisionPredicateGraph:
         Returns:
             Dict[tuple, int]: Edge frequencies as {(source, target): count}
         """
-        def process_chunk(chunk):
-            """Process a subset of cases in parallel"""
-            chunk_dfg = {}
-            for case in tqdm(chunk, desc="Processing cases", leave=False):
-                trace_df = log[log["case:concept:name"] == case].copy()
-                trace_df.sort_values(by="case:concept:name", inplace=True)
-                for i in range(len(trace_df) - 1):
-                    key = (trace_df.iloc[i, 1], trace_df.iloc[i + 1, 1])
-                    chunk_dfg[key] = chunk_dfg.get(key, 0) + 1
-            return chunk_dfg
-
         cases = log["case:concept:name"].unique()
         if len(cases) == 0:
             raise Exception("There is no paths with the current value of perc_var and decimal_threshold!")
 
-        if self.n_jobs == -1:
-            self.n_jobs = os.cpu_count()
-
-        chunk_size = max(len(cases) // self.n_jobs, 1)
-        chunks = [cases[i:i + chunk_size] for i in range(0, len(cases), chunk_size)]
-        results = Parallel(n_jobs=self.n_jobs)(delayed(process_chunk)(chunk) for chunk in chunks)
-
+        # Optimized: Group by case once, then process each group
+        # This avoids repeated filtering of the dataframe for each case
         dfg = {}
-        for result in results:
-            for key, value in result.items():
-                dfg[key] = dfg.get(key, 0) + value
+        grouped = log.groupby("case:concept:name", sort=False)
+        
+        for case, trace_df in tqdm(grouped, desc="Processing cases", total=len(cases)):
+            trace_df = trace_df.sort_values(by="case:concept:name")
+            concepts = trace_df["concept:name"].values
+            for i in range(len(concepts) - 1):
+                key = (concepts[i], concepts[i + 1])
+                dfg[key] = dfg.get(key, 0) + 1
+        
         return dfg
 
     def generate_dot(self, dfg):
@@ -255,11 +285,32 @@ class DecisionPredicateGraph:
         Returns:
             graphviz.Digraph: Visualizable graph
         """
+        # Get visualization config
+        viz_config = self.visualization_config
+        graph_attrs = viz_config.get('graph_attrs', {})
+        node_attrs = viz_config.get('node_attrs', {})
+        
+        # Build graph_attr dict
+        final_graph_attr = {
+            "bgcolor": graph_attrs.get('bgcolor'),
+            "rankdir": graph_attrs.get('rankdir'),
+            "overlap": "false",
+            "fontsize": "20"
+        }
+        
+        # Build node_attr dict
+        final_node_attr = {
+            "shape": node_attrs.get('shape')
+        }
+        
+        # Get fillcolor for regular nodes
+        default_fillcolor = node_attrs.get('fillcolor')
+        
         dot = graphviz.Digraph(
             "dpg",
             engine="dot",
-            graph_attr={"bgcolor": "white", "rankdir": "R", "overlap": "false", "fontsize": "20"},
-            node_attr={"shape": "box"},
+            graph_attr=final_graph_attr,
+            node_attr=final_node_attr,
         )
         added_nodes = set()
         for k, v in sorted(dfg.items(), key=lambda item: item[1]):
@@ -270,7 +321,7 @@ class DecisionPredicateGraph:
                         label=activity,
                         style="filled",
                         fontsize="20",
-                        fillcolor="#ffc3c3",
+                        fillcolor=default_fillcolor,
                     )
                     added_nodes.add(activity)
             dot.edge(
