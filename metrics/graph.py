@@ -59,19 +59,19 @@ class GraphMetrics:
     def extract_graph_metrics(cls, dpg_model: nx.DiGraph, nodes_list: List[tuple], target_names: List[str]) -> Dict:
         """Main interface for graph metrics"""
         # Create node mappings
-        diz_nodes = {node[1]: node[0] for node in nodes_list if not node[0].startswith('->')}
-        diz_nodes_reversed = {v: k for k, v in diz_nodes.items()}
+        node_label_to_id = {node[1]: node[0] for node in nodes_list if "->" not in node[0]}
+        node_id_to_label = {v: k for k, v in node_label_to_id.items()}
         
         # Community detection
         communities = list(nx.community.asyn_lpa_communities(dpg_model, weight='weight'))
         communities_labels = [
-            {diz_nodes_reversed[str(node)] for node in community} 
+            {node_id_to_label[str(node)] for node in community} 
             for community in communities
         ]
         
         # Class boundaries
         terminal_nodes = {
-            k: v for k, v in diz_nodes.items() 
+            k: v for k, v in node_label_to_id.items() 
             if any(x in k for x in ['Class', 'Pred'])
         }
         predecessors = {}
@@ -80,9 +80,9 @@ class GraphMetrics:
             try:
                 preds = nx.descendants(dpg_model.reverse(), node_id)
                 predecessors[class_name] = [
-                    diz_nodes[p] for p in preds 
-                    if p in diz_nodes and not any(
-                        x in diz_nodes[p] for x in ['Class', 'Pred']
+                    node_id_to_label[p] for p in preds 
+                    if p in node_id_to_label and not any(
+                        x in node_id_to_label[p] for x in ['Class', 'Pred']
                     )
                 ]
             except nx.NetworkXError:
