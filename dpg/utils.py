@@ -7,13 +7,14 @@ import pandas as pd
 import numpy as np
 
 
-def highlight_class_node(dot):
+def highlight_class_node(dot, dpg_config=None):
     """
     Highlights nodes in the Graphviz Digraph that contain "Class" in their identifiers by changing their fill color
     and adding a rounded shape.
 
     Args:
     dot: A Graphviz Digraph object.
+    dpg_config: Optional DPG config dict (from DecisionPredicateGraph)
 
     Returns:
     dot: The modified Graphviz Digraph object with the class nodes highlighted.
@@ -22,20 +23,25 @@ def highlight_class_node(dot):
     if not isinstance(dot, Digraph):
         raise ValueError("Input must be a Graphviz Digraph object")
     
-    config_path="config.yaml"
-    try:
-        with open(config_path) as f:
-                config = yaml.safe_load(f)
-        # Get class node styling from config (with defaults if not specified)
-        class_style = config.get('dpg', {}).get('visualization', {}).get('class_node', {})
-        fillcolor = class_style.get('fillcolor', '#a4c2f4')  # Default light blue
-        shape = class_style.get('shape', 'box')
-        style = class_style.get('style', 'rounded, filled')
-
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Config file not found at {config_path}")
-    except yaml.YAMLError as e:
-        raise yaml.YAMLError(f"Invalid YAML in config file: {str(e)}")
+    # Get class node styling from config or use defaults
+    if dpg_config is not None:
+        class_style = dpg_config.get('dpg', {}).get('visualization', {}).get('class_node', {})
+    else:
+        # Fallback to loading from config file
+        config_path="config.yaml"
+        try:
+            with open(config_path) as f:
+                    config = yaml.safe_load(f)
+            class_style = config.get('dpg', {}).get('visualization', {}).get('class_node', {})
+        except FileNotFoundError:
+            class_style = {}
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(f"Invalid YAML in config file: {str(e)}")
+    
+    # Get values with defaults
+    fillcolor = class_style.get('fillcolor', '#a4c2f4')  # Default light blue
+    shape = class_style.get('shape', 'box')
+    style = class_style.get('style', 'rounded, filled')
     
     # Iterate over each line in the dot body
     for i, line in enumerate(dot.body):

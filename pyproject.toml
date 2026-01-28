@@ -42,6 +42,8 @@ threadpoolctl = "3.5.0"
 tqdm = "4.67.1"
 tzdata = "2024.1"
 pyyaml = "^6.0.2" 
+ipykernel = "^6.25.2"
+seaborn = "^0.12.2"
 
 [tool.poetry.extras]
 dev = ["pytest", "ipython", "jupyter"]

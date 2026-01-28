@@ -1,9 +1,13 @@
 import os
 import re
+import numpy as np
+from typing import Dict, List, Optional, TYPE_CHECKING
 from graphviz import Source
+import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib.lines import Line2D
 from PIL import Image
 from .utils import highlight_class_node, change_node_color, delete_folder_contents
 
@@ -251,6 +255,271 @@ def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=Non
 
     # Clean up temporary files
     delete_folder_contents("temp")
+
+
+def plot_dpg_constraints_overview(
+    normalized_constraints: Dict,
+    feature_names: List[str],
+    class_colors_list: List[str],
+    output_path: str = None,
+    title: str = "DPG Constraints Overview",
+    original_sample: Dict = None,
+    original_class: int = None,
+    target_class: int = None
+) -> plt.Figure:
+    """Create a horizontal bar chart showing DPG constraints for all features.
+
+    Similar to the "Feature Changes" chart style, this shows:
+    - Original sample values as markers/bars
+    - Constraint boundaries (min/max) for original and target classes as colored regions
+
+    Args:
+        normalized_constraints: Dict with structure {class_name: {feature: {min, max}}}
+        feature_names: List of feature names to display
+        class_colors_list: List of colors for each class
+        output_path: Optional path to save the figure
+        title: Title for the figure
+        original_sample: Optional dict of original sample feature values
+        original_class: Optional original class index (for highlighting)
+        target_class: Optional target class index (for highlighting)
+
+    Returns:
+        matplotlib Figure object
+    """
+    if not normalized_constraints:
+        print("WARNING: No constraints available for visualization")
+        return None
+
+    # Get list of classes
+    class_names = sorted(normalized_constraints.keys())
+    n_classes = len(class_names)
+
+    # Filter features that have constraints in at least one class
+    features_with_constraints = []
+    for feat in feature_names:
+        has_constraint = any(
+            feat in normalized_constraints.get(cname, {})
+            for cname in class_names
+        )
+        if has_constraint:
+            features_with_constraints.append(feat)
+
+    if not features_with_constraints:
+        print("WARNING: No features with constraints found")
+        return None
+
+    n_features = len(features_with_constraints)
+
+    # Identify non-overlapping features between classes
+    # Non-overlapping means the ranges are disjoint (no intersection)
+    # c1_max < c2_min means c1 range ends BEFORE c2 range starts (strictly less than)
+    non_overlapping_features = set()
+    for feat in features_with_constraints:
+        for i, c1 in enumerate(class_names):
+            for c2 in class_names[i+1:]:
+                c1_bounds = normalized_constraints.get(c1, {}).get(feat, {})
+                c2_bounds = normalized_constraints.get(c2, {}).get(feat, {})
+
+                c1_min = c1_bounds.get('min')
+                c1_max = c1_bounds.get('max')
+                c2_min = c2_bounds.get('min')
+                c2_max = c2_bounds.get('max')
+
+                # Check for non-overlap (strictly less than, not equal)
+                # Equal bounds means they touch/overlap, not non-overlapping
+                if c1_max is not None and c2_min is not None and c1_max < c2_min:
+                    non_overlapping_features.add(feat)
+                if c2_max is not None and c1_min is not None and c2_max < c1_min:
+                    non_overlapping_features.add(feat)
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(14, max(6, n_features * 0.5)))
+
+    # Y positions for features
+    y_positions = np.arange(n_features)
+    bar_height = 0.35
+
+    # Collect global min/max for x-axis scaling
+    all_values = []
+    for cname in class_names:
+        for feat in features_with_constraints:
+            if feat in normalized_constraints.get(cname, {}):
+                bounds = normalized_constraints[cname][feat]
+                if bounds.get('min') is not None:
+                    all_values.append(bounds['min'])
+                if bounds.get('max') is not None:
+                    all_values.append(bounds['max'])
+
+    # Include original sample values in scaling if provided
+    if original_sample:
+        for feat in features_with_constraints:
+            if feat in original_sample:
+                all_values.append(original_sample[feat])
+
+    if not all_values:
+        print("WARNING: No constraint values found")
+        return None
+
+    # Filter out NaN and Inf values
+    all_values = [v for v in all_values if v is not None and np.isfinite(v)]
+    if not all_values:
+        print("WARNING: No valid (finite) constraint values found")
+        return None
+
+    value_range = max(all_values) - min(all_values)
+    # Handle case where all values are the same (range = 0)
+    if value_range == 0 or not np.isfinite(value_range):
+        value_range = abs(max(all_values)) * 0.2 if max(all_values) != 0 else 1.0
+
+    x_min = min(all_values) - 0.1 * value_range
+    x_max = max(all_values) + 0.1 * value_range
+
+    # For each feature, draw constraint regions for each class
+    for feat_idx, feat in enumerate(features_with_constraints):
+        y = y_positions[feat_idx]
+
+        # Highlight non-overlapping features
+        is_discriminative = feat in non_overlapping_features
+        if is_discriminative:
+            ax.axhspan(y - 0.45, y + 0.45, alpha=0.1, color='gold', zorder=0)
+
+        # Draw constraints for each class
+        for class_idx, cname in enumerate(class_names):
+            color = class_colors_list[class_idx % len(class_colors_list)]
+
+            if feat in normalized_constraints.get(cname, {}):
+                bounds = normalized_constraints[cname][feat]
+                feat_min = bounds.get('min')
+                feat_max = bounds.get('max')
+
+                # Determine y offset for this class
+                y_offset = (class_idx - (n_classes - 1) / 2) * bar_height * 0.8
+
+                # Draw constraint region as horizontal bar
+                if feat_min is not None and feat_max is not None:
+                    # Both bounds - draw filled rectangle
+                    rect = mpatches.Rectangle(
+                        (feat_min, y + y_offset - bar_height/2),
+                        feat_max - feat_min,
+                        bar_height,
+                        linewidth=2,
+                        edgecolor=color,
+                        facecolor=color,
+                        alpha=0.3,
+                        zorder=2
+                    )
+                    ax.add_patch(rect)
+
+                    # Add min/max value labels
+                    ax.text(feat_min, y + y_offset, f'{feat_min:.2f}',
+                           ha='right', va='center', fontsize=7, color=color, weight='bold',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                                    edgecolor=color, alpha=0.8, linewidth=0.5))
+                    ax.text(feat_max, y + y_offset, f'{feat_max:.2f}',
+                           ha='left', va='center', fontsize=7, color=color, weight='bold',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                                    edgecolor=color, alpha=0.8, linewidth=0.5))
+
+                elif feat_min is not None:
+                    # Only min bound - draw line with arrow pointing right
+                    ax.plot([feat_min, x_max], [y + y_offset, y + y_offset],
+                           color=color, linewidth=3, alpha=0.5, linestyle='--', zorder=2)
+                    ax.scatter([feat_min], [y + y_offset], color=color, s=100,
+                              marker='|', zorder=3, linewidths=3)
+                    ax.text(feat_min, y + y_offset + bar_height/2, f'min:{feat_min:.2f}',
+                           ha='center', va='bottom', fontsize=7, color=color, weight='bold',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                                    edgecolor=color, alpha=0.8, linewidth=0.5))
+
+                elif feat_max is not None:
+                    # Only max bound - draw line with arrow pointing left
+                    ax.plot([x_min, feat_max], [y + y_offset, y + y_offset],
+                           color=color, linewidth=3, alpha=0.5, linestyle='--', zorder=2)
+                    ax.scatter([feat_max], [y + y_offset], color=color, s=100,
+                              marker='|', zorder=3, linewidths=3)
+                    ax.text(feat_max, y + y_offset + bar_height/2, f'max:{feat_max:.2f}',
+                           ha='center', va='bottom', fontsize=7, color=color, weight='bold',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                                    edgecolor=color, alpha=0.8, linewidth=0.5))
+
+        # Draw original sample value if provided
+        if original_sample and feat in original_sample:
+            sample_val = original_sample[feat]
+            # Draw as a prominent marker
+            ax.scatter([sample_val], [y], color='black', s=150, marker='o',
+                      zorder=10, edgecolors='white', linewidths=2)
+            ax.plot([sample_val, sample_val], [y - 0.4, y + 0.4],
+                   color='black', linewidth=2, linestyle='-', zorder=9, alpha=0.7)
+            ax.text(sample_val, y + 0.42, f'{sample_val:.2f}',
+                   ha='center', va='bottom', fontsize=8, color='black', weight='bold',
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor='yellow',
+                            edgecolor='black', alpha=0.9, linewidth=1))
+
+    # Configure axes
+    ax.set_yticks(y_positions)
+
+    # Format y-tick labels with discriminative feature highlighting
+    y_labels = []
+    for feat in features_with_constraints:
+        if feat in non_overlapping_features:
+            y_labels.append(f'★ {feat}')
+        else:
+            y_labels.append(feat)
+    ax.set_yticklabels(y_labels, fontsize=10)
+
+    # Color discriminative feature labels
+    for tick_label, feat in zip(ax.get_yticklabels(), features_with_constraints):
+        if feat in non_overlapping_features:
+            tick_label.set_color('darkgreen')
+            tick_label.set_weight('bold')
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_xlabel('Feature Value', fontsize=12, loc='left')
+    ax.axvline(x=0, color='gray', linestyle=':', alpha=0.5, zorder=1)
+    ax.grid(True, axis='x', linestyle='--', alpha=0.3)
+
+    # Create legend
+    legend_elements = []
+    for class_idx, cname in enumerate(class_names):
+        color = class_colors_list[class_idx % len(class_colors_list)]
+        legend_elements.append(
+            mpatches.Patch(facecolor=color, edgecolor=color, alpha=0.3,
+                          linewidth=2, label=f'{cname} Constraints')
+        )
+
+    if original_sample:
+        legend_elements.append(
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='black',
+                   markeredgecolor='white', markersize=10, label='Original Sample')
+        )
+
+    if non_overlapping_features:
+        legend_elements.append(
+            mpatches.Patch(facecolor='gold', alpha=0.2,
+                          label=f'★ Non-overlapping ({len(non_overlapping_features)} features)')
+        )
+
+    ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
+    # Title with class info
+    title_text = title
+    if original_class is not None and target_class is not None:
+        title_text += f'\nOriginal Class: {original_class} → Target Class: {target_class}'
+    ax.set_title(title_text, fontsize=14, weight='bold', pad=10)
+
+    # Add statistics subtitle
+    n_non_overlap = len(non_overlapping_features)
+    subtitle = f"Features: {n_features} | Non-overlapping: {n_non_overlap} | Classes: {n_classes}"
+    fig.text(0.5, 0.01, subtitle, ha='center', fontsize=10, style='italic')
+
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.08)
+
+    if output_path:
+        fig.savefig(output_path, bbox_inches='tight', dpi=150)
+        print(f"INFO: Saved DPG constraints overview to {output_path}")
+
+    return fig
 
 
 def change_edge_color(graph, source_id, target_id, new_color, new_width):
