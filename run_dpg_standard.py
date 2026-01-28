@@ -72,43 +72,64 @@ if __name__ == "__main__":
         
         def extract_feature_intervals(decisions):
             feature_count = defaultdict(int)
-            feature_intervals = defaultdict(lambda: {"min": float('inf'), "max": float('-inf')})
+            feature_intervals = defaultdict(lambda: {"min": float('-inf'), "max": float('inf')})
+            
+            regex = r'([a-zA-Z0-9_]+)\s*([<=|>]+)\s*([-+]?[\d.]+)'
+            
             for decision in decisions:
-                matches = re.findall(r'([a-zA-Z_]+)\s*([<=|>]+)\s*([\d.]+)', decision)
-                for feature, operator, value in matches:
+                match = re.search(regex, decision)
+                if match:
+                    feature, operator, value = match.groups()
                     value = float(value)
                     feature_count[feature] += 1
-                    if operator == '>':
-                        feature_intervals[feature]["min"] = min(feature_intervals[feature]["min"], value)
-                    elif operator == '<=':
-                        feature_intervals[feature]["max"] = max(feature_intervals[feature]["max"], value)
+                    
+                    if '>' in operator:
+                        feature_intervals[feature]["min"] = max(feature_intervals[feature]["min"], value)
+                    elif '<=' in operator:
+                        feature_intervals[feature]["max"] = min(feature_intervals[feature]["max"], value)
+                        
             return feature_count, feature_intervals
+
         def create_dataframes(data):
-            feature_count_df = pd.DataFrame(columns=data.keys())
-            feature_intervals_df = pd.DataFrame(columns=data.keys())
-            all_features = set() 
+            all_found_features = set()
+            temp_counts = {}
+            temp_intervals = {}
+
             for class_name, decisions in data.items():
-                feature_count, feature_intervals = extract_feature_intervals(decisions)
-                for feature, count in feature_count.items():
-                    feature_count_df.loc[feature, class_name] = count
-                    all_features.add(feature)
-                for feature, interval in feature_intervals.items():
-                    min_value = interval["min"]
-                    max_value = interval["max"]
-                    feature_intervals_df.loc[f"{feature}_min", class_name] = min_value
-                    feature_intervals_df.loc[f"{feature}_max", class_name] = max_value
-            feature_count_df = feature_count_df.fillna(0)
-            feature_intervals_df = feature_intervals_df.fillna(float('inf'))
+                counts, intervals = extract_feature_intervals(decisions)
+                temp_counts[class_name] = counts
+                temp_intervals[class_name] = intervals
+                all_found_features.update(counts.keys())
+
+            sorted_features = sorted(list(all_found_features))
+            
+            feature_count_df = pd.DataFrame(index=sorted_features, columns=data.keys())
+            
+            interval_index = []
+            for f in sorted_features:
+                interval_index.extend([f"{f}_min", f"{f}_max"])
+            feature_intervals_df = pd.DataFrame(index=interval_index, columns=data.keys())
+
+            for class_name in data.keys():
+                for feat in sorted_features:
+                    feature_count_df.loc[feat, class_name] = temp_counts[class_name].get(feat, 0)
+                    
+                    inter = temp_intervals[class_name].get(feat, {"min": float('-inf'), "max": float('inf')})
+                    feature_intervals_df.loc[f"{feat}_min", class_name] = inter["min"]
+                    feature_intervals_df.loc[f"{feat}_max", class_name] = inter["max"]
+
             return feature_count_df, feature_intervals_df
         
+
+
         node_to_label = df.set_index('Node')['Label'].to_dict()
         clusters_labels = {k: [node_to_label.get(n, n) for n in v] for k, v in clusters.items()}
         node_probs_labels = {node_to_label.get(str(k), str(k)): v for k, v in node_prob.items()}
         confidence_labels = {node_to_label.get(str(k), str(k)): v for k, v in confidence.items()}
         feature_count_df, feature_intervals_df = create_dataframes(clusters_labels)
-        feature_count_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_dpg_clusters_count.csv'))
-        feature_intervals_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_dpg_clusters_intervals.csv'))
-        with open(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_dpg_clusters.txt'), 'w') as f:
+        feature_count_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters_count.csv'))
+        feature_intervals_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters_intervals.csv'))
+        with open(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters.txt'), 'w') as f:
             f.write("Clusters:\n")
             for key, value in clusters_labels.items():
                 f.write(f"{key}: {value}\n")
@@ -119,5 +140,5 @@ if __name__ == "__main__":
             for key, value in confidence_labels.items():
                 f.write(f"{key}: {value}\n")
 
-        
-                  
+
+# python run_dpg_standard.py --ds datasets\tpot_clustered_files\thy.csv --l 5 --dir examples\tpot --plot --save_plot_dir examples\tpot --clusters --threshold_clusters 0.2 --seed 160898S
