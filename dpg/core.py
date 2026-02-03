@@ -303,18 +303,20 @@ class DecisionPredicateGraph:
         graph_attrs = viz_config.get('graph_attrs', {})
         node_attrs = viz_config.get('node_attrs', {})
         
-        # Build graph_attr dict
+        # Build graph_attr dict, dropping unset values
         final_graph_attr = {
             "bgcolor": graph_attrs.get('bgcolor'),
             "rankdir": graph_attrs.get('rankdir'),
             "overlap": "false",
-            "fontsize": "20"
+            "fontsize": "20",
         }
-        
-        # Build node_attr dict
+        final_graph_attr = {k: v for k, v in final_graph_attr.items() if v is not None}
+
+        # Build node_attr dict, dropping unset values
         final_node_attr = {
-            "shape": node_attrs.get('shape')
+            "shape": node_attrs.get('shape'),
         }
+        final_node_attr = {k: v for k, v in final_node_attr.items() if v is not None}
         
         # Get fillcolor for regular nodes
         default_fillcolor = node_attrs.get('fillcolor')
@@ -323,7 +325,7 @@ class DecisionPredicateGraph:
             "dpg",
             engine="dot",
             graph_attr=final_graph_attr,
-            node_attr=final_node_attr,
+            node_attr=final_node_attr if final_node_attr else None,
         )
         def _escape_dot_label(label: str) -> str:
             # Escape characters that can break DOT parsing.
