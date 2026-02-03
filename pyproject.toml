@@ -5,8 +5,8 @@ description = "A Python library for extracting and analyzing Decision Predicate 
 authors = ["Sylvio Barbon Junior <sylvio.barbonjunior@units.it>", "Leonardo Arrighi <leonardo.arrighi@phd.units.it>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/LeonardoArrighi/DPG"
-repository = "https://github.com/LeonardoArrighi/DPG"
+homepage = "https://github.com/Meta-Group/DPG"
+repository = "https://github.com/Meta-Group/DPG"
 keywords = ["decision graph", "ensemble learning", "explainable ai"]
 packages = [
     { include = "dpg" },
@@ -42,11 +42,9 @@ threadpoolctl = "3.5.0"
 tqdm = "4.67.1"
 tzdata = "2024.1"
 pyyaml = "^6.0.2" 
-ipykernel = "^6.25.2"
-seaborn = "^0.12.2"
 
 [tool.poetry.extras]
-dev = ["pytest", "ipython", "jupyter"]
+dev = ["pytest"]
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]

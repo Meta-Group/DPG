@@ -13,8 +13,6 @@ from sklearn.datasets import (load_iris, load_digits, load_wine,
                              load_breast_cancer, load_diabetes)
 from sklearn.base import is_classifier, is_regressor
 
-from ucimlrepo import fetch_ucirepo
-
 from .core import DecisionPredicateGraph
 from .visualizer import plot_dpg, plot_dpg_communities
 from .utils import get_dpg_edge_metrics, clustering
@@ -44,21 +42,10 @@ def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np
         "cancer": load_breast_cancer(),
     }
 
-    uci_datasets = {
-        "breast_cancer": fetch_ucirepo(id=17),
-        "glass": fetch_ucirepo(id=42),
-    }
-
-
     if source in std_datasets:
         dataset = std_datasets[source]
         return dataset.data, dataset.feature_names, dataset.target
     
-    elif source in uci_datasets:
-        dataset = uci_datasets[source]
-        return dataset.data.features.values, dataset.data.features.columns.tolist(), dataset.data.targets.iloc[:, 0].tolist()
-
-
     # Custom dataset from CSV
     try:
         df = pd.read_csv(source, sep=',')

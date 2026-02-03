@@ -24,6 +24,17 @@ except ImportError:
 
 from sklearn.ensemble import (AdaBoostRegressor, RandomForestRegressor, ExtraTreesRegressor)
 
+DEFAULT_DPG_CONFIG = {
+    "dpg": {
+        "default": {
+            "perc_var": 0.000000001,
+            "decimal_threshold": 6,
+            "n_jobs": -1,
+        },
+        "visualization": {},
+    }
+}
+
 class DPGError(Exception):
     """Base exception class for DPG-specific errors"""
     pass
@@ -52,12 +63,19 @@ class DecisionPredicateGraph:
             config_file: Path to YAML config file (fallback if dpg_config not provided)
             dpg_config: Optional dict with DPG config parameters (overrides config_file)
         """
-        # Load configuration from file or use provided config
+        # Load configuration from provided config, file, or defaults
         if dpg_config is not None:
             config = dpg_config
         else:
-            with open(config_file) as f:
-                config = yaml.safe_load(f)
+            config = None
+            if config_file:
+                if os.path.exists(config_file):
+                    with open(config_file) as f:
+                        config = yaml.safe_load(f)
+                else:
+                    print(f"Config file not found at '{config_file}'. Using built-in defaults.")
+            if config is None:
+                config = DEFAULT_DPG_CONFIG
         
         # Convert OmegaConf DictConfig to regular dict if needed
         if HAS_OMEGACONF and isinstance(config, DictConfig):
@@ -77,18 +95,13 @@ class DecisionPredicateGraph:
         self.feature_names = feature_names
         self.target_names = target_names #TODO create "Class as class name"
         
-        # Get config values - config must be provided
+        # Get config values with defaults
         dpg_config_section = config.get('dpg', {})
-        if not dpg_config_section:
-            raise DPGError("DPG config section not found in provided config")
-        
         default_config = dpg_config_section.get('default', {})
-        if not default_config:
-            raise DPGError("DPG default config section not found")
-        
-        self.perc_var = default_config.get('perc_var')
-        self.decimal_threshold = default_config.get('decimal_threshold')
-        self.n_jobs = default_config.get('n_jobs')
+
+        self.perc_var = default_config.get('perc_var', DEFAULT_DPG_CONFIG["dpg"]["default"]["perc_var"])
+        self.decimal_threshold = default_config.get('decimal_threshold', DEFAULT_DPG_CONFIG["dpg"]["default"]["decimal_threshold"])
+        self.n_jobs = default_config.get('n_jobs', DEFAULT_DPG_CONFIG["dpg"]["default"]["n_jobs"])
         
         # Validate required config values
         if self.perc_var is None:
@@ -100,7 +113,7 @@ class DecisionPredicateGraph:
         
         print(f"DPG initialized with perc_var={self.perc_var}, decimal_threshold={self.decimal_threshold}, n_jobs={self.n_jobs}")
         # Store visualization config for use by utils
-        self.visualization_config = dpg_config_section.get('visualization', {})
+        self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
 
     def fit(self, X_train):
         """
