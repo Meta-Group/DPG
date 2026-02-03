@@ -1,6 +1,7 @@
 import os
 import re
 import numpy as np
+from io import BytesIO
 from typing import Dict, List, Optional, TYPE_CHECKING
 from graphviz import Source
 import matplotlib.patches as mpatches
@@ -19,26 +20,41 @@ from graphviz import Source
 
 Image.MAX_IMAGE_PIXELS = 500000000  # Adjust based on your needs
 
-def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribute=None, communities=False, clusters=None, threshold_clusters=None, class_flag=False):
+def plot_dpg(
+    plot_name,
+    dot,
+    df,
+    df_edges,
+    save_dir="results/",
+    attribute=None,
+    clusters=None,
+    threshold_clusters=None,
+    class_flag=False,
+    show=True,
+    export_pdf=False,
+):
     """
-    Plots a Decision Predicate Graph (DPG) with various customization options.
+    Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
 
     Args:
-    plot_name: The name of the plot.
-    dot: A Graphviz Digraph object representing the DPG.
-    df: A pandas DataFrame containing node metrics.
-    df_dpg: A pandas DataFrame containing DPG metrics.
-    save_dir: Directory to save the plot image. Default is "examples/".
-    attribute: A specific node attribute to visualize. Default is None.
-    communities: Boolean indicating whether to visualize communities. Default is False.
-    class_flag: Boolean indicating whether to highlight class nodes. Default is False.
+    plot_name: Output base name for saved files (no extension).
+    dot: Graphviz Digraph instance representing the DPG structure.
+    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
+    df_edges: DataFrame with edge metrics; must include 'Source_id', 'Target_id', and 'Weight'.
+    save_dir: Directory where output images are saved. Default is "results/".
+    attribute: Optional node metric column name to color nodes by (e.g., 'Degree').
+    clusters: Optional mapping {cluster_label: [node_id, ...]} to color nodes by clusters.
+    threshold_clusters: Optional value used only to annotate the output name.
+    class_flag: If True, class nodes are highlighted in yellow before other coloring.
+    show: Whether to display the image via matplotlib. Default is True.
+    export_pdf: If True, also writes a PDF next to the PNG.
 
     Returns:
     None
     """
     print("Plotting DPG...")
     # Basic color scheme if no attribute or communities are specified
-    if attribute is None and not communities and clusters is None:
+    if attribute is None and clusters is None:
         for index, row in df.iterrows():
             if 'Class' in row['Label']:
                 change_node_color(dot, row['Node'], "#{:02x}{:02x}{:02x}".format(157, 195, 230))  # Light blue for class nodes
@@ -47,7 +63,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
 
 
     # Color nodes based on a specific attribute
-    elif attribute is not None and not communities and clusters is None:
+    elif attribute is not None and clusters is None:
         colormap = cm.Blues  # Choose a colormap
         norm = None
 
@@ -70,34 +86,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
         plot_name = plot_name + f"_{attribute}".replace(" ","")
     
 
-    # Color nodes based on community detection
-    elif communities and attribute is None and clusters is None:
-        colormap = cm.YlOrRd  # Choose a colormap
-        
-        # Highlight class nodes if class_flag is True
-        if class_flag:
-            for index, row in df.iterrows():
-                if 'Class' in row['Label']:
-                    change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
-            df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
-
-        # Map labels to community indices
-        label_to_community = {label: idx for idx, s in enumerate(df_dpg['Communities']) for label in s}
-        df['Community'] = df['Label'].map(label_to_community)
-        
-        max_score = df['Community'].max()
-        norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
-        
-        colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
-
-        for index, row in df.iterrows():
-            color = "#{:02x}{:02x}{:02x}".format(int(colors[index][0]*255), int(colors[index][1]*255), int(colors[index][2]*255))
-            change_node_color(dot, row['Node'], color)
-
-        plot_name = plot_name + "_communities"
-    
-
-    elif attribute is None and not communities and clusters is not None:
+    elif attribute is None and clusters is not None:
         colormap = cm.get_cmap('tab20')  # Choose a colormap
         
         # Highlight class nodes if class_flag is True
@@ -137,7 +126,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
 
 
     else:
-        raise AttributeError("The plot can show the basic plot, communities or a specific node-metric")
+        raise AttributeError("The plot can show the basic plot, clusters or a specific node-metric")
 
 
     # Highlight edges
@@ -169,32 +158,168 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
     # Highlight class nodes
     highlight_class_node(dot)
 
-    # Render the graph and display it
-    dot.render("temp/" + plot_name, format="pdf")
-    graph = Source(dot.source, format="png")
-    graph.render("temp/" + plot_name + "_temp", view=False)
+    # Render the graph to PNG bytes (avoid temp files)
+    graph = Source(dot.source)
+    png_bytes = graph.pipe(format="png")
 
     # Open and display the rendered image
-    img = Image.open("temp/" + plot_name + "_temp.png")
-    plt.figure(figsize=(16, 8))
-    plt.gca().axes.get_yaxis().set_visible(False)
-    plt.gca().axes.get_xaxis().set_visible(False)
-    plt.title(plot_name)
-    plt.imshow(img)
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=(16, 8))
+    ax.set_axis_off()
+    ax.set_title(plot_name)
+    ax.imshow(img)
     
     # Add a color bar if an attribute is specified
     if attribute is not None:
-        cax = plt.axes([0.11, 0.1, 0.8, 0.025])  # Define color bar position
-        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=colormap), cax=cax, orientation='horizontal')
+        # Place the colorbar just below the graph to reduce whitespace
+        ax_pos = ax.get_position()
+        cbar_height = 0.02
+        cbar_pad = 0.02
+        cbar_y = max(0.01, ax_pos.y0 - (cbar_height + cbar_pad))
+        cax = fig.add_axes([ax_pos.x0, cbar_y, ax_pos.width, cbar_height])
+        cbar = fig.colorbar(
+            cm.ScalarMappable(norm=norm, cmap=colormap),
+            cax=cax,
+            orientation='horizontal',
+        )
         cbar.set_label(attribute)
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
-    plt.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=300)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=300, bbox_inches="tight", pad_inches=0.02)
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=600,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
     #plt.show()
-    graph_pdf_path = os.path.join("temp", plot_name + "_graph.pdf")
-    plt.savefig(graph_pdf_path, format="pdf", bbox_inches="tight", dpi=300)
+    # No PDF output by default
     
+    # Clean up temporary files
+    # delete_folder_contents("temp")
+    if not show:
+        plt.close(fig)
+
+def plot_dpg_communities(
+    plot_name,
+    dot,
+    df,
+    dpg_metrics,
+    save_dir="results/",
+    class_flag=False,
+    df_edges=None,
+    show=True,
+    export_pdf=False,
+):
+    """
+    Plot a DPG colored by community assignment.
+
+    Args:
+    plot_name: Output base name for saved files (no extension).
+    dot: Graphviz Digraph instance representing the DPG structure.
+    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
+    dpg_metrics: Dict containing 'Communities' (list of sets/lists of node labels).
+    save_dir: Directory where output images are saved. Default is "results/".
+    class_flag: If True, class nodes are highlighted in yellow before other coloring.
+    df_edges: Optional DataFrame with edge metrics to color edges by weight.
+    show: Whether to display the image via matplotlib. Default is True.
+    export_pdf: If True, also writes a PDF next to the PNG.
+
+    Returns:
+    None
+    """
+    print("Plotting DPG (communities)...")
+
+    if dpg_metrics is None or "Communities" not in dpg_metrics:
+        raise AttributeError("dpg_metrics with 'Communities' is required to plot communities.")
+
+    colormap = cm.YlOrRd  # Choose a colormap
+
+    # Highlight class nodes if class_flag is True
+    if class_flag:
+        for index, row in df.iterrows():
+            if 'Class' in row['Label']:
+                change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+        df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
+
+    # Map labels to community indices
+    communities = dpg_metrics.get("Communities", [])
+    label_to_community = {}
+    for idx, community in enumerate(communities):
+        for label in community:
+            label_to_community[label] = idx
+    df['Community'] = df['Label'].map(label_to_community)
+
+    max_score = df['Community'].max()
+    norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
+
+    colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
+
+    for index, row in df.iterrows():
+        color = "#{:02x}{:02x}{:02x}".format(
+            int(colors[index][0] * 255),
+            int(colors[index][1] * 255),
+            int(colors[index][2] * 255),
+        )
+        change_node_color(dot, row['Node'], color)
+
+    plot_name = plot_name + "_communities"
+
+    # Highlight edges (optional)
+    if df_edges is not None:
+        colormap_edge = cm.Greys  # Colormap edges
+        max_edge_value = df_edges['Weight'].max()
+        min_edge_value = df_edges['Weight'].min()
+        norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
+        for index, row in df_edges.iterrows():
+            edge_value = row['Weight']
+            color = colormap_edge(norm_edge(edge_value))
+            color_hex = "#{:02x}{:02x}{:02x}".format(
+                int(color[0] * 255),
+                int(color[1] * 255),
+                int(color[2] * 255),
+            )
+            penwidth = 1 + 3 * norm_edge(edge_value)
+
+            change_edge_color(dot, row['Source_id'], row['Target_id'], new_color=color_hex, new_width=penwidth)
+
+    # Highlight class nodes
+    highlight_class_node(dot)
+
+    # Render the graph to PNG bytes (avoid temp files)
+    graph = Source(dot.source)
+    png_bytes = graph.pipe(format="png")
+
+    # Open and display the rendered image
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=(16, 8))
+    ax.set_axis_off()
+    ax.set_title(plot_name)
+    ax.imshow(img)
+
+    # Save the plot to the specified directory with tight borders
+    os.makedirs(save_dir, exist_ok=True)
+    fig.savefig(
+        os.path.join(save_dir, plot_name + ".png"),
+        dpi=300,
+        bbox_inches="tight",
+        pad_inches=0.02,
+    )
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=600,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    if not show:
+        plt.close(fig)
+    # No PDF output by default
+
     # Clean up temporary files
     # delete_folder_contents("temp")
 

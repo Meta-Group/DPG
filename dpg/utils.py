@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import yaml
 from graphviz import Digraph
@@ -45,22 +46,19 @@ def highlight_class_node(dot, dpg_config=None):
     
     # Iterate over each line in the dot body
     for i, line in enumerate(dot.body):
-        # Extract the node identifier from the line
-        line_id = line.split(' ')[1].replace("\t", "")
-        # Check if the node identifier contains "Class"
-        if "Class" in line_id:
+        # Check for class labels in the node attributes
+        if 'label="Class' in line:
             new_attrs = f'fillcolor="{fillcolor}" shape={shape} style="{style}"'
-            # If node already has attributes, modify them
             if '[' in line:
-                parts = line.split('[')
-                attrs = parts[1].rstrip(']')
-                # Remove existing attributes we're replacing
-                for attr in ['fillcolor', 'shape', 'style']:
-                    attrs = ' '.join([a for a in attrs.split() if not a.startswith(attr)])
-                # Add new attributes
-                dot.body[i] = f"{parts[0]}[{attrs} {new_attrs}]"
+                pre, rest = line.split('[', 1)
+                attrs = rest.rsplit(']', 1)[0]
+                # Remove existing attributes we're replacing (quoted or unquoted)
+                attrs = re.sub(r'\b(fillcolor|shape|style)=(".*?"|[^ \]]+)', '', attrs)
+                attrs = re.sub(r'\s+', ' ', attrs).strip()
+                if attrs:
+                    attrs = attrs + ' '
+                dot.body[i] = f"{pre}[{attrs}{new_attrs}]"
             else:
-                # Node has no attributes yet
                 node_id = line.split(' ')[0]
                 dot.body[i] = f'{node_id} [{new_attrs}]'
     

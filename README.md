@@ -46,7 +46,7 @@ The graph-based nature of DPG provides significant enhancements in the direction
 To install DPG locally, first clone the repository:
 
 ```bash
-git clone https://github.com/LeonardoArrighi/DPG.git
+git clone https://github.com/Meta-Group/DPG.git
 cd DPG
 ```
 
@@ -57,7 +57,7 @@ pip install -e .
 
 Alternatively, if using `pip directly`:
 ```bash
-pip install git+https://github.com/LeonardoArrighi/DPG.git
+pip install git+https://github.com/Meta-Group/DPG.git
 ```
 **Troubleshooting:** If you encounter dependency conflicts, we recommend using a virtual environment:
 
@@ -132,11 +132,11 @@ dpg_model, nodes_list = dpg.to_networkx(dot)
 # Extract and visualize
 dpg_metrics = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
 df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-plot_dpg("dpg_output.png", dot, df_nodes, dpg_metrics, save_dir="datasets", communities=True, class_flag=True)
+plot_dpg_communities("dpg_output", dot, df, dpg_metrics, save_dir="datasets", class_flag=True, export_pdf=True)
 ```
 #### Output:
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/dpg_output.png_communities.png?raw=true" width="600" />
+  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/dpg_output_communities.png?raw=true" width="600" />
 </p>
 
 #### CLI scripts
@@ -157,7 +157,7 @@ The DPG output, through `run_dpg_standard.py` or `run_dpg_custom.py`, produces s
 - a `.txt` file containing the Random Forest statistics (accuracy, confusion matrix, classification report)
 
 ## Easy usage
-Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --class_flag`
+Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
 Where:
 - `dataset` is the name of the standard classification `sklearn` dataset to be analyzed;
 - `n_learners` is the number of base learners for the Random Forest;
@@ -169,9 +169,12 @@ Where:
 - `save_plot_dir` is the path of the directory to save the plot image;
 - `attribute` is the specific node metric which can be visualized on the DPG;
 - `communities` is a store_true variable which can be added to visualize communities on the DPG;
-- `class_flag` is a store_true variable which can be added to highlight class nodes.
+- `clusters` is a store_true variable which can be added to visualize clusters on the DPG;
+- `threshold_clusters` is the threshold used to detect ambiguous nodes in clusters;
+- `class_flag` is a store_true variable which can be added to highlight class nodes;
+- `seed` controls the random split.
   
-Disclaimer: `attribute` and `communities` can not be added together, since DPG supports just one of the two visualizations.
+Disclaimer: `attribute`, `communities`, and `clusters` are mutually exclusive: DPG supports just one visualization mode at a time.
 
 The usage of `run_dpg_custom.py` is similar, but it requires another parameter:
 - `target_column`, which is the name of the column to be used as the target variable;

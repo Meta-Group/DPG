@@ -12,8 +12,8 @@ import dpg.sklearn_dpg as test
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ds", type=str, default="iris", help="Basic dataset to be analyzed")
-    parser.add_argument("--l", type=int, default=5, help="Number of learners for the Random Forest")
+    parser.add_argument("--ds", "--dataset", type=str, default="iris", help="Basic dataset to be analyzed")
+    parser.add_argument("--l", "--n_learners", type=int, default=5, help="Number of learners for the Random Forest")
     parser.add_argument("--model_name", type=str, default="RandomForestClassifier", help="Chosen tree-based ensemble model")
     parser.add_argument("--dir", type=str, default="examples/", help="Directory to save results")
     parser.add_argument("--plot", action='store_true', help="Plot the DPG, add the argument to use it as True")
@@ -22,8 +22,10 @@ if __name__ == "__main__":
     parser.add_argument("--communities", action='store_true', help="Boolean indicating whether to visualize communities, add the argument to use it as True")
     parser.add_argument("--clusters", action='store_true', help="Boolean indicating whether to visualize clusters, add the argument to use it as True")
     parser.add_argument("--threshold_clusters", type=float, default=None, help="Threshold for detecting ambiguous nodes in clusters")
+    parser.add_argument("--t", type=int, default=None, help="Override decimal_threshold from config")
     parser.add_argument("--class_flag", action='store_true', help="Boolean indicating whether to highlight class nodes, add the argument to use it as True")
     parser.add_argument("--seed", type=int, help="Randomicity control")
+    parser.add_argument("--pv", type=float, default=None, help="Override perc_var from config")
     args = parser.parse_args()
 
     config_path="config.yaml"
@@ -39,6 +41,10 @@ if __name__ == "__main__":
     pv = config['dpg']['default']['perc_var']
     t = config['dpg']['default']['decimal_threshold']
     j = config['dpg']['default']['n_jobs']
+    if args.pv is not None:
+        pv = args.pv
+    if args.t is not None:
+        t = args.t
         
     df, df_edges, df_dpg_metrics, clusters, node_prob, confidence = test.test_dpg(datasets = args.ds,
                                         n_learners = args.l, 

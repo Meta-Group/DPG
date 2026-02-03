@@ -16,7 +16,7 @@ from sklearn.base import is_classifier, is_regressor
 from ucimlrepo import fetch_ucirepo
 
 from .core import DecisionPredicateGraph
-from .visualizer import plot_dpg
+from .visualizer import plot_dpg, plot_dpg_communities
 from .utils import get_dpg_edge_metrics, clustering
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
@@ -208,18 +208,27 @@ def test_dpg(datasets: str,
         )
         plot_name +=  f"_{model_name}_l{n_learners}_pv{perc_var}_t{decimal_threshold}_{seed}"
         
-        plot_dpg(
-            plot_name,
-            dot,
-            df,
-            df_edges,
-            df_dpg,
-            save_dir=save_plot_dir,
-            attribute=attribute,
-            communities=communities,
-            clusters=clusters,
-            threshold_clusters=threshold_clusters,
-            class_flag=class_flag
-        )
+        if communities:
+            plot_dpg_communities(
+                plot_name,
+                dot,
+                df,
+                df_dpg,
+                save_dir=save_plot_dir,
+                class_flag=class_flag,
+                df_edges=df_edges,
+            )
+        else:
+            plot_dpg(
+                plot_name,
+                dot,
+                df,
+                df_edges,
+                save_dir=save_plot_dir,
+                attribute=attribute,
+                clusters=clusters,
+                threshold_clusters=threshold_clusters,
+                class_flag=class_flag,
+            )
     
     return df, df_edges, df_dpg, clusters, node_prob, confidence

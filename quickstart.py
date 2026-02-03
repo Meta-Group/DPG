@@ -13,9 +13,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import KFold
 from dpg.core import DecisionPredicateGraph
-from dpg.visualizer import plot_dpg
+from dpg.visualizer import plot_dpg, plot_dpg_communities
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
+from dpg.utils import get_dpg_edge_metrics
 import yaml
 
 # =============================================================================
@@ -104,24 +105,40 @@ dpg_model, nodes_list = dpg.to_networkx(dot)
 # =============================================================================
 dpg_metrics = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
 df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
+df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
 
 # Save metrics to files
-metrics_file = os.path.join(current_path, f'datasets/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_dpg_metrics.txt')
+metrics_file = os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_dpg_metrics.txt')
 with open(metrics_file, 'w') as f:
     for key, value in dpg_metrics.items():
         f.write(f"{key}: {value}\n")
 
-df.to_csv(os.path.join(current_path, f'datasets/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_node_metrics.csv'), encoding='utf-8')
+df.to_csv(os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_node_metrics.csv'), encoding='utf-8')
+
+df_edges.to_csv(os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_edge_metrics.csv'), encoding='utf-8')
 
 # =============================================================================
-# VISUALIZATION
+# Visualization
 # =============================================================================
 plot_dpg(
-    f'{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_dpg_metrics.png',
+    f'{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_DPG',
+    dot,
+    df,
+    df_edges,
+    save_dir="results/",
+    class_flag=False,
+    export_pdf=True
+)
+
+# =============================================================================
+# Communities Visualization
+# =============================================================================
+plot_dpg_communities(
+    f'{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_DPG',
     dot,
     df,
     dpg_metrics,
-    save_dir="datasets/",
-    communities=True,
-    class_flag=True
+    save_dir="results/",
+    class_flag=True,
+    export_pdf=True
 )
