@@ -325,13 +325,22 @@ class DecisionPredicateGraph:
             graph_attr=final_graph_attr,
             node_attr=final_node_attr,
         )
+        def _escape_dot_label(label: str) -> str:
+            # Escape characters that can break DOT parsing.
+            return (
+                label.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+            )
+
         added_nodes = set()
         for k, v in sorted(dfg.items(), key=lambda item: item[1]):
             for activity in k:
                 if activity not in added_nodes:
                     dot.node(
                         str(int(hashlib.sha1(activity.encode()).hexdigest(), 16)),
-                        label=activity,
+                        label=_escape_dot_label(activity),
                         style="filled",
                         fontsize="20",
                         fillcolor=default_fillcolor,
