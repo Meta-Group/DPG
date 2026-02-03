@@ -100,7 +100,7 @@ You can also try DPG directly inside a Jupyter Notebook. Here's a minimal workin
 Here is a minimal example of how to use DPG with a trained model and a CSV dataset (e.g., `datasets/custom.csv`) using `scikit-learn` and the DPG API:
 
 ```python
-# Example in Jupyter Notebook
+# Example script: train a model, build a DPG, and render a visualization.
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -108,31 +108,47 @@ from dpg.core import DecisionPredicateGraph
 from dpg.visualizer import plot_dpg
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
+from dpg.utils import get_dpg_edge_metrics
 
 # Load dataset (last column assumed to be target)
 df = pd.read_csv("datasets/custom.csv", index_col=0)
-X = df.iloc[:, :-1]
-y = df.iloc[:, -1]
+features = df.iloc[:, :-1]
+target = df.iloc[:, -1]
 
-# Train simple Random Forest
+# Train a simple Random Forest classifier
 model = RandomForestClassifier(n_estimators=10, random_state=27)
-model.fit(X, y)
+model.fit(features, target)
 
-# Create DPG
-feature_names = X.columns.tolist()
-class_names = np.unique(y).astype(str).tolist()
+# Build the DPG
+feature_names = features.columns.tolist()
+class_names = np.unique(target).astype(str).tolist()
 dpg = DecisionPredicateGraph(
     model=model,
     feature_names=feature_names,
     target_names=class_names
 )
-dot = dpg.fit(X.values)
+dot = dpg.fit(features.values)
 dpg_model, nodes_list = dpg.to_networkx(dot)
 
-# Extract and visualize
-dpg_metrics = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
-df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-plot_dpg_communities("dpg_output", dot, df, dpg_metrics, save_dir="datasets", class_flag=True, export_pdf=True)
+# Extract metrics for visualization
+df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
+df_nodes = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
+GraphMetrics.extract_graph_metrics(
+    dpg_model,
+    nodes_list,
+    target_names=class_names,
+)
+
+# Render the graph to disk
+plot_dpg(
+    "dpg_output",
+    dot,
+    df_nodes,
+    df_edges,
+    save_dir="datasets",
+    class_flag=True,
+    export_pdf=True,
+)
 ```
 #### Output:
 <p align="center">
