@@ -385,7 +385,14 @@ class DecisionPredicateGraph:
             if "[label=" in edge:
                 id, desc = edge.split("[label=")
                 id = id.replace("\t", "").replace(" ", "")
-                desc = desc.split(" fillcolor=")[0].replace('"', "")
+                # Extract label value safely, ignoring other attributes
+                m = re.search(r'label="([^"]*)"', edge)
+                if m:
+                    desc = m.group(1)
+                else:
+                    # Fallback for unquoted labels: label=VALUE (no spaces)
+                    m = re.search(r'label=([^\\s\\]]+)', edge)
+                    desc = m.group(1) if m else ""
                 nodes_list.append([id, desc])
         for src, dest in edges:
             if (src, dest) in weights:
