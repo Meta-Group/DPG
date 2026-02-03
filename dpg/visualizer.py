@@ -159,8 +159,25 @@ def plot_dpg(
     highlight_class_node(dot)
 
     # Render the graph to PNG bytes (avoid temp files)
-    graph = Source(dot.source)
-    png_bytes = graph.pipe(format="png")
+    def _sanitize_dot_source(source: str) -> str:
+        # Escape brackets and quotes in node labels to avoid DOT parse errors.
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    try:
+        graph = Source(dot.source)
+        png_bytes = graph.pipe(format="png")
+    except Exception as e:
+        print(f"Plotting failed with {type(e).__name__}; retrying with sanitized DOT source.")
+        graph = Source(_sanitize_dot_source(dot.source))
+        png_bytes = graph.pipe(format="png")
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
@@ -290,8 +307,25 @@ def plot_dpg_communities(
     highlight_class_node(dot)
 
     # Render the graph to PNG bytes (avoid temp files)
-    graph = Source(dot.source)
-    png_bytes = graph.pipe(format="png")
+    def _sanitize_dot_source(source: str) -> str:
+        # Escape brackets and quotes in node labels to avoid DOT parse errors.
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    try:
+        graph = Source(dot.source)
+        png_bytes = graph.pipe(format="png")
+    except Exception as e:
+        print(f"Plotting failed with {type(e).__name__}; retrying with sanitized DOT source.")
+        graph = Source(_sanitize_dot_source(dot.source))
+        png_bytes = graph.pipe(format="png")
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
