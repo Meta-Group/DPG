@@ -108,7 +108,7 @@ from dpg.core import DecisionPredicateGraph
 from dpg.visualizer import plot_dpg
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
-from dpg.utils import get_dpg_edge_metrics
+from metrics.edges import EdgeMetrics
 
 # Load dataset (last column assumed to be target)
 df = pd.read_csv("datasets/custom.csv", index_col=0)
@@ -131,7 +131,7 @@ dot = dpg.fit(features.values)
 dpg_model, nodes_list = dpg.to_networkx(dot)
 
 # Extract metrics for visualization
-df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
+df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
 df_nodes = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
 GraphMetrics.extract_graph_metrics(
     dpg_model,

@@ -8,7 +8,8 @@ import yaml
 import argparse
 import random
 import dpg.sklearn_dpg as test
-
+import numpy as np
+from metrics.graph import GraphMetrics
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -127,14 +128,15 @@ if __name__ == "__main__":
             return feature_count_df, feature_intervals_df
         
 
-
         node_to_label = df.set_index('Node')['Label'].to_dict()
         clusters_labels = {k: [node_to_label.get(n, n) for n in v] for k, v in clusters.items()}
         node_probs_labels = {node_to_label.get(str(k), str(k)): v for k, v in node_prob.items()}
         confidence_labels = {node_to_label.get(str(k), str(k)): v for k, v in confidence.items()}
         feature_count_df, feature_intervals_df = create_dataframes(clusters_labels)
+
         feature_count_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters_count.csv'))
         feature_intervals_df.to_csv(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters_intervals.csv'))
+        
         with open(os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_t{args.threshold_clusters}_dpg_clusters.txt'), 'w') as f:
             f.write("Clusters:\n")
             for key, value in clusters_labels.items():
@@ -144,7 +146,7 @@ if __name__ == "__main__":
                 f.write(f"{key}: {value}\n")
             f.write("\n\nConfidence Interval:\n")
             for key, value in confidence_labels.items():
-                f.write(f"{key}: {value}\n")
+                f.write(f"{key}: {np.round(value, 2)}\n")
 
 
 # python run_dpg_standard.py --ds datasets\tpot_clustered_files\thy.csv --l 5 --dir examples\tpot --plot --save_plot_dir examples\tpot --clusters --threshold_clusters 0.2 --seed 160898S

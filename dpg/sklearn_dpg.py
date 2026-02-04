@@ -15,9 +15,9 @@ from sklearn.base import is_classifier, is_regressor
 
 from .core import DecisionPredicateGraph
 from .visualizer import plot_dpg, plot_dpg_communities
-from .utils import get_dpg_edge_metrics, clustering
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
+from metrics.edges import EdgeMetrics
 
 
 def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -176,14 +176,13 @@ def test_dpg(datasets: str,
     class_nodes = {i[0] : i[1] for i in nodes_list if 'Class' in i[1]}
     
     if clusters_flag:
-        clusters, node_prob, confidence = clustering(dpg_model, class_nodes, threshold_clusters)
+        clusters, node_prob, confidence = GraphMetrics.clustering(dpg_model, class_nodes, threshold_clusters)
     else:
         clusters = node_prob = confidence = None
 
     df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-    df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
-    # df_edges = 0
-    df_dpg = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
+    df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
+    df_dpg = GraphMetrics.extract_graph_metrics_lpa(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
     # df_dpg = {}
 
     # Plot if requested

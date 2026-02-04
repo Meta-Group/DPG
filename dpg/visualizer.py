@@ -1,6 +1,7 @@
 import os
 import re
 import numpy as np
+import pandas as pd
 from io import BytesIO
 from typing import Dict, List, Optional, TYPE_CHECKING
 from graphviz import Source
@@ -238,7 +239,8 @@ def plot_dpg_communities(
     plot_name: Output base name for saved files (no extension).
     dot: Graphviz Digraph instance representing the DPG structure.
     df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
-    dpg_metrics: Dict containing 'Communities' (list of sets/lists of node labels).
+    dpg_metrics: Dict containing either 'Communities' (list of sets/lists of node labels)
+                 or 'Clusters' (mapping cluster_label -> list of node labels).
     save_dir: Directory where output images are saved. Default is "results/".
     class_flag: If True, class nodes are highlighted in yellow before other coloring.
     df_edges: Optional DataFrame with edge metrics to color edges by weight.
@@ -250,8 +252,8 @@ def plot_dpg_communities(
     """
     print("Plotting DPG (communities)...")
 
-    if dpg_metrics is None or "Communities" not in dpg_metrics:
-        raise AttributeError("dpg_metrics with 'Communities' is required to plot communities.")
+    if dpg_metrics is None:
+        raise AttributeError("dpg_metrics is required to plot communities.")
 
     colormap = cm.YlOrRd  # Choose a colormap
 
@@ -263,24 +265,40 @@ def plot_dpg_communities(
         df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
 
     # Map labels to community indices
-    communities = dpg_metrics.get("Communities", [])
+    if "Communities" in dpg_metrics:
+        communities = dpg_metrics.get("Communities", [])
+    elif "Clusters" in dpg_metrics:
+        clusters = dpg_metrics.get("Clusters", {})
+        communities = list(clusters.values())
+    else:
+        raise AttributeError("dpg_metrics must include 'Communities' or 'Clusters' to plot communities.")
+
     label_to_community = {}
     for idx, community in enumerate(communities):
         for label in community:
             label_to_community[label] = idx
     df['Community'] = df['Label'].map(label_to_community)
 
+    if df['Community'].isna().all():
+        raise AttributeError("No nodes matched communities/clusters labels.")
+
     max_score = df['Community'].max()
-    norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
+    if max_score <= 0:
+        norm = mcolors.Normalize(0, 1)
+    else:
+        norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
 
     colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
 
     for index, row in df.iterrows():
-        color = "#{:02x}{:02x}{:02x}".format(
-            int(colors[index][0] * 255),
-            int(colors[index][1] * 255),
-            int(colors[index][2] * 255),
-        )
+        if pd.isna(row['Community']):
+            color = "#bdbdbd"
+        else:
+            color = "#{:02x}{:02x}{:02x}".format(
+                int(colors[index][0] * 255),
+                int(colors[index][1] * 255),
+                int(colors[index][2] * 255),
+            )
         change_node_color(dot, row['Node'], color)
 
     plot_name = plot_name + "_communities"

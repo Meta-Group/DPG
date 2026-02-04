@@ -16,129 +16,165 @@ from dpg.core import DecisionPredicateGraph
 from dpg.visualizer import plot_dpg, plot_dpg_communities
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
-from dpg.utils import get_dpg_edge_metrics
+from metrics.edges import EdgeMetrics
 import yaml
 
-# =============================================================================
-# CONFIGURATION SECTION
-# =============================================================================
-# Dataset and model parameters
-dataset = "custom.csv"          # Input dataset filename (CSV format)
-num_bl = 10                     # Number of trees in the ensemble
-approach = "CustomDPG"          # Tag for output files
-random_state = 27               # Random seed for reproducibility
-dataset = "custom.csv"
-num_bl = 10
-approach = "CustomDPG"
-# Initialize model
-model = RandomForestClassifier(n_estimators=num_bl, random_state=27)
-
-# =============================================================================
-# DATA LOADING AND PREPROCESSING
-# =============================================================================
-
-config_path="config.yaml"
-try:
+def load_config(config_path):
+    # Read YAML configuration used by the DPG library (percentile, thresholds, etc.)
+    try:
         with open(config_path) as f:
-                config = yaml.safe_load(f)
-
-except FileNotFoundError:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
         raise FileNotFoundError(f"Config file not found at {config_path}")
-except yaml.YAMLError as e:
+    except yaml.YAMLError as e:
         raise yaml.YAMLError(f"Invalid YAML in config file: {str(e)}")
 
-perc_var = config['dpg']['default']['perc_var']
-decimal_threshold = config['dpg']['default']['decimal_threshold']
-n_jobs = config['dpg']['default']['n_jobs'] 
-# Construct dataset path
-current_path = os.getcwd()
-dataset_path = os.path.join(current_path, "datasets", dataset)
-dataset_raw = pd.read_csv(dataset_path, index_col=0)
 
-features = dataset_raw.iloc[:, :-1]
-target_column = dataset_raw.columns[-1]
-feature_names = dataset_raw.columns[:-1]
-y = dataset_raw[target_column]
+def load_dataset(dataset_name, base_dir):
+    # Load CSV dataset from datasets/ and split features/labels
+    dataset_path = os.path.join(base_dir, "datasets", dataset_name)
+    dataset_raw = pd.read_csv(dataset_path, index_col=0)
 
-# Clean data: handle infinities and missing values
-features = features.replace([np.inf, -np.inf], np.nan).fillna(features.mean())
-X = np.round(features, 2)
+    features = dataset_raw.iloc[:, :-1]
+    target_column = dataset_raw.columns[-1]
+    feature_names = dataset_raw.columns[:-1]
+    labels = dataset_raw[target_column]
 
-print("Size of X", X.shape)
+    # Clean data: handle infinities and missing values
+    features = features.replace([np.inf, -np.inf], np.nan).fillna(features.mean())
+    features_matrix = np.round(features, 2)
 
-# =============================================================================
-# MODEL TRAINING AND EVALUATION
-# =============================================================================
-# Initialize 5-fold cross-validation
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
-accuracy_scores, f1_scores = [], []
+    print("Size of X", features_matrix.shape)
+    return features_matrix, labels, feature_names
 
-for train_index, test_index in kf.split(X):
-    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+def train_model_cv(model, features_matrix, labels, random_state):
+    # Run K-Fold CV to report performance and keep the last trained split
+    kf = KFold(n_splits=5, shuffle=True, random_state=random_state)
+    accuracy_scores, f1_scores = [], []
+    last_train = None
 
-    accuracy = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average='weighted')
+    for train_index, test_index in kf.split(features_matrix):
+        X_train, X_test = features_matrix.iloc[train_index], features_matrix.iloc[test_index]
+        y_train, y_test = labels.iloc[train_index], labels.iloc[test_index]
 
-    accuracy_scores.append(accuracy)
-    f1_scores.append(f1)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-    print(f"Fold - Accuracy: {accuracy}, F1-Score: {f1}")
+        accuracy = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average='weighted')
 
-# Calculate average performance
-mean_accuracy = np.mean(accuracy_scores)
-metric_suffix = f"acc_{np.round(mean_accuracy, 2)}"
+        accuracy_scores.append(accuracy)
+        f1_scores.append(f1)
+        last_train = (X_train, y_train)
 
-# =============================================================================
-# DECISION PREDICATE GRAPH GENERATION
-# =============================================================================
-# Initialize DPG with the trained model
-dpg = DecisionPredicateGraph(model=model, feature_names=feature_names, target_names=np.unique(y_train).astype(str).tolist())
-dot = dpg.fit(X_train.values)
-dpg_model, nodes_list = dpg.to_networkx(dot)
+        print(f"Fold - Accuracy: {accuracy}, F1-Score: {f1}")
 
-# =============================================================================
-# METRICS EXTRACTION
-# =============================================================================
-dpg_metrics = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
-df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
+    mean_accuracy = np.mean(accuracy_scores)
+    metric_suffix = f"acc_{np.round(mean_accuracy, 2)}"
+    return metric_suffix, last_train
 
-# Save metrics to files
-metrics_file = os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_dpg_metrics.txt')
-with open(metrics_file, 'w') as f:
-    for key, value in dpg_metrics.items():
-        f.write(f"{key}: {value}\n")
+def main():
+    # =============================================================================
+    # CONFIGURATION SECTION
+    # =============================================================================
+    # Tutorial note: adjust these values to point at your dataset and control the run.
+    config = {
+        "dataset_name": "custom.csv",
+        "num_trees": 10,
+        "run_tag": "CustomDPG",
+        "random_state": 27,
+        "config_path": "config.yaml",
+        "results_dir": "results/",
+    }
 
-df.to_csv(os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_node_metrics.csv'), encoding='utf-8')
+    # Load DPG defaults from config.yaml
+    config_data = load_config(config["config_path"])
+    perc_var = config_data["dpg"]["default"]["perc_var"]
 
-df_edges.to_csv(os.path.join(current_path, f'results/{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_perc_{perc_var}_edge_metrics.csv'), encoding='utf-8')
+    base_dir = os.getcwd()
+    # Load and clean the dataset
+    features_matrix, labels, feature_names = load_dataset(
+        config["dataset_name"], base_dir
+    )
 
-# =============================================================================
-# Visualization
-# =============================================================================
-plot_dpg(
-    f'{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_DPG',
-    dot,
-    df,
-    df_edges,
-    save_dir="results/",
-    class_flag=False,
-    export_pdf=True
-)
+    # Train a Random Forest and estimate performance via CV
+    model = RandomForestClassifier(
+        n_estimators=config["num_trees"], random_state=config["random_state"]
+    )
 
-# =============================================================================
-# Communities Visualization
-# =============================================================================
-plot_dpg_communities(
-    f'{model.__class__.__name__}_{approach}_s{features.shape[0]}_bl{num_bl}_{metric_suffix}_DPG',
-    dot,
-    df,
-    dpg_metrics,
-    save_dir="results/",
-    class_flag=True,
-    export_pdf=True
-)
+    metric_suffix, last_train = train_model_cv(
+        model, features_matrix, labels, random_state=42
+    )
+    X_train, y_train = last_train
+
+    # Compose a shared run id for all outputs
+    run_id = (
+        f"{model.__class__.__name__}_{config['run_tag']}_s{features_matrix.shape[0]}"
+        f"_bl{config['num_trees']}_{metric_suffix}_perc_{perc_var}"
+    )
+
+    # Build the Decision Predicate Graph from the trained model
+    target_names = np.unique(labels).astype(str).tolist()
+    dpg_builder = DecisionPredicateGraph(
+        model=model, feature_names=feature_names, target_names=target_names
+    )
+    graph_dot = dpg_builder.fit(X_train.values)
+    dpg_graph, dpg_nodes = dpg_builder.to_networkx(graph_dot)
+
+    # Extract graph-level, node-level, and edge-level metrics
+    class_boundaries = GraphMetrics.extract_class_boundaries(
+        dpg_graph, dpg_nodes, target_names=target_names
+    )
+    class_boundaries_path = os.path.join(
+        base_dir, f"{config['results_dir']}/{run_id}_dpg_class_boundaries.txt"
+    )
+    with open(class_boundaries_path, "w") as f:
+        for key, value in class_boundaries.items():
+            f.write(f"{key}: {value}\n")
+
+    node_metrics = NodeMetrics.extract_node_metrics(dpg_graph, dpg_nodes)
+    node_metrics_path = os.path.join(
+        base_dir, f"{config['results_dir']}/{run_id}_node_metrics.csv"
+    )
+    node_metrics.to_csv(node_metrics_path, encoding="utf-8")
+
+    edge_metrics = EdgeMetrics.extract_edge_metrics(dpg_graph, dpg_nodes)
+    edge_metrics_path = os.path.join(
+        base_dir, f"{config['results_dir']}/{run_id}_edge_metrics.csv"
+    )
+    edge_metrics.to_csv(edge_metrics_path, encoding="utf-8")
+
+    # Render the full DPG visualization
+    run_name = f"{run_id}_DPG"
+    plot_dpg(
+        run_name,
+        graph_dot,
+        node_metrics,
+        edge_metrics,
+        save_dir=config["results_dir"],
+        class_flag=False,
+        export_pdf=True,
+    )
+
+    # Detect graph communities and save as a text file
+    communities = GraphMetrics.extract_communities(dpg_graph, node_metrics, dpg_nodes)
+    communities_path = os.path.join(
+        base_dir, f"{config['results_dir']}/{run_id}_dpg_communities.txt"
+    )
+    GraphMetrics.communities_to_csv(communities, communities_path)
+
+    # Render a community-colored DPG visualization
+    plot_dpg_communities(
+        run_name,
+        graph_dot,
+        node_metrics,
+        communities,
+        save_dir=config["results_dir"],
+        class_flag=True,
+        export_pdf=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
