@@ -7,6 +7,4 @@ __all__ = [
     "plot_dpg",
     "plot_dpg_reg",
     "plot_dpg_constraints_overview",
-    "extract_graph_metrics",
-    "extract_node_metrics",
 ]

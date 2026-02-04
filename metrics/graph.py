@@ -91,6 +91,15 @@ class GraphMetrics:
         }
 
     @classmethod
+    def extract_graph_metrics(cls, dpg_model: nx.DiGraph, nodes_list: List[tuple], target_names: List[str]) -> Dict:
+        """Backwards-compatible graph metrics interface.
+
+        This delegates to the current LPA-based implementation to keep
+        older examples and notebooks working.
+        """
+        return cls.extract_graph_metrics_lpa(dpg_model, nodes_list, target_names)
+
+    @classmethod
     def extract_graph_metrics_lpa(cls, dpg_model: nx.DiGraph, nodes_list: List[tuple], target_names: List[str]) -> Dict:
         """Main interface for graph metrics"""
         # Create node mappings
