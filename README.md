@@ -95,51 +95,67 @@ pip install git+https://github.com/Meta-Group/DPG.git
 
 ## Example usage (Python)
 
-You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example:
-
-Here is a minimal example of how to use DPG with a trained model and a CSV dataset (e.g., `datasets/custom.csv`) using `scikit-learn` and the DPG API:
+You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example using the high-level API:
 
 ```python
-# Example script: train a model, build a DPG, and render a visualization.
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from dpg import DPGExplainer
+
+# Load dataset (last column assumed to be target)
+df = pd.read_csv("datasets/custom.csv", index_col=0)
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
+
+# Train a simple Random Forest classifier
+model = RandomForestClassifier(n_estimators=10, random_state=27)
+model.fit(X, y)
+
+# Build the DPG and extract global explanations
+explainer = DPGExplainer(
+    model=model,
+    feature_names=X.columns,
+    target_names=np.unique(y).astype(str).tolist(),
+)
+explanation = explainer.explain_global(X.values, communities=True)
+
+# Render the graph to disk
+explainer.plot("dpg_output", explanation, save_dir="datasets", export_pdf=True)
+explainer.plot_communities("dpg_output", explanation, save_dir="datasets", export_pdf=True)
+```
+
+### Legacy API (low-level)
+
+```python
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from dpg.core import DecisionPredicateGraph
 from dpg.visualizer import plot_dpg
 from metrics.nodes import NodeMetrics
-from metrics.graph import GraphMetrics
 from metrics.edges import EdgeMetrics
 
-# Load dataset (last column assumed to be target)
 df = pd.read_csv("datasets/custom.csv", index_col=0)
-features = df.iloc[:, :-1]
-target = df.iloc[:, -1]
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
 
-# Train a simple Random Forest classifier
 model = RandomForestClassifier(n_estimators=10, random_state=27)
-model.fit(features, target)
+model.fit(X, y)
 
-# Build the DPG
-feature_names = features.columns.tolist()
-class_names = np.unique(target).astype(str).tolist()
+feature_names = X.columns.tolist()
+class_names = np.unique(y).astype(str).tolist()
 dpg = DecisionPredicateGraph(
     model=model,
     feature_names=feature_names,
     target_names=class_names
 )
-dot = dpg.fit(features.values)
+dot = dpg.fit(X.values)
 dpg_model, nodes_list = dpg.to_networkx(dot)
 
-# Extract metrics for visualization
 df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
 df_nodes = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-GraphMetrics.extract_graph_metrics(
-    dpg_model,
-    nodes_list,
-    target_names=class_names,
-)
 
-# Render the graph to disk
 plot_dpg(
     "dpg_output",
     dot,
@@ -154,6 +170,17 @@ plot_dpg(
 <p align="center">
   <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/dpg_output_communities.png?raw=true" width="600" />
 </p>
+
+### API overview (high-level)
+
+The high-level API is designed to return structured outputs so downstream tools can use them directly.
+
+- `DPGExplainer.fit(X)`: builds the DPG structure
+- `DPGExplainer.explain_global(X=None, communities=False, community_threshold=0.2)`: returns a `DPGExplanation`
+- `DPGExplainer.plot(...)`: renders the standard DPG
+- `DPGExplainer.plot_communities(...)`: renders a community-colored DPG
+
+`DPGExplanation` includes `dot`, `graph`, `nodes`, `node_metrics`, `edge_metrics`, `class_boundaries`, and optional `communities`.
 
 #### CLI scripts
 The library contains two different scripts to apply DPG:

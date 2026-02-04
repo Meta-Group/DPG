@@ -12,11 +12,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import KFold
-from dpg.core import DecisionPredicateGraph
-from dpg.visualizer import plot_dpg, plot_dpg_communities
-from metrics.nodes import NodeMetrics
-from metrics.graph import GraphMetrics
-from metrics.edges import EdgeMetrics
+from dpg import DPGExplainer
 import yaml
 
 def load_config(config_path):
@@ -114,62 +110,60 @@ def main():
         f"_bl{config['num_trees']}_{metric_suffix}_perc_{perc_var}"
     )
 
-    # Build the Decision Predicate Graph from the trained model
+    # Build and explain DPG via the high-level API
     target_names = np.unique(labels).astype(str).tolist()
-    dpg_builder = DecisionPredicateGraph(
-        model=model, feature_names=feature_names, target_names=target_names
+    explainer = DPGExplainer(
+        model=model,
+        feature_names=feature_names,
+        target_names=target_names,
+        config_file=config["config_path"],
     )
-    graph_dot = dpg_builder.fit(X_train.values)
-    dpg_graph, dpg_nodes = dpg_builder.to_networkx(graph_dot)
+    explanation = explainer.explain_global(
+        X_train.values,
+        communities=True,
+        community_threshold=0.2,
+    )
 
-    # Extract graph-level, node-level, and edge-level metrics
-    class_boundaries = GraphMetrics.extract_class_boundaries(
-        dpg_graph, dpg_nodes, target_names=target_names
-    )
+    # Save class boundary summary
     class_boundaries_path = os.path.join(
         base_dir, f"{config['results_dir']}/{run_id}_dpg_class_boundaries.txt"
     )
     with open(class_boundaries_path, "w") as f:
-        for key, value in class_boundaries.items():
+        for key, value in explanation.class_boundaries.items():
             f.write(f"{key}: {value}\n")
 
-    node_metrics = NodeMetrics.extract_node_metrics(dpg_graph, dpg_nodes)
+    # Save node and edge metrics
     node_metrics_path = os.path.join(
         base_dir, f"{config['results_dir']}/{run_id}_node_metrics.csv"
     )
-    node_metrics.to_csv(node_metrics_path, encoding="utf-8")
+    explanation.node_metrics.to_csv(node_metrics_path, encoding="utf-8")
 
-    edge_metrics = EdgeMetrics.extract_edge_metrics(dpg_graph, dpg_nodes)
     edge_metrics_path = os.path.join(
         base_dir, f"{config['results_dir']}/{run_id}_edge_metrics.csv"
     )
-    edge_metrics.to_csv(edge_metrics_path, encoding="utf-8")
+    explanation.edge_metrics.to_csv(edge_metrics_path, encoding="utf-8")
 
-    # Render the full DPG visualization
+    # Save communities
+    communities_path = os.path.join(
+        base_dir, f"{config['results_dir']}/{run_id}_dpg_communities.txt"
+    )
+    if explanation.communities is not None:
+        from metrics.graph import GraphMetrics
+
+        GraphMetrics.communities_to_csv(explanation.communities, communities_path)
+
+    # Render plots
     run_name = f"{run_id}_DPG"
-    plot_dpg(
+    explainer.plot(
         run_name,
-        graph_dot,
-        node_metrics,
-        edge_metrics,
+        explanation=explanation,
         save_dir=config["results_dir"],
         class_flag=False,
         export_pdf=True,
     )
-
-    # Detect graph communities and save as a text file
-    communities = GraphMetrics.extract_communities(dpg_graph, node_metrics, dpg_nodes)
-    communities_path = os.path.join(
-        base_dir, f"{config['results_dir']}/{run_id}_dpg_communities.txt"
-    )
-    GraphMetrics.communities_to_csv(communities, communities_path)
-
-    # Render a community-colored DPG visualization
-    plot_dpg_communities(
+    explainer.plot_communities(
         run_name,
-        graph_dot,
-        node_metrics,
-        communities,
+        explanation=explanation,
         save_dir=config["results_dir"],
         class_flag=True,
         export_pdf=True,
