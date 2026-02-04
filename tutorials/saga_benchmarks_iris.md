@@ -1,6 +1,6 @@
 # DPGExplainer Saga Benchmarks — Episode 1: Iris
 
-A practitioner-friendly walkthrough of Decision Predicate Graphs (DPG) using the classic Iris dataset. We train a small RandomForest, build a DPG, and interpret three key signals: Local Reaching Centrality (LRC), Betweenness Centrality (BC), and Communities.
+A practitioner-friendly walkthrough of Decision Predicate Graphs (DPG) using the classic Iris dataset. We train a small RandomForest, build a DPG, and interpret three key signals: Local Reaching Centrality (LRC), Betweenness Centrality (BC), and Communities. 
 
 ---
 
@@ -44,7 +44,7 @@ explanation = explainer.explain_global(
 )
 ```
 
----
+--- 
 
 ## 3. Read the DPG Metrics
 
