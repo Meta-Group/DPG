@@ -1,5 +1,9 @@
 # Decision Predicate Graph (DPG)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
+[![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
+
 <p align="center">
   <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" width="300" />
 </p>

@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "dpg"
-version = "0.1.0"
-description = "A Python library for extracting and analyzing Decision Predicate Graphs from ensemble models."
+version = "0.1.5"
+description = "A Python library for extracting Decision Predicate Graphs and global explanations from ensemble models."
 authors = ["Sylvio Barbon Junior <sylvio.barbonjunior@units.it>", "Leonardo Arrighi <leonardo.arrighi@phd.units.it>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/Meta-Group/DPG"
 repository = "https://github.com/Meta-Group/DPG"
-keywords = ["decision graph", "ensemble learning", "explainable ai"]
+keywords = ["decision graph", "ensemble learning", "explainable ai", "explainability", "global explanations"]
 packages = [
     { include = "dpg" },
     { include = "metrics" }
