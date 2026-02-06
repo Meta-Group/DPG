@@ -1,34 +1,69 @@
 # DPGExplainer Saga Benchmarks — Episode 1: Iris
 
-A practitioner-friendly walkthrough of Decision Predicate Graphs (DPG) using the classic Iris dataset. We train a small RandomForest, build a DPG, and interpret three key signals: Local Reaching Centrality (LRC), Betweenness Centrality (BC), and Communities. 
+A practitioner-friendly walkthrough of Decision Predicate Graphs (DPG) using the classic Iris dataset. We train a small Random Forest (RF), build a DPG to map the model’s global behavior using Explainable AI (XAI), and interpret three key properties to explain the model: Local Reaching Centrality (LRC), Betweenness Centrality (BC), and node communities.
 
 ---
 
-## 1. Why DPG (in one minute)
-Tree ensembles can be accurate but hard to interpret globally. DPG converts the ensemble into a graph where:
-- Nodes are predicates like `petal length <= 2.45`
+## 1. What is Explainable AI (XAI)
+Explainable AI (XAI) focuses on making model behavior understandable to people. It helps answer questions like why a prediction was made, what features mattered most, and whether the model behaves as intended.
+
+Common motivations for XAI include:
+- Explain to justify: Provide evidence for decisions in high-stakes contexts.
+- Explain to discover: Surface patterns, biases, or unexpected signals in the data.
+- Explain to improve: Debug models, features, and data issues.
+- Explain to control: Support monitoring, governance, and compliance.
+
+XAI methods are often grouped into:
+- Global explanations: Summarize how the model behaves overall.
+- Local explanations: Explain a single prediction or a small region of the feature space.
+
+SHAP is a popular local method, while DPG provides a global view by turning an ensemble into a predicate graph and analyzing its structure.
+
+
+## 2. Why DPG (in one minute)
+Tree ensembles, such as RF, can be accurate but hard to interpret globally. DPG converts the ensemble into a graph where:
+- Nodes are predicates like `petal length <= 2.45`, in the iris case.
 - Edges capture how often training samples traverse those predicates
 - Metrics quantify how predicates structure the model’s global reasoning
 
-This gives a global map of decision logic, complementing local explainers.
+This gives a global map of decision logic and allows the use of graph metrics to capture the model’s rationale.
+
+In the next steps, we create a Random Forest model of the Iris dataset and explain it with DPG.
 
 ---
 
-## 2. Setup (Iris + Random Forest + DPG)
+## 3. Setup (Iris + Random Forest + DPG)
 
 ```python
 import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
 from dpg import DPGExplainer
 
 iris = load_iris(as_frame=True)
 X = iris.data
 y = iris.target
 
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=27, stratify=y
+)
+
 model = RandomForestClassifier(n_estimators=10, random_state=27)
-model.fit(X, y)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+cm = confusion_matrix(y_test, y_pred)
+ConfusionMatrixDisplay(cm, display_labels=iris.target_names).plot()
+print(classification_report(y_test, y_pred, target_names=iris.target_names))
+```
+
+## 4. Extracting DPG from RF
+
+Next, we extract the DPG from our RF model. The parameters `feature_names` and `target_names` provide readable output for the mapped scenarios.
+```python
 
 explainer = DPGExplainer(
     model=model,
@@ -46,8 +81,7 @@ explanation = explainer.explain_global(
 
 --- 
 
-## 3. Read the DPG Metrics
-
+## 5. Read the DPG Metrics
 ```python
 explanation.node_metrics.head()
 ```
@@ -62,7 +96,7 @@ explanation.node_metrics.head()
 
 ---
 
-## 4. Find the Top LRC and BC Predicates
+## 6. Find the Top LRC and BC Predicates
 
 ```python
 explanation.node_metrics.sort_values(
@@ -82,7 +116,7 @@ Interpretation guide:
 
 ---
 
-## 5. Communities (Decision Themes)
+## 7. Communities (Decision Themes)
 Communities group predicates that are tightly connected. For Iris, you often see groups that align with:
 - Short petal rules (often Setosa)
 - Longer petal or wider sepal rules (often Versicolor/Virginica)
@@ -94,7 +128,7 @@ explanation.communities.get("Communities", [])[:3]
 
 ---
 
-## 6. Visualize the Story
+## 8. Visualize the Story
 
 ```python
 run_name = "iris_dpg"
@@ -104,8 +138,8 @@ explainer.plot_communities(run_name, explanation, save_dir="results", class_flag
 
 ---
 
-## 7. What to Say in the Story
-Use these 3 points for a quick practitioner summary:
+## 9. What to Say in the Story
+Use these three points for a quick practitioner summary:
 - **LRC:** Which predicate most strongly frames the model’s logic?
 - **BC:** Which predicate acts as a bottleneck between key decision paths?
 - **Communities:** Which predicate groups define the “themes” of each class?
@@ -113,4 +147,4 @@ Use these 3 points for a quick practitioner summary:
 ---
 
 ## Next Episode
-We will move to a more complex dataset (UCI) and compare how DPG signatures change as the decision space grows.
+We will move to another scikit-learn benchmark dataset.
