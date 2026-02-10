@@ -99,15 +99,74 @@ explanation.node_metrics.head()
 ## 6. Find the Top LRC and BC Predicates
 
 ```python
-explanation.node_metrics.sort_values(
-    "Local reaching centrality", ascending=False
-).head(10)
-```
+import matplotlib.pyplot as plt
+import re
 
-```python
-explanation.node_metrics.sort_values(
-    "Betweenness centrality", ascending=False
-).head(10)
+def parse_feature_from_predicate(label: str) -> str:
+    """
+    Extract feature name from labels like:
+    - petal length (cm) <= 2.45
+    - sepal width (cm) > 3.1
+    """
+    m = re.search(r"(.+?)\s*(<=|>)\s*[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", str(label))
+    return m.group(1).strip() if m else str(label)
+
+nm = explanation.node_metrics.copy()
+nm = nm[nm["Label"].str.contains(r"(<=|>)", regex=True, na=False)]
+
+top_lrc = nm.sort_values("Local reaching centrality", ascending=False).head(10).copy()
+top_bc = nm.sort_values("Betweenness centrality", ascending=False).head(10).copy()
+
+top_lrc["Feature"] = top_lrc["Label"].apply(parse_feature_from_predicate)
+top_bc["Feature"] = top_bc["Label"].apply(parse_feature_from_predicate)
+
+# One shared color map so the same feature has the same color in both charts
+all_features = list(dict.fromkeys(top_lrc["Feature"].tolist() + top_bc["Feature"].tolist()))
+cmap = plt.cm.tab20
+feature_to_color = {
+    f: cmap(i / max(1, len(all_features) - 1))
+    for i, f in enumerate(all_features)
+}
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+
+# LRC chart
+lrc_plot = top_lrc.sort_values("Local reaching centrality", ascending=True)
+axes[0].barh(
+    lrc_plot["Label"],
+    lrc_plot["Local reaching centrality"],
+    color=[feature_to_color[f] for f in lrc_plot["Feature"]],
+    edgecolor="black",
+    linewidth=0.4,
+)
+axes[0].set_title("Top 10 LRC Predicates")
+axes[0].set_xlabel("Local Reaching Centrality")
+axes[0].set_ylabel("Predicate")
+
+# BC chart
+bc_plot = top_bc.sort_values("Betweenness centrality", ascending=True)
+axes[1].barh(
+    bc_plot["Label"],
+    bc_plot["Betweenness centrality"],
+    color=[feature_to_color[f] for f in bc_plot["Feature"]],
+    edgecolor="black",
+    linewidth=0.4,
+)
+axes[1].set_title("Top 10 BC Predicates")
+axes[1].set_xlabel("Betweenness Centrality")
+axes[1].set_ylabel("Predicate")
+
+# Shared legend (feature -> color)
+legend_handles = [
+    plt.Line2D([0], [0], marker='s', color='w', label=f,
+               markerfacecolor=feature_to_color[f], markeredgecolor='black', markersize=8)
+    for f in all_features
+]
+fig.legend(handles=legend_handles, title="Feature colors",
+           loc="lower center", ncol=min(4, max(1, len(legend_handles))), frameon=True)
+
+plt.tight_layout(rect=(0, 0.08, 1, 1))
+plt.show()
 ```
 
 Interpretation guide:
