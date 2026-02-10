@@ -95,6 +95,23 @@ pip install git+https://github.com/Meta-Group/DPG.git
   ```bash
   deactivate
   ```
+
+4- Graph rendering error (`dot` not found):
+  DPG plotting requires the Graphviz system executable (`dot`) in your PATH.  
+  Installing the Python package `graphviz` is not sufficient on its own.
+
+  - macOS (Homebrew):
+    ```bash
+    brew install graphviz
+    ```
+  - Ubuntu/Debian:
+    ```bash
+    sudo apt-get install graphviz
+    ```
+  - Windows (winget):
+    ```powershell
+    winget install Graphviz.Graphviz
+    ```
 ---
 
 ## Example usage (Python)

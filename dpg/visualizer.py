@@ -5,6 +5,7 @@ import pandas as pd
 from io import BytesIO
 from typing import Dict, List, Optional, TYPE_CHECKING
 from graphviz import Source
+from graphviz.backend.execute import ExecutableNotFound
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -16,10 +17,34 @@ from .utils import highlight_class_node, change_node_color, delete_folder_conten
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
-from PIL import Image
-from graphviz import Source
-
 Image.MAX_IMAGE_PIXELS = 500000000  # Adjust based on your needs
+
+
+def _graphviz_not_found_error() -> RuntimeError:
+    message = (
+        "Graphviz executable 'dot' was not found in PATH.\n"
+        "Install Graphviz and ensure 'dot' is available from your terminal.\n"
+        "Install examples:\n"
+        "- macOS (Homebrew): brew install graphviz\n"
+        "- Ubuntu/Debian: sudo apt-get install graphviz\n"
+        "- Windows (winget): winget install Graphviz.Graphviz"
+    )
+    return RuntimeError(message)
+
+
+def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
+    try:
+        return Source(dot_source).pipe(format="png")
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
+    except Exception as first_exc:
+        print(f"Plotting failed with {type(first_exc).__name__}; retrying with sanitized DOT source.")
+        try:
+            return Source(sanitizer(dot_source)).pipe(format="png")
+        except ExecutableNotFound as exc:
+            raise _graphviz_not_found_error() from exc
+        except Exception:
+            raise first_exc
 
 def plot_dpg(
     plot_name,
@@ -172,13 +197,7 @@ def plot_dpg(
         source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
         return source
 
-    try:
-        graph = Source(dot.source)
-        png_bytes = graph.pipe(format="png")
-    except Exception as e:
-        print(f"Plotting failed with {type(e).__name__}; retrying with sanitized DOT source.")
-        graph = Source(_sanitize_dot_source(dot.source))
-        png_bytes = graph.pipe(format="png")
+    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
@@ -337,13 +356,7 @@ def plot_dpg_communities(
         source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
         return source
 
-    try:
-        graph = Source(dot.source)
-        png_bytes = graph.pipe(format="png")
-    except Exception as e:
-        print(f"Plotting failed with {type(e).__name__}; retrying with sanitized DOT source.")
-        graph = Source(_sanitize_dot_source(dot.source))
-        png_bytes = graph.pipe(format="png")
+    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
@@ -410,7 +423,10 @@ def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=Non
         change_node_color(dot, node, color)
 
     graph_path = os.path.join(save_dir, f"{plot_name}_temp.gv")
-    dot.render(graph_path, view=False, format='png')
+    try:
+        dot.render(graph_path, view=False, format='png')
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
 
     # Display and save the image
     img_path = f"{graph_path}.png"
