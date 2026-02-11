@@ -1,209 +1,171 @@
 # DPGExplainer Saga Benchmarks — Episode 1: Iris
 
-A practitioner-friendly walkthrough of Decision Predicate Graphs (DPG) using the classic Iris dataset. We train a small Random Forest (RF), build a DPG to map the model’s global behavior using Explainable AI (XAI), and interpret three key properties to explain the model: Local Reaching Centrality (LRC), Betweenness Centrality (BC), and node communities.
+This is a compact global-interpretability report for a Random Forest on Iris using **Decision Predicate Graphs (DPG)**.
+
+The pipeline is:
+1. train a baseline Random Forest,
+2. extract DPG,
+3. analyze LRC, BC, communities, class boundaries, overlap, and class complexity,
+4. compare DPG signals with dataset statistics.
 
 ---
 
-## 1. What is Explainable AI (XAI)
-Explainable AI (XAI) focuses on making model behavior understandable to people. It helps answer questions like why a prediction was made, what features mattered most, and whether the model behaves as intended.
+## 1. Baseline model sanity check
 
-Common motivations for XAI include:
-- Explain to justify: Provide evidence for decisions in high-stakes contexts.
-- Explain to discover: Surface patterns, biases, or unexpected signals in the data.
-- Explain to improve: Debug models, features, and data issues.
-- Explain to control: Support monitoring, governance, and compliance.
+Before graph analysis, we verify the classifier is doing something reasonable.
 
-XAI methods are often grouped into:
-- Global explanations: Summarize how the model behaves overall.
-- Local explanations: Explain a single prediction or a small region of the feature space.
+![RF confusion matrix](results/saga_benchmarks_iris/rf_confusion_matrix.png)
 
-SHAP is a popular local method, while DPG provides a global view by turning an ensemble into a predicate graph and analyzing its structure.
-
-
-## 2. Why DPG (in one minute)
-Tree ensembles, such as RF, can be accurate but hard to interpret globally. DPG converts the ensemble into a graph where:
-- Nodes are predicates like `petal length <= 2.45`, in the iris case.
-- Edges capture how often training samples traverse those predicates
-- Metrics quantify how predicates structure the model’s global reasoning
-
-This gives a global map of decision logic and allows the use of graph metrics to capture the model’s rationale.
-
-In the next steps, we create a Random Forest model of the Iris dataset and explain it with DPG.
+The confusion matrix confirms the expected Iris pattern: setosa is usually easy, while versicolor/virginica carry most confusion. This is exactly the part DPG should help explain structurally.
 
 ---
 
-## 3. Setup (Iris + Random Forest + DPG)
+## 2. Data geometry (feature-level intuition)
 
-```python
-import numpy as np
-import pandas as pd
-from sklearn.datasets import load_iris
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import ConfusionMatrixDisplay, classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
-from dpg import DPGExplainer
+Pairwise feature distributions give the geometric baseline before any graph metric.
 
-iris = load_iris(as_frame=True)
-X = iris.data
-y = iris.target
+![Iris pairplot](results/saga_benchmarks_iris/pairplot.png)
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=27, stratify=y
-)
-
-model = RandomForestClassifier(n_estimators=10, random_state=27)
-model.fit(X_train, y_train)
-
-y_pred = model.predict(X_test)
-cm = confusion_matrix(y_test, y_pred)
-ConfusionMatrixDisplay(cm, display_labels=iris.target_names).plot()
-print(classification_report(y_test, y_pred, target_names=iris.target_names))
-```
-
-## 4. Extracting DPG from RF
-
-Next, we extract the DPG from our RF model. The parameters `feature_names` and `target_names` provide readable output for the mapped scenarios.
-```python
-
-explainer = DPGExplainer(
-    model=model,
-    feature_names=X.columns,
-    target_names=iris.target_names.tolist(),
-    config_file="config.yaml",  # optional if present
-)
-
-explanation = explainer.explain_global(
-    X.values,
-    communities=True,
-    community_threshold=0.2,
-)
-```
-
---- 
-
-## 5. Read the DPG Metrics
-```python
-explanation.node_metrics.head()
-```
-
-**Local Reaching Centrality (LRC)**
-- High LRC nodes can reach many other nodes downstream.
-- These predicates often act early, framing large portions of the model’s logic.
-
-**Betweenness Centrality (BC)**
-- High BC nodes lie on many shortest paths between other nodes.
-- These predicates are “bottlenecks” that connect major decision flows.
+Setosa is mostly isolated in petal-space. Versicolor and virginica overlap more. We use this as reference when reading BC bottlenecks and community overlap later.
 
 ---
 
-## 6. Find the Top LRC and BC Predicates
+## 3. Why DPG on top of Random Forest
 
-```python
-import matplotlib.pyplot as plt
-import re
+Random Forest importance is good for ranking features, but it does not give explicit decision flow between concrete threshold predicates.
 
-def parse_feature_from_predicate(label: str) -> str:
-    """
-    Extract feature name from labels like:
-    - petal length (cm) <= 2.45
-    - sepal width (cm) > 3.1
-    """
-    m = re.search(r"(.+?)\s*(<=|>)\s*[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", str(label))
-    return m.group(1).strip() if m else str(label)
+DPG converts trees into a global predicate graph:
+- nodes: `feature <= threshold` / `feature > threshold`,
+- edges: transitions observed in tree paths,
+- metrics: structural role of predicates in global decision logic.
 
-nm = explanation.node_metrics.copy()
-nm = nm[nm["Label"].str.contains(r"(<=|>)", regex=True, na=False)]
-
-top_lrc = nm.sort_values("Local reaching centrality", ascending=False).head(10).copy()
-top_bc = nm.sort_values("Betweenness centrality", ascending=False).head(10).copy()
-
-top_lrc["Feature"] = top_lrc["Label"].apply(parse_feature_from_predicate)
-top_bc["Feature"] = top_bc["Label"].apply(parse_feature_from_predicate)
-
-# One shared color map so the same feature has the same color in both charts
-all_features = list(dict.fromkeys(top_lrc["Feature"].tolist() + top_bc["Feature"].tolist()))
-cmap = plt.cm.tab20
-feature_to_color = {
-    f: cmap(i / max(1, len(all_features) - 1))
-    for i, f in enumerate(all_features)
-}
-
-fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-
-# LRC chart
-lrc_plot = top_lrc.sort_values("Local reaching centrality", ascending=True)
-axes[0].barh(
-    lrc_plot["Label"],
-    lrc_plot["Local reaching centrality"],
-    color=[feature_to_color[f] for f in lrc_plot["Feature"]],
-    edgecolor="black",
-    linewidth=0.4,
-)
-axes[0].set_title("Top 10 LRC Predicates")
-axes[0].set_xlabel("Local Reaching Centrality")
-axes[0].set_ylabel("Predicate")
-
-# BC chart
-bc_plot = top_bc.sort_values("Betweenness centrality", ascending=True)
-axes[1].barh(
-    bc_plot["Label"],
-    bc_plot["Betweenness centrality"],
-    color=[feature_to_color[f] for f in bc_plot["Feature"]],
-    edgecolor="black",
-    linewidth=0.4,
-)
-axes[1].set_title("Top 10 BC Predicates")
-axes[1].set_xlabel("Betweenness Centrality")
-axes[1].set_ylabel("Predicate")
-
-# Shared legend (feature -> color)
-legend_handles = [
-    plt.Line2D([0], [0], marker='s', color='w', label=f,
-               markerfacecolor=feature_to_color[f], markeredgecolor='black', markersize=8)
-    for f in all_features
-]
-fig.legend(handles=legend_handles, title="Feature colors",
-           loc="lower center", ncol=min(4, max(1, len(legend_handles))), frameon=True)
-
-plt.tight_layout(rect=(0, 0.08, 1, 1))
-plt.show()
-```
-
-Interpretation guide:
-- If a predicate has **high LRC**, it likely sets an early rule that shapes many later decisions.
-- If a predicate has **high BC**, it likely separates multiple alternative paths in the model.
+So the rationale is pragmatic:
+- keep RF predictive strength,
+- gain a graph view to inspect routing, bottlenecks, and class-rule organization.
 
 ---
 
-## 7. Communities (Decision Themes)
-Communities group predicates that are tightly connected. For Iris, you often see groups that align with:
-- Short petal rules (often Setosa)
-- Longer petal or wider sepal rules (often Versicolor/Virginica)
+## 4. LRC vs RF importance (complementary views)
 
-```python
-explanation.communities.keys()
-explanation.communities.get("Communities", [])[:3]
-```
+LRC and RF importance answer different questions.
 
----
+![LRC vs RF importance](results/saga_benchmarks_iris/lrc_vs_rf_importance.png)
 
-## 8. Visualize the Story
+- **RF importance**: which features reduce impurity most across splits.
+- **LRC**: which specific predicates are globally influential in downstream graph flow.
 
-```python
-run_name = "iris_dpg"
-explainer.plot(run_name, explanation, save_dir="results", class_flag=True, export_pdf=True)
-explainer.plot_communities(run_name, explanation, save_dir="results", class_flag=True, export_pdf=True)
-```
+If a feature is high in RF and appears in high-LRC predicates, it is both statistically useful and structurally central.
+
+To make this concrete, top LRC split lines are projected on the top feature pair:
+
+![Top LRC predicate splits](results/saga_benchmarks_iris/top_lrc_predicate_splits.png)
+
+This plot shows where high-LRC predicates cut the data manifold.
 
 ---
 
-## 9. What to Say in the Story
-Use these three points for a quick practitioner summary:
-- **LRC:** Which predicate most strongly frames the model’s logic?
-- **BC:** Which predicate acts as a bottleneck between key decision paths?
-- **Communities:** Which predicate groups define the “themes” of each class?
+## 5. BC as bottleneck decision logic
+
+BC highlights predicates that connect major decision regions.
+
+![BC bottleneck PCA cloud](results/saga_benchmarks_iris/bc_bottleneck_pca_cloud.png)
+
+Interpretation: high-BC predicates tend to concentrate around transition zones where class assignment is less trivial. In Iris, these zones are usually related to versicolor/virginica interaction.
 
 ---
 
-## Next Episode
-We will move to another scikit-learn benchmark dataset.
+## 6. Global DPG and communities
+
+Full graph view:
+
+![DPG graph](results/saga_benchmarks_iris/iris_dpg.png)
+
+Community-colored view:
+
+![DPG communities](results/saga_benchmarks_iris/iris_dpg_communities.png)
+
+Communities represent coherent predicate themes. They help translate “many tree paths” into a smaller number of class-relevant rule groups.
+
+---
+
+## 7. Communities, overlap, and complexity
+
+Class-feature predicate concentration:
+
+![Community class-feature heatmap](results/saga_benchmarks_iris/communities_class_feature_complexity_heatmap.png)
+
+Class predicate volume and feature coverage:
+
+![Community class complexity bars](results/saga_benchmarks_iris/communities_class_feature_complexity_bars.png)
+
+What this adds:
+- identifies which classes rely on broader or narrower predicate sets,
+- exposes where classes share feature-rule patterns (overlap signal),
+- provides a structural proxy for class simplicity/complexity.
+
+---
+
+## 8. Class boundaries from DPG communities
+
+Community-derived class range summaries:
+
+![Classwise DPG ranges](results/saga_benchmarks_iris/classwise_feature_ranges_ranges.png)
+
+Range-width heatmap by class-feature:
+
+![Classwise range-width heatmap](results/saga_benchmarks_iris/classwise_feature_ranges_width_heatmap.png)
+
+Direct comparison with empirical class ranges from the original dataset:
+
+![DPG vs dataset feature ranges](results/saga_benchmarks_iris/dpg_vs_dataset_feature_ranges.png)
+
+This comparison is important: it checks whether DPG boundaries are aligned with observed class statistics (min/max spreads), and highlights where model boundaries are tighter/looser than raw data geometry.
+
+---
+
+## 9. Main DPG contributions in this benchmark
+
+DPG extends standard RF interpretation with:
+
+1. **Global rule topology**
+   - from isolated feature ranking to connected predicate flow.
+
+2. **Predicate-level influence (LRC)**
+   - identifies which threshold rules organize model reasoning.
+
+3. **Bottleneck routing (BC)**
+   - isolates high-impact transition predicates in overlapping regions.
+
+4. **Community-level class semantics**
+   - class definitions as coherent rule ecosystems, not just split counts.
+
+5. **Overlap diagnostics**
+   - shared/ambiguous community structure marks naturally confusable class zones.
+
+6. **Class complexity profiling**
+   - complexity as a structural property of predicate organization.
+
+7. **Boundary validation against dataset statistics**
+   - checks whether model-induced class ranges are consistent with empirical class distributions.
+
+---
+
+## 10. References and related work
+
+### Original DPG proposal
+- Arrighi, L., Pennella, L., Marques Tavares, G., Barbon Junior, S.
+  **Decision Predicate Graphs: Enhancing Interpretability in Tree Ensembles**.
+  *World Conference on Explainable Artificial Intelligence*, 311-332.
+  https://link.springer.com/chapter/10.1007/978-3-031-63797-1_16
+
+### Extended DPG (Isolation Forest)
+- Ceschin, M., Arrighi, L., Longo, L., Barbon Junior, S.
+  **Extending Decision Predicate Graphs for Comprehensive Explanation of Isolation Forest**.
+  *World Conference on Explainable Artificial Intelligence*, 271-293.
+  https://link.springer.com/chapter/10.1007/978-3-032-08324-1_12
+
+### Real-life applications
+- Systems:
+  https://www.mdpi.com/2079-8954/13/11/935
+- Computers and Electronics in Agriculture:
+  https://www.sciencedirect.com/science/article/pii/S0168169926000979
