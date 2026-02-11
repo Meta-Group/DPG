@@ -14,7 +14,7 @@ The pipeline is:
 
 Before graph analysis, we verify the classifier is doing something reasonable.
 
-![RF confusion matrix](results/saga_benchmarks_iris/rf_confusion_matrix.png)
+![RF confusion matrix](images/rf_confusion_matrix.png)
 
 The confusion matrix confirms the expected Iris pattern: setosa is usually easy, while versicolor/virginica carry most confusion. This is exactly the part DPG should help explain structurally.
 
@@ -24,7 +24,7 @@ The confusion matrix confirms the expected Iris pattern: setosa is usually easy,
 
 Pairwise feature distributions give the geometric baseline before any graph metric.
 
-![Iris pairplot](results/saga_benchmarks_iris/pairplot.png)
+![Iris pairplot](images/pairplot.png)
 
 Setosa is mostly isolated in petal-space. Versicolor and virginica overlap more. We use this as reference when reading BC bottlenecks and community overlap later.
 
@@ -49,7 +49,7 @@ So the rationale is pragmatic:
 
 LRC and RF importance answer different questions.
 
-![LRC vs RF importance](results/saga_benchmarks_iris/lrc_vs_rf_importance.png)
+![LRC vs RF importance](images/lrc_vs_rf_importance.png)
 
 - **RF importance**: which features reduce impurity most across splits.
 - **LRC**: which specific predicates are globally influential in downstream graph flow.
@@ -58,7 +58,7 @@ If a feature is high in RF and appears in high-LRC predicates, it is both statis
 
 To make this concrete, top LRC split lines are projected on the top feature pair:
 
-![Top LRC predicate splits](results/saga_benchmarks_iris/top_lrc_predicate_splits.png)
+![Top LRC predicate splits](images/top_lrc_predicate_splits.png)
 
 This plot shows where high-LRC predicates cut the data manifold.
 
@@ -68,7 +68,7 @@ This plot shows where high-LRC predicates cut the data manifold.
 
 BC highlights predicates that connect major decision regions.
 
-![BC bottleneck PCA cloud](results/saga_benchmarks_iris/bc_bottleneck_pca_cloud.png)
+![BC bottleneck PCA cloud](images/bc_bottleneck_pca_cloud.png)
 
 Interpretation: high-BC predicates tend to concentrate around transition zones where class assignment is less trivial. In Iris, these zones are usually related to versicolor/virginica interaction.
 
@@ -78,11 +78,11 @@ Interpretation: high-BC predicates tend to concentrate around transition zones w
 
 Full graph view:
 
-![DPG graph](results/saga_benchmarks_iris/iris_dpg.png)
+![DPG graph](images/iris_dpg.png)
 
 Community-colored view:
 
-![DPG communities](results/saga_benchmarks_iris/iris_dpg_communities.png)
+![DPG communities](images/iris_dpg_communities.png)
 
 Communities represent coherent predicate themes. They help translate “many tree paths” into a smaller number of class-relevant rule groups.
 
@@ -92,11 +92,11 @@ Communities represent coherent predicate themes. They help translate “many tre
 
 Class-feature predicate concentration:
 
-![Community class-feature heatmap](results/saga_benchmarks_iris/communities_class_feature_complexity_heatmap.png)
+![Community class-feature heatmap](images/communities_class_feature_complexity_heatmap.png)
 
 Class predicate volume and feature coverage:
 
-![Community class complexity bars](results/saga_benchmarks_iris/communities_class_feature_complexity_bars.png)
+![Community class complexity bars](images/communities_class_feature_complexity_bars.png)
 
 What this adds:
 - identifies which classes rely on broader or narrower predicate sets,
@@ -109,15 +109,15 @@ What this adds:
 
 Community-derived class range summaries:
 
-![Classwise DPG ranges](results/saga_benchmarks_iris/classwise_feature_ranges_ranges.png)
+![Classwise DPG ranges](images/classwise_feature_ranges_ranges.png)
 
 Range-width heatmap by class-feature:
 
-![Classwise range-width heatmap](results/saga_benchmarks_iris/classwise_feature_ranges_width_heatmap.png)
+![Classwise range-width heatmap](images/classwise_feature_ranges_width_heatmap.png)
 
 Direct comparison with empirical class ranges from the original dataset:
 
-![DPG vs dataset feature ranges](results/saga_benchmarks_iris/dpg_vs_dataset_feature_ranges.png)
+![DPG vs dataset feature ranges](images/dpg_vs_dataset_feature_ranges.png)
 
 This comparison is important: it checks whether DPG boundaries are aligned with observed class statistics (min/max spreads), and highlights where model boundaries are tighter/looser than raw data geometry.
 
