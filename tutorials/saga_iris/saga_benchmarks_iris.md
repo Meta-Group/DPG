@@ -86,9 +86,14 @@ Community-colored view:
 
 Communities represent coherent predicate themes. They help translate “many tree paths” into a smaller number of class-relevant rule groups.
 
+Interpretation guidance:
+- In the plain DPG, look for high-traffic predicate hubs and repeated threshold motifs.
+- In the community view, look for groups that are mostly class-specific versus groups touching multiple classes.
+- Shared groups are where overlap/ambiguity tends to live.
+
 ---
 
-## 7. Communities, overlap, and complexity
+## 7. Communities, overlap, and complexity (DPGExplainer-aligned)
 
 Class-feature predicate concentration:
 
@@ -103,23 +108,37 @@ What this adds:
 - exposes where classes share feature-rule patterns (overlap signal),
 - provides a structural proxy for class simplicity/complexity.
 
+Notebook alignment note:
+- community extraction is taken from `DPGExplainer` output (`explanation.communities`);
+- when `Clusters` are available, class-community association follows the cluster key;
+- fallback inference is used only if community metadata cannot be resolved.
+
 ---
 
-## 8. Class boundaries from DPG communities
-
-Community-derived class range summaries:
-
-![Classwise DPG ranges](images/classwise_feature_ranges_ranges.png)
-
-Range-width heatmap by class-feature:
-
-![Classwise range-width heatmap](images/classwise_feature_ranges_width_heatmap.png)
-
-Direct comparison with empirical class ranges from the original dataset:
+## 8. DPG class bounds vs dataset ranges
 
 ![DPG vs dataset feature ranges](images/dpg_vs_dataset_feature_ranges.png)
 
-This comparison is important: it checks whether DPG boundaries are aligned with observed class statistics (min/max spreads), and highlights where model boundaries are tighter/looser than raw data geometry.
+This figure is the main boundary-validation view in the current notebook.
+
+What is plotted:
+- **gray thick bars**: empirical dataset class ranges for each feature;
+- **blue bars**: DPG community-derived ranges;
+- **triangle markers at edges**: unbounded sides (`-inf` / `+inf`) from one-sided predicates;
+- **predicate-density triangles**:
+  - green `^` for `>` predicates,
+  - red `v` for `<=` predicates,
+  - nearby thresholds are aggregated to emphasize dense decision zones.
+
+How to interpret:
+- if DPG and dataset bars are close, model boundaries are broadly consistent with observed class spread;
+- narrower DPG bars suggest stricter model partitioning;
+- wider DPG bars suggest looser partitioning or overlap handling;
+- dense triangles indicate where the forest repeatedly uses thresholds (decision-detail concentration).
+
+Axis policy used in notebook:
+- limits are based on the most extreme values in scope (dataset + finite DPG bounds),
+- lower bound is clamped to `0` when negative.
 
 ---
 
@@ -146,7 +165,7 @@ DPG extends standard RF interpretation with:
    - complexity as a structural property of predicate organization.
 
 7. **Boundary validation against dataset statistics**
-   - checks whether model-induced class ranges are consistent with empirical class distributions.
+   - checks model-induced class ranges against empirical ranges, including one-sided intervals and predicate-density concentration.
 
 ---
 
