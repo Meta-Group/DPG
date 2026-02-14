@@ -88,7 +88,7 @@ Communities represent coherent predicate themes. They help translate “many tre
 
 ---
 
-## 7. Communities, overlap, and complexity
+## 7. Communities, overlap, and complexity (DPGExplainer-aligned)
 
 Class-feature predicate concentration:
 
@@ -103,23 +103,32 @@ What this adds:
 - exposes where classes share feature-rule patterns (overlap signal),
 - provides a structural proxy for class simplicity/complexity.
 
+Implementation note for this benchmark:
+- community analysis follows `DPGExplainer` community output (`Clusters`) directly,
+- `community_id` stays tied to a single DPG community,
+- class-community association uses the cluster label when available (with fallback only when needed).
+
 ---
 
-## 8. Class boundaries from DPG communities
-
-Community-derived class range summaries:
-
-![Classwise DPG ranges](results/saga_benchmarks_iris/classwise_feature_ranges_ranges.png)
-
-Range-width heatmap by class-feature:
-
-![Classwise range-width heatmap](results/saga_benchmarks_iris/classwise_feature_ranges_width_heatmap.png)
-
-Direct comparison with empirical class ranges from the original dataset:
+## 8. DPG ranges vs dataset ranges
 
 ![DPG vs dataset feature ranges](results/saga_benchmarks_iris/dpg_vs_dataset_feature_ranges.png)
 
-This comparison is important: it checks whether DPG boundaries are aligned with observed class statistics (min/max spreads), and highlights where model boundaries are tighter/looser than raw data geometry.
+This plot is now the main boundary-validation view and includes:
+- dataset class ranges (gray reference),
+- DPG community-derived ranges (blue),
+- explicit unbounded-side markers (`-inf` / `+inf`) when one predicate side is missing,
+- predicate-threshold density overlays, split by operator:
+  - green for `>` predicates,
+  - red for `<=` predicates,
+  - close thresholds aggregated to emphasize dense decision zones.
+
+Axis limits are computed from the most extreme values in scope (dataset and finite DPG bounds), with lower bound clamped to `0` when negative.
+
+Why it matters:
+- validates whether model-induced boundaries are consistent with empirical class spreads,
+- shows where DPG uses narrower/wider intervals than raw data,
+- reveals where many predicates concentrate, indicating high decision-detail regions.
 
 ---
 
@@ -146,7 +155,7 @@ DPG extends standard RF interpretation with:
    - complexity as a structural property of predicate organization.
 
 7. **Boundary validation against dataset statistics**
-   - checks whether model-induced class ranges are consistent with empirical class distributions.
+   - checks whether model-induced class ranges are consistent with empirical class distributions, including unbounded intervals and predicate-density concentration.
 
 ---
 
