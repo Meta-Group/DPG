@@ -20,6 +20,58 @@ from matplotlib.cm import ScalarMappable
 Image.MAX_IMAGE_PIXELS = 500000000  # Adjust based on your needs
 
 
+_LAYOUT_TEMPLATES = {
+    # Current behavior, close to Graphviz defaults for DPG usage.
+    "default": {
+        "graph": {"rankdir": "LR"},
+        "node": {},
+        "edge": {},
+    },
+    # Good for reducing horizontal spread and making figures more compact.
+    "compact": {
+        "graph": {"rankdir": "TB", "nodesep": "0.2", "ranksep": "0.25"},
+        "node": {"margin": "0.03,0.02"},
+        "edge": {"arrowsize": "0.6"},
+    },
+    # Strong vertical layout for long/wide graphs.
+    "vertical": {
+        "graph": {"rankdir": "TB", "nodesep": "0.25", "ranksep": "0.35"},
+        "node": {},
+        "edge": {},
+    },
+    # Explicitly wide left-to-right style.
+    "wide": {
+        "graph": {"rankdir": "LR", "nodesep": "0.5", "ranksep": "0.6"},
+        "node": {},
+        "edge": {},
+    },
+}
+
+
+def _apply_layout_template(dot, layout_template=None, graph_style=None, node_style=None, edge_style=None):
+    """Apply optional graph layout/style settings to Graphviz Digraph."""
+    template_name = (layout_template or "default").lower()
+    template = _LAYOUT_TEMPLATES.get(template_name, _LAYOUT_TEMPLATES["default"])
+
+    merged_graph = dict(template.get("graph", {}))
+    merged_node = dict(template.get("node", {}))
+    merged_edge = dict(template.get("edge", {}))
+
+    if graph_style:
+        merged_graph.update(graph_style)
+    if node_style:
+        merged_node.update(node_style)
+    if edge_style:
+        merged_edge.update(edge_style)
+
+    if merged_graph:
+        dot.attr("graph", **{str(k): str(v) for k, v in merged_graph.items()})
+    if merged_node:
+        dot.attr("node", **{str(k): str(v) for k, v in merged_node.items()})
+    if merged_edge:
+        dot.attr("edge", **{str(k): str(v) for k, v in merged_edge.items()})
+
+
 def _graphviz_not_found_error() -> RuntimeError:
     message = (
         "Graphviz executable 'dot' was not found in PATH.\n"
@@ -56,6 +108,13 @@ def plot_dpg(
     clusters=None,
     threshold_clusters=None,
     class_flag=False,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
     show=True,
     export_pdf=False,
 ):
@@ -72,6 +131,13 @@ def plot_dpg(
     clusters: Optional mapping {cluster_label: [node_id, ...]} to color nodes by clusters.
     threshold_clusters: Optional value used only to annotate the output name.
     class_flag: If True, class nodes are highlighted in yellow before other coloring.
+    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
+    graph_style: Optional dict of Graphviz graph attributes to override template values.
+    node_style: Optional dict of Graphviz node attributes to override template values.
+    edge_style: Optional dict of Graphviz edge attributes to override template values.
+    fig_size: Matplotlib figure size (width, height).
+    dpi: PNG export/display resolution.
+    pdf_dpi: PDF export resolution when export_pdf=True.
     show: Whether to display the image via matplotlib. Default is True.
     export_pdf: If True, also writes a PDF next to the PNG.
 
@@ -79,6 +145,13 @@ def plot_dpg(
     None
     """
     print("Plotting DPG...")
+    _apply_layout_template(
+        dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
     # Basic color scheme if no attribute or communities are specified
     if attribute is None and clusters is None:
         for index, row in df.iterrows():
@@ -201,7 +274,7 @@ def plot_dpg(
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
-    fig, ax = plt.subplots(figsize=(16, 8))
+    fig, ax = plt.subplots(figsize=fig_size)
     ax.set_axis_off()
     ax.set_title(plot_name)
     ax.imshow(img)
@@ -223,12 +296,12 @@ def plot_dpg(
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
-    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=300, bbox_inches="tight", pad_inches=0.02)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
     if export_pdf:
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
-            dpi=600,
+            dpi=pdf_dpi,
             bbox_inches="tight",
             pad_inches=0.02,
         )
@@ -248,6 +321,13 @@ def plot_dpg_communities(
     save_dir="results/",
     class_flag=False,
     df_edges=None,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
     show=True,
     export_pdf=False,
 ):
@@ -263,6 +343,13 @@ def plot_dpg_communities(
     save_dir: Directory where output images are saved. Default is "results/".
     class_flag: If True, class nodes are highlighted in yellow before other coloring.
     df_edges: Optional DataFrame with edge metrics to color edges by weight.
+    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
+    graph_style: Optional dict of Graphviz graph attributes to override template values.
+    node_style: Optional dict of Graphviz node attributes to override template values.
+    edge_style: Optional dict of Graphviz edge attributes to override template values.
+    fig_size: Matplotlib figure size (width, height).
+    dpi: PNG export/display resolution.
+    pdf_dpi: PDF export resolution when export_pdf=True.
     show: Whether to display the image via matplotlib. Default is True.
     export_pdf: If True, also writes a PDF next to the PNG.
 
@@ -270,6 +357,13 @@ def plot_dpg_communities(
     None
     """
     print("Plotting DPG (communities)...")
+    _apply_layout_template(
+        dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
 
     if dpg_metrics is None:
         raise AttributeError("dpg_metrics is required to plot communities.")
@@ -360,7 +454,7 @@ def plot_dpg_communities(
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
-    fig, ax = plt.subplots(figsize=(16, 8))
+    fig, ax = plt.subplots(figsize=fig_size)
     ax.set_axis_off()
     ax.set_title(plot_name)
     ax.imshow(img)
@@ -369,7 +463,7 @@ def plot_dpg_communities(
     os.makedirs(save_dir, exist_ok=True)
     fig.savefig(
         os.path.join(save_dir, plot_name + ".png"),
-        dpi=300,
+        dpi=dpi,
         bbox_inches="tight",
         pad_inches=0.02,
     )
@@ -377,7 +471,7 @@ def plot_dpg_communities(
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
-            dpi=600,
+            dpi=pdf_dpi,
             bbox_inches="tight",
             pad_inches=0.02,
         )
