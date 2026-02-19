@@ -1,0 +1,27 @@
+name: Telegram On Commit
+
+on:
+  push:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          AUTHOR: ${{ github.actor }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          SHORT_SHA="$(printf '%s' "${COMMIT_SHA}" | cut -c1-7)"
+          MESSAGE="Commit on ${REPOSITORY}%0ABranch: ${BRANCH}%0ABy: ${AUTHOR}%0ACommit: ${SHORT_SHA}%0AMessage: ${COMMIT_MESSAGE}%0ALink: ${COMMIT_URL}"
+
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=${MESSAGE}" \
+            -d "disable_web_page_preview=true"

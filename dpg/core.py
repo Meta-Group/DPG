@@ -24,6 +24,17 @@ except ImportError:
 
 from sklearn.ensemble import (AdaBoostRegressor, RandomForestRegressor, ExtraTreesRegressor)
 
+DEFAULT_DPG_CONFIG = {
+    "dpg": {
+        "default": {
+            "perc_var": 0.000000001,
+            "decimal_threshold": 6,
+            "n_jobs": -1,
+        },
+        "visualization": {},
+    }
+}
+
 class DPGError(Exception):
     """Base exception class for DPG-specific errors"""
     pass
@@ -52,12 +63,19 @@ class DecisionPredicateGraph:
             config_file: Path to YAML config file (fallback if dpg_config not provided)
             dpg_config: Optional dict with DPG config parameters (overrides config_file)
         """
-        # Load configuration from file or use provided config
+        # Load configuration from provided config, file, or defaults
         if dpg_config is not None:
             config = dpg_config
         else:
-            with open(config_file) as f:
-                config = yaml.safe_load(f)
+            config = None
+            if config_file:
+                if os.path.exists(config_file):
+                    with open(config_file) as f:
+                        config = yaml.safe_load(f)
+                else:
+                    print(f"Config file not found at '{config_file}'. Using built-in defaults.")
+            if config is None:
+                config = DEFAULT_DPG_CONFIG
         
         # Convert OmegaConf DictConfig to regular dict if needed
         if HAS_OMEGACONF and isinstance(config, DictConfig):
@@ -77,18 +95,13 @@ class DecisionPredicateGraph:
         self.feature_names = feature_names
         self.target_names = target_names #TODO create "Class as class name"
         
-        # Get config values - config must be provided
+        # Get config values with defaults
         dpg_config_section = config.get('dpg', {})
-        if not dpg_config_section:
-            raise DPGError("DPG config section not found in provided config")
-        
         default_config = dpg_config_section.get('default', {})
-        if not default_config:
-            raise DPGError("DPG default config section not found")
-        
-        self.perc_var = default_config.get('perc_var')
-        self.decimal_threshold = default_config.get('decimal_threshold')
-        self.n_jobs = default_config.get('n_jobs')
+
+        self.perc_var = default_config.get('perc_var', DEFAULT_DPG_CONFIG["dpg"]["default"]["perc_var"])
+        self.decimal_threshold = default_config.get('decimal_threshold', DEFAULT_DPG_CONFIG["dpg"]["default"]["decimal_threshold"])
+        self.n_jobs = default_config.get('n_jobs', DEFAULT_DPG_CONFIG["dpg"]["default"]["n_jobs"])
         
         # Validate required config values
         if self.perc_var is None:
@@ -100,7 +113,7 @@ class DecisionPredicateGraph:
         
         print(f"DPG initialized with perc_var={self.perc_var}, decimal_threshold={self.decimal_threshold}, n_jobs={self.n_jobs}")
         # Store visualization config for use by utils
-        self.visualization_config = dpg_config_section.get('visualization', {})
+        self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
 
     def fit(self, X_train):
         """
@@ -290,18 +303,20 @@ class DecisionPredicateGraph:
         graph_attrs = viz_config.get('graph_attrs', {})
         node_attrs = viz_config.get('node_attrs', {})
         
-        # Build graph_attr dict
+        # Build graph_attr dict, dropping unset values
         final_graph_attr = {
             "bgcolor": graph_attrs.get('bgcolor'),
             "rankdir": graph_attrs.get('rankdir'),
             "overlap": "false",
-            "fontsize": "20"
+            "fontsize": "20",
         }
-        
-        # Build node_attr dict
+        final_graph_attr = {k: v for k, v in final_graph_attr.items() if v is not None}
+
+        # Build node_attr dict, dropping unset values
         final_node_attr = {
-            "shape": node_attrs.get('shape')
+            "shape": node_attrs.get('shape'),
         }
+        final_node_attr = {k: v for k, v in final_node_attr.items() if v is not None}
         
         # Get fillcolor for regular nodes
         default_fillcolor = node_attrs.get('fillcolor')
@@ -310,15 +325,24 @@ class DecisionPredicateGraph:
             "dpg",
             engine="dot",
             graph_attr=final_graph_attr,
-            node_attr=final_node_attr,
+            node_attr=final_node_attr if final_node_attr else None,
         )
+        def _escape_dot_label(label: str) -> str:
+            # Escape characters that can break DOT parsing.
+            return (
+                label.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+            )
+
         added_nodes = set()
         for k, v in sorted(dfg.items(), key=lambda item: item[1]):
             for activity in k:
                 if activity not in added_nodes:
                     dot.node(
                         str(int(hashlib.sha1(activity.encode()).hexdigest(), 16)),
-                        label=activity,
+                        label=_escape_dot_label(activity),
                         style="filled",
                         fontsize="20",
                         fillcolor=default_fillcolor,
@@ -361,7 +385,14 @@ class DecisionPredicateGraph:
             if "[label=" in edge:
                 id, desc = edge.split("[label=")
                 id = id.replace("\t", "").replace(" ", "")
-                desc = desc.split(" fillcolor=")[0].replace('"', "")
+                # Extract label value safely, ignoring other attributes
+                m = re.search(r'label="([^"]*)"', edge)
+                if m:
+                    desc = m.group(1)
+                else:
+                    # Fallback for unquoted labels: label=VALUE (no spaces)
+                    m = re.search(r'label=([^\\s\\]]+)', edge)
+                    desc = m.group(1) if m else ""
                 nodes_list.append([id, desc])
         for src, dest in edges:
             if (src, dest) in weights:

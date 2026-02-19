@@ -14,10 +14,10 @@ from sklearn.datasets import (load_iris, load_digits, load_wine,
 from sklearn.base import is_classifier, is_regressor
 
 from .core import DecisionPredicateGraph
-from .visualizer import plot_dpg
-from .utils import get_dpg_edge_metrics, clustering
+from .visualizer import plot_dpg, plot_dpg_communities
 from metrics.nodes import NodeMetrics
 from metrics.graph import GraphMetrics
+from metrics.edges import EdgeMetrics
 
 
 def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -41,7 +41,7 @@ def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np
         "wine": load_wine(),
         "cancer": load_breast_cancer(),
     }
-    
+
     if source in std_datasets:
         dataset = std_datasets[source]
         return dataset.data, dataset.feature_names, dataset.target
@@ -176,14 +176,15 @@ def test_dpg(datasets: str,
     class_nodes = {i[0] : i[1] for i in nodes_list if 'Class' in i[1]}
     
     if clusters_flag:
-        clusters, node_prob, confidence = clustering(dpg_model, class_nodes, threshold_clusters)
+        clusters, node_prob, confidence = GraphMetrics.clustering(dpg_model, class_nodes, threshold_clusters)
     else:
         clusters = node_prob = confidence = None
 
     df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-    df_edges = get_dpg_edge_metrics(dpg_model, nodes_list)
-    df_dpg = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
-    
+    df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
+    df_dpg = GraphMetrics.extract_graph_metrics_lpa(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
+    # df_dpg = {}
+
     # Plot if requested
     if plot:
         os.makedirs(save_plot_dir, exist_ok=True)
@@ -193,18 +194,27 @@ def test_dpg(datasets: str,
         )
         plot_name +=  f"_{model_name}_l{n_learners}_pv{perc_var}_t{decimal_threshold}_{seed}"
         
-        plot_dpg(
-            plot_name,
-            dot,
-            df,
-            df_edges,
-            df_dpg,
-            save_dir=save_plot_dir,
-            attribute=attribute,
-            communities=communities,
-            clusters=clusters,
-            threshold_clusters=threshold_clusters,
-            class_flag=class_flag
-        )
+        if communities:
+            plot_dpg_communities(
+                plot_name,
+                dot,
+                df,
+                df_dpg,
+                save_dir=save_plot_dir,
+                class_flag=class_flag,
+                df_edges=df_edges,
+            )
+        else:
+            plot_dpg(
+                plot_name,
+                dot,
+                df,
+                df_edges,
+                save_dir=save_plot_dir,
+                attribute=attribute,
+                clusters=clusters,
+                threshold_clusters=threshold_clusters,
+                class_flag=class_flag,
+            )
     
     return df, df_edges, df_dpg, clusters, node_prob, confidence

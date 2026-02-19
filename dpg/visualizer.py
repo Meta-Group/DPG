@@ -1,8 +1,13 @@
 import os
 import re
+import warnings
 import numpy as np
-from typing import Dict, List, Optional, TYPE_CHECKING
+import pandas as pd
+import networkx as nx
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 from graphviz import Source
+from graphviz.backend.execute import ExecutableNotFound
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -14,31 +19,147 @@ from .utils import highlight_class_node, change_node_color, delete_folder_conten
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
-from PIL import Image
-from graphviz import Source
-
 Image.MAX_IMAGE_PIXELS = 500000000  # Adjust based on your needs
 
-def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribute=None, communities=False, clusters=None, threshold_clusters=None, class_flag=False):
+_PREDICATE_PATTERN = re.compile(
+    r"(.+?)\s*(<=|>)\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)"
+)
+
+
+_LAYOUT_TEMPLATES = {
+    # Current behavior, close to Graphviz defaults for DPG usage.
+    "default": {
+        "graph": {"rankdir": "LR"},
+        "node": {},
+        "edge": {},
+    },
+    # Good for reducing horizontal spread and making figures more compact.
+    "compact": {
+        "graph": {"rankdir": "TB", "nodesep": "0.2", "ranksep": "0.25"},
+        "node": {"margin": "0.03,0.02"},
+        "edge": {"arrowsize": "0.6"},
+    },
+    # Strong vertical layout for long/wide graphs.
+    "vertical": {
+        "graph": {"rankdir": "TB", "nodesep": "0.25", "ranksep": "0.35"},
+        "node": {},
+        "edge": {},
+    },
+    # Explicitly wide left-to-right style.
+    "wide": {
+        "graph": {"rankdir": "LR", "nodesep": "0.5", "ranksep": "0.6"},
+        "node": {},
+        "edge": {},
+    },
+}
+
+
+def _apply_layout_template(dot, layout_template=None, graph_style=None, node_style=None, edge_style=None):
+    """Apply optional graph layout/style settings to Graphviz Digraph."""
+    template_name = (layout_template or "default").lower()
+    template = _LAYOUT_TEMPLATES.get(template_name, _LAYOUT_TEMPLATES["default"])
+
+    merged_graph = dict(template.get("graph", {}))
+    merged_node = dict(template.get("node", {}))
+    merged_edge = dict(template.get("edge", {}))
+
+    if graph_style:
+        merged_graph.update(graph_style)
+    if node_style:
+        merged_node.update(node_style)
+    if edge_style:
+        merged_edge.update(edge_style)
+
+    if merged_graph:
+        dot.attr("graph", **{str(k): str(v) for k, v in merged_graph.items()})
+    if merged_node:
+        dot.attr("node", **{str(k): str(v) for k, v in merged_node.items()})
+    if merged_edge:
+        dot.attr("edge", **{str(k): str(v) for k, v in merged_edge.items()})
+
+
+def _graphviz_not_found_error() -> RuntimeError:
+    message = (
+        "Graphviz executable 'dot' was not found in PATH.\n"
+        "Install Graphviz and ensure 'dot' is available from your terminal.\n"
+        "Install examples:\n"
+        "- macOS (Homebrew): brew install graphviz\n"
+        "- Ubuntu/Debian: sudo apt-get install graphviz\n"
+        "- Windows (winget): winget install Graphviz.Graphviz"
+    )
+    return RuntimeError(message)
+
+
+def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
+    try:
+        return Source(dot_source).pipe(format="png")
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
+    except Exception as first_exc:
+        print(f"Plotting failed with {type(first_exc).__name__}; retrying with sanitized DOT source.")
+        try:
+            return Source(sanitizer(dot_source)).pipe(format="png")
+        except ExecutableNotFound as exc:
+            raise _graphviz_not_found_error() from exc
+        except Exception:
+            raise first_exc
+
+def plot_dpg(
+    plot_name,
+    dot,
+    df,
+    df_edges,
+    save_dir="results/",
+    attribute=None,
+    clusters=None,
+    threshold_clusters=None,
+    class_flag=False,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
+    show=True,
+    export_pdf=False,
+):
     """
-    Plots a Decision Predicate Graph (DPG) with various customization options.
+    Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
 
     Args:
-    plot_name: The name of the plot.
-    dot: A Graphviz Digraph object representing the DPG.
-    df: A pandas DataFrame containing node metrics.
-    df_dpg: A pandas DataFrame containing DPG metrics.
-    save_dir: Directory to save the plot image. Default is "examples/".
-    attribute: A specific node attribute to visualize. Default is None.
-    communities: Boolean indicating whether to visualize communities. Default is False.
-    class_flag: Boolean indicating whether to highlight class nodes. Default is False.
+    plot_name: Output base name for saved files (no extension).
+    dot: Graphviz Digraph instance representing the DPG structure.
+    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
+    df_edges: DataFrame with edge metrics; must include 'Source_id', 'Target_id', and 'Weight'.
+    save_dir: Directory where output images are saved. Default is "results/".
+    attribute: Optional node metric column name to color nodes by (e.g., 'Degree').
+    clusters: Optional mapping {cluster_label: [node_id, ...]} to color nodes by clusters.
+    threshold_clusters: Optional value used only to annotate the output name.
+    class_flag: If True, class nodes are highlighted in yellow before other coloring.
+    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
+    graph_style: Optional dict of Graphviz graph attributes to override template values.
+    node_style: Optional dict of Graphviz node attributes to override template values.
+    edge_style: Optional dict of Graphviz edge attributes to override template values.
+    fig_size: Matplotlib figure size (width, height).
+    dpi: PNG export/display resolution.
+    pdf_dpi: PDF export resolution when export_pdf=True.
+    show: Whether to display the image via matplotlib. Default is True.
+    export_pdf: If True, also writes a PDF next to the PNG.
 
     Returns:
     None
     """
     print("Plotting DPG...")
+    _apply_layout_template(
+        dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
     # Basic color scheme if no attribute or communities are specified
-    if attribute is None and not communities and clusters is None:
+    if attribute is None and clusters is None:
         for index, row in df.iterrows():
             if 'Class' in row['Label']:
                 change_node_color(dot, row['Node'], "#{:02x}{:02x}{:02x}".format(157, 195, 230))  # Light blue for class nodes
@@ -47,7 +168,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
 
 
     # Color nodes based on a specific attribute
-    elif attribute is not None and not communities and clusters is None:
+    elif attribute is not None and clusters is None:
         colormap = cm.Blues  # Choose a colormap
         norm = None
 
@@ -70,34 +191,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
         plot_name = plot_name + f"_{attribute}".replace(" ","")
     
 
-    # Color nodes based on community detection
-    elif communities and attribute is None and clusters is None:
-        colormap = cm.YlOrRd  # Choose a colormap
-        
-        # Highlight class nodes if class_flag is True
-        if class_flag:
-            for index, row in df.iterrows():
-                if 'Class' in row['Label']:
-                    change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
-            df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
-
-        # Map labels to community indices
-        label_to_community = {label: idx for idx, s in enumerate(df_dpg['Communities']) for label in s}
-        df['Community'] = df['Label'].map(label_to_community)
-        
-        max_score = df['Community'].max()
-        norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
-        
-        colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
-
-        for index, row in df.iterrows():
-            color = "#{:02x}{:02x}{:02x}".format(int(colors[index][0]*255), int(colors[index][1]*255), int(colors[index][2]*255))
-            change_node_color(dot, row['Node'], color)
-
-        plot_name = plot_name + "_communities"
-    
-
-    elif attribute is None and not communities and clusters is not None:
+    elif attribute is None and clusters is not None:
         colormap = cm.get_cmap('tab20')  # Choose a colormap
         
         # Highlight class nodes if class_flag is True
@@ -137,7 +231,7 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
 
 
     else:
-        raise AttributeError("The plot can show the basic plot, communities or a specific node-metric")
+        raise AttributeError("The plot can show the basic plot, clusters or a specific node-metric")
 
 
     # Highlight edges
@@ -169,32 +263,228 @@ def plot_dpg(plot_name, dot, df, df_edges, df_dpg, save_dir="examples/", attribu
     # Highlight class nodes
     highlight_class_node(dot)
 
-    # Render the graph and display it
-    dot.render("temp/" + plot_name, format="pdf")
-    graph = Source(dot.source, format="png")
-    graph.render("temp/" + plot_name + "_temp", view=False)
+    # Render the graph to PNG bytes (avoid temp files)
+    def _sanitize_dot_source(source: str) -> str:
+        # Escape brackets and quotes in node labels to avoid DOT parse errors.
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
 
     # Open and display the rendered image
-    img = Image.open("temp/" + plot_name + "_temp.png")
-    plt.figure(figsize=(16, 8))
-    plt.gca().axes.get_yaxis().set_visible(False)
-    plt.gca().axes.get_xaxis().set_visible(False)
-    plt.title(plot_name)
-    plt.imshow(img)
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axis_off()
+    ax.set_title(plot_name)
+    ax.imshow(img)
     
     # Add a color bar if an attribute is specified
     if attribute is not None:
-        cax = plt.axes([0.11, 0.1, 0.8, 0.025])  # Define color bar position
-        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=colormap), cax=cax, orientation='horizontal')
+        # Place the colorbar just below the graph to reduce whitespace
+        ax_pos = ax.get_position()
+        cbar_height = 0.02
+        cbar_pad = 0.02
+        cbar_y = max(0.01, ax_pos.y0 - (cbar_height + cbar_pad))
+        cax = fig.add_axes([ax_pos.x0, cbar_y, ax_pos.width, cbar_height])
+        cbar = fig.colorbar(
+            cm.ScalarMappable(norm=norm, cmap=colormap),
+            cax=cax,
+            orientation='horizontal',
+        )
         cbar.set_label(attribute)
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
-    plt.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=300)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=pdf_dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
     #plt.show()
-    graph_pdf_path = os.path.join("temp", plot_name + "_graph.pdf")
-    plt.savefig(graph_pdf_path, format="pdf", bbox_inches="tight", dpi=300)
+    # No PDF output by default
     
+    # Clean up temporary files
+    # delete_folder_contents("temp")
+    if not show:
+        plt.close(fig)
+
+def plot_dpg_communities(
+    plot_name,
+    dot,
+    df,
+    dpg_metrics,
+    save_dir="results/",
+    class_flag=False,
+    df_edges=None,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
+    show=True,
+    export_pdf=False,
+):
+    """
+    Plot a DPG colored by community assignment.
+
+    Args:
+    plot_name: Output base name for saved files (no extension).
+    dot: Graphviz Digraph instance representing the DPG structure.
+    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
+    dpg_metrics: Dict containing either 'Communities' (list of sets/lists of node labels)
+                 or 'Clusters' (mapping cluster_label -> list of node labels).
+    save_dir: Directory where output images are saved. Default is "results/".
+    class_flag: If True, class nodes are highlighted in yellow before other coloring.
+    df_edges: Optional DataFrame with edge metrics to color edges by weight.
+    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
+    graph_style: Optional dict of Graphviz graph attributes to override template values.
+    node_style: Optional dict of Graphviz node attributes to override template values.
+    edge_style: Optional dict of Graphviz edge attributes to override template values.
+    fig_size: Matplotlib figure size (width, height).
+    dpi: PNG export/display resolution.
+    pdf_dpi: PDF export resolution when export_pdf=True.
+    show: Whether to display the image via matplotlib. Default is True.
+    export_pdf: If True, also writes a PDF next to the PNG.
+
+    Returns:
+    None
+    """
+    print("Plotting DPG (communities)...")
+    _apply_layout_template(
+        dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
+
+    if dpg_metrics is None:
+        raise AttributeError("dpg_metrics is required to plot communities.")
+
+    colormap = cm.YlOrRd  # Choose a colormap
+
+    # Highlight class nodes if class_flag is True
+    if class_flag:
+        for index, row in df.iterrows():
+            if 'Class' in row['Label']:
+                change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+        df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
+
+    # Map labels to community indices
+    if "Communities" in dpg_metrics:
+        communities = dpg_metrics.get("Communities", [])
+    elif "Clusters" in dpg_metrics:
+        clusters = dpg_metrics.get("Clusters", {})
+        communities = list(clusters.values())
+    else:
+        raise AttributeError("dpg_metrics must include 'Communities' or 'Clusters' to plot communities.")
+
+    label_to_community = {}
+    for idx, community in enumerate(communities):
+        for label in community:
+            label_to_community[label] = idx
+    df['Community'] = df['Label'].map(label_to_community)
+
+    if df['Community'].isna().all():
+        raise AttributeError("No nodes matched communities/clusters labels.")
+
+    max_score = df['Community'].max()
+    if max_score <= 0:
+        norm = mcolors.Normalize(0, 1)
+    else:
+        norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
+
+    colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
+
+    for index, row in df.iterrows():
+        if pd.isna(row['Community']):
+            color = "#bdbdbd"
+        else:
+            color = "#{:02x}{:02x}{:02x}".format(
+                int(colors[index][0] * 255),
+                int(colors[index][1] * 255),
+                int(colors[index][2] * 255),
+            )
+        change_node_color(dot, row['Node'], color)
+
+    plot_name = plot_name + "_communities"
+
+    # Highlight edges (optional)
+    if df_edges is not None:
+        colormap_edge = cm.Greys  # Colormap edges
+        max_edge_value = df_edges['Weight'].max()
+        min_edge_value = df_edges['Weight'].min()
+        norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
+        for index, row in df_edges.iterrows():
+            edge_value = row['Weight']
+            color = colormap_edge(norm_edge(edge_value))
+            color_hex = "#{:02x}{:02x}{:02x}".format(
+                int(color[0] * 255),
+                int(color[1] * 255),
+                int(color[2] * 255),
+            )
+            penwidth = 1 + 3 * norm_edge(edge_value)
+
+            change_edge_color(dot, row['Source_id'], row['Target_id'], new_color=color_hex, new_width=penwidth)
+
+    # Highlight class nodes
+    highlight_class_node(dot)
+
+    # Render the graph to PNG bytes (avoid temp files)
+    def _sanitize_dot_source(source: str) -> str:
+        # Escape brackets and quotes in node labels to avoid DOT parse errors.
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
+
+    # Open and display the rendered image
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axis_off()
+    ax.set_title(plot_name)
+    ax.imshow(img)
+
+    # Save the plot to the specified directory with tight borders
+    os.makedirs(save_dir, exist_ok=True)
+    fig.savefig(
+        os.path.join(save_dir, plot_name + ".png"),
+        dpi=dpi,
+        bbox_inches="tight",
+        pad_inches=0.02,
+    )
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=pdf_dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    if not show:
+        plt.close(fig)
+    # No PDF output by default
+
     # Clean up temporary files
     # delete_folder_contents("temp")
 
@@ -233,7 +523,10 @@ def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=Non
         change_node_color(dot, node, color)
 
     graph_path = os.path.join(save_dir, f"{plot_name}_temp.gv")
-    dot.render(graph_path, view=False, format='png')
+    try:
+        dot.render(graph_path, view=False, format='png')
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
 
     # Display and save the image
     img_path = f"{graph_path}.png"
@@ -522,6 +815,843 @@ def plot_dpg_constraints_overview(
         fig.savefig(output_path, bbox_inches='tight', dpi=150)
         print(f"INFO: Saved DPG constraints overview to {output_path}")
 
+    return fig
+
+
+def parse_predicate_parts(label: str) -> Optional[Tuple[str, str, float]]:
+    """Parse predicate labels like 'feature <= 1.23' or 'feature > 0.7'."""
+    match = _PREDICATE_PATTERN.search(str(label))
+    if not match:
+        return None
+    return match.group(1).strip(), match.group(2), float(match.group(3))
+
+
+def parse_feature_from_predicate(label: str) -> str:
+    parsed = parse_predicate_parts(label)
+    return parsed[0] if parsed else str(label)
+
+
+def _feature_color_map(features: List[str]) -> Dict[str, Any]:
+    unique = list(dict.fromkeys(features))
+    if not unique:
+        return {}
+    cmap = plt.cm.tab20
+    if len(unique) == 1:
+        return {unique[0]: cmap(0)}
+    return {feature: cmap(i / (len(unique) - 1)) for i, feature in enumerate(unique)}
+
+
+def lrc_predicate_scores(explanation, top_k: int = 10) -> pd.DataFrame:
+    """Return top-k predicate rows ranked by Local reaching centrality."""
+    nm = explanation.node_metrics.copy()
+    mask = (
+        nm["Label"].astype(str).str.contains("<=", regex=False, na=False)
+        | nm["Label"].astype(str).str.contains(">", regex=False, na=False)
+    )
+    nm = nm[mask].sort_values("Local reaching centrality", ascending=False).head(top_k)
+
+    rows = []
+    for _, row in nm.iterrows():
+        parsed = parse_predicate_parts(row["Label"])
+        if not parsed:
+            continue
+        feature, operator, threshold = parsed
+        rows.append(
+            {
+                "predicate": str(row["Label"]),
+                "feature": feature,
+                "operator": operator,
+                "threshold": threshold,
+                "lrc": float(row["Local reaching centrality"]),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def plot_lrc_vs_rf_importance(
+    explanation,
+    model,
+    X_df: pd.DataFrame,
+    top_k: int = 10,
+    dataset_name: str = "Dataset",
+    save_path: Optional[str] = None,
+    show: bool = True,
+) -> plt.Figure:
+    """
+    Compare top LRC predicates and top RF feature importances side-by-side.
+
+    Returns:
+        Matplotlib figure.
+    """
+    top_lrc = lrc_predicate_scores(explanation, top_k=top_k).copy()
+    if top_lrc.empty:
+        raise ValueError("No predicate labels available to compute LRC scores.")
+
+    if not hasattr(model, "feature_importances_"):
+        raise ValueError("Model must expose feature_importances_.")
+
+    top_rf = (
+        pd.DataFrame(
+            {
+                "feature": list(getattr(model, "feature_names_in_", X_df.columns)),
+                "rf_importance": np.asarray(model.feature_importances_, dtype=float),
+            }
+        )
+        .sort_values("rf_importance", ascending=False)
+        .head(top_k)
+    )
+
+    top_lrc_plot = top_lrc.sort_values("lrc", ascending=True)
+    top_rf_plot = top_rf.sort_values("rf_importance", ascending=True)
+    all_features = top_lrc_plot["feature"].tolist() + top_rf_plot["feature"].tolist()
+    feature_to_color = _feature_color_map(all_features)
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, max(5, top_k * 0.45)))
+
+    axes[0].barh(
+        top_lrc_plot["predicate"],
+        top_lrc_plot["lrc"],
+        color=[feature_to_color[f] for f in top_lrc_plot["feature"]],
+        edgecolor="black",
+        linewidth=0.4,
+    )
+    axes[0].set_title(f"{dataset_name}: Top {top_k} LRC predicates")
+    axes[0].set_xlabel("Local Reaching Centrality")
+    axes[0].set_ylabel("Predicate")
+
+    axes[1].barh(
+        top_rf_plot["feature"],
+        top_rf_plot["rf_importance"],
+        color=[feature_to_color[f] for f in top_rf_plot["feature"]],
+        edgecolor="black",
+        linewidth=0.4,
+    )
+    axes[1].set_title(f"{dataset_name}: Top {top_k} RF feature importances")
+    axes[1].set_xlabel("Random Forest feature importance")
+    axes[1].set_ylabel("Feature")
+
+    legend_features = list(dict.fromkeys(all_features))
+    legend_handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="s",
+            color="w",
+            label=feature,
+            markerfacecolor=feature_to_color[feature],
+            markeredgecolor="black",
+            markersize=8,
+        )
+        for feature in legend_features
+    ]
+    fig.legend(
+        handles=legend_handles,
+        title="Feature colors",
+        loc="lower center",
+        ncol=min(4, max(1, len(legend_handles))),
+        frameon=True,
+    )
+
+    plt.tight_layout(rect=(0, 0.08, 1, 1))
+    if save_path is not None:
+        fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+    return fig
+
+
+def plot_lec_vs_rf_importance(*args, **kwargs) -> plt.Figure:
+    """
+    Backward-compatible alias for a common typo.
+
+    Use `plot_lrc_vs_rf_importance` instead.
+    """
+    warnings.warn(
+        "plot_lec_vs_rf_importance is deprecated; use plot_lrc_vs_rf_importance.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return plot_lrc_vs_rf_importance(*args, **kwargs)
+
+
+def plot_top_lrc_predicate_splits(
+    explanation,
+    X_df: pd.DataFrame,
+    y,
+    top_predicates: int = 5,
+    top_features: int = 2,
+    dataset_name: str = "Dataset",
+    save_path: Optional[str] = None,
+    show: bool = True,
+) -> Optional[plt.Figure]:
+    """
+    Scatter the top-2 LRC features and overlay top-LRC predicate split lines.
+
+    Returns:
+        Matplotlib figure, or None when top features cannot be resolved.
+    """
+    top_lrc = lrc_predicate_scores(explanation, top_k=max(top_predicates, 10)).copy()
+    top_pred = top_lrc.sort_values("lrc", ascending=False).head(top_predicates).copy()
+
+    feature_rank = (
+        top_lrc.groupby("feature", as_index=False)["lrc"]
+        .sum()
+        .sort_values("lrc", ascending=False)
+        .head(top_features)
+    )
+    selected_features = feature_rank["feature"].tolist()
+    if len(selected_features) < 2:
+        return None
+
+    fx, fy = selected_features[0], selected_features[1]
+    if fx not in X_df.columns or fy not in X_df.columns:
+        return None
+
+    split_rows = top_pred[top_pred["feature"].isin([fx, fy])].copy()
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    y_series = pd.Series(np.asarray(y))
+    y_numeric = pd.to_numeric(y_series, errors="coerce")
+    colorbar_label = "Class id"
+    colorbar_ticks = None
+    colorbar_ticklabels = None
+    if y_numeric.notna().all():
+        color_values = y_numeric.to_numpy()
+    else:
+        # Support string/categorical class labels (e.g., "F1", "F2") in scatter coloring.
+        color_values, unique_labels = pd.factorize(y_series.astype(str), sort=True)
+        colorbar_label = "Class"
+        colorbar_ticks = np.arange(len(unique_labels))
+        colorbar_ticklabels = [str(label) for label in unique_labels]
+
+    scatter = ax.scatter(
+        X_df[fx],
+        X_df[fy],
+        c=color_values,
+        cmap="viridis",
+        s=36,
+        alpha=0.75,
+        edgecolor="white",
+        linewidth=0.5,
+    )
+
+    feature_to_color = _feature_color_map([fx, fy])
+    labels_seen = set()
+    for _, row in split_rows.iterrows():
+        feature = row["feature"]
+        operator = row["operator"]
+        threshold = row["threshold"]
+        score = row["lrc"]
+        linestyle = "--" if operator == "<=" else "-"
+        label = f"{feature} {operator} {threshold:.2f} (LRC={score:.3f})"
+        if feature == fx:
+            ax.axvline(
+                threshold,
+                color=feature_to_color[feature],
+                linestyle=linestyle,
+                linewidth=2,
+                alpha=0.9,
+                label=label if label not in labels_seen else None,
+            )
+            labels_seen.add(label)
+        elif feature == fy:
+            ax.axhline(
+                threshold,
+                color=feature_to_color[feature],
+                linestyle=linestyle,
+                linewidth=2,
+                alpha=0.9,
+                label=label if label not in labels_seen else None,
+            )
+            labels_seen.add(label)
+
+    ax.set_title(f"{dataset_name}: Top-{top_predicates} LRC predicate splits")
+    ax.set_xlabel(fx)
+    ax.set_ylabel(fy)
+    cbar = fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label(colorbar_label)
+    if colorbar_ticks is not None and colorbar_ticklabels is not None:
+        cbar.set_ticks(colorbar_ticks)
+        cbar.set_ticklabels(colorbar_ticklabels)
+
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend(handles, labels, title="Top LRC predicate lines", loc="best", fontsize=8)
+
+    plt.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+    return fig
+
+
+def _resolve_graph_node(graph: nx.DiGraph, candidate):
+    if candidate in graph:
+        return candidate
+    candidate_str = str(candidate)
+    for node in graph.nodes:
+        if str(node) == candidate_str:
+            return node
+    return None
+
+
+def _normalize_class_label(label: Any) -> str:
+    text = str(label)
+    if text.startswith("Class "):
+        return text.replace("Class ", "", 1)
+    return text
+
+
+def _community_specs(explanation, graph: nx.DiGraph, node_df: pd.DataFrame) -> List[Dict[str, Any]]:
+    communities = getattr(explanation, "communities", None)
+    if not communities:
+        return []
+
+    raw_specs = []
+    if isinstance(communities, dict) and "Clusters" in communities:
+        for key, members in communities.get("Clusters", {}).items():
+            class_name = _normalize_class_label(key)
+            if class_name.lower() == "ambiguous":
+                class_name = None
+            raw_specs.append({"class_name": class_name, "members": members})
+    elif isinstance(communities, dict) and "Communities" in communities:
+        for members in communities.get("Communities", []):
+            raw_specs.append({"class_name": None, "members": members})
+
+    label_to_nodes: Dict[str, List[Any]] = {}
+    for _, row in node_df.iterrows():
+        label_to_nodes.setdefault(str(row["Label"]), []).append(row["Node"])
+
+    output = []
+    for idx, spec in enumerate(raw_specs):
+        resolved = set()
+        for item in spec["members"]:
+            node = _resolve_graph_node(graph, item)
+            if node is not None:
+                resolved.add(node)
+                continue
+            for candidate in label_to_nodes.get(str(item), []):
+                node_candidate = _resolve_graph_node(graph, candidate)
+                if node_candidate is not None:
+                    resolved.add(node_candidate)
+        if resolved:
+            output.append(
+                {
+                    "community_id": idx,
+                    "class_name": spec["class_name"],
+                    "nodes": resolved,
+                }
+            )
+    return output
+
+
+def _class_nodes_map(explanation) -> Dict[Any, str]:
+    node_df = explanation.node_metrics.copy()
+    graph = getattr(explanation, "graph", None)
+    if graph is None:
+        raise ValueError("explanation.graph is required")
+
+    class_df = node_df[node_df["Label"].astype(str).str.startswith("Class ")].copy()
+    class_nodes = {}
+    for _, row in class_df.iterrows():
+        node = _resolve_graph_node(graph, row["Node"])
+        if node is not None:
+            class_nodes[node] = str(row["Label"]).replace("Class ", "", 1)
+    return class_nodes
+
+
+def _predicate_node_lookup(explanation) -> Dict[Any, Tuple[str, str, float]]:
+    node_df = explanation.node_metrics.copy()
+    graph = getattr(explanation, "graph", None)
+    if graph is None:
+        raise ValueError("explanation.graph is required")
+
+    pred_df = node_df.copy()
+    pred_df["parsed"] = pred_df["Label"].apply(parse_predicate_parts)
+    pred_df = pred_df[pred_df["parsed"].notna()].copy()
+
+    lookup: Dict[Any, Tuple[str, str, float]] = {}
+    for _, row in pred_df.iterrows():
+        node = _resolve_graph_node(graph, row["Node"])
+        if node is None:
+            continue
+        feature, operator, threshold = row["parsed"]
+        lookup[node] = (str(feature), str(operator), float(threshold))
+    return lookup
+
+
+def class_feature_predicate_counts(explanation) -> pd.DataFrame:
+    """
+    Compute class-vs-feature predicate frequency table from DPG communities.
+
+    Returns:
+        DataFrame indexed by class, columns as features, values as counts.
+    """
+    node_df = explanation.node_metrics.copy()
+    graph = getattr(explanation, "graph", None)
+    if graph is None:
+        raise ValueError("explanation.graph is required for class-path analysis")
+    if "Node" not in node_df.columns or "Label" not in node_df.columns:
+        raise ValueError("node_metrics must contain Node and Label columns")
+
+    class_nodes = _class_nodes_map(explanation)
+    pred_lookup = _predicate_node_lookup(explanation)
+
+    comm_specs = _community_specs(explanation, graph, node_df)
+    if not comm_specs:
+        comm_specs = [{"community_id": 0, "class_name": None, "nodes": set(pred_lookup.keys())}]
+
+    class_feature_counts: Dict[str, List[str]] = {}
+    for spec in comm_specs:
+        class_from_cluster = spec["class_name"]
+        for node in spec["nodes"]:
+            if node not in pred_lookup:
+                continue
+            feature, _, _ = pred_lookup[node]
+            if class_from_cluster is not None:
+                target_classes = [str(class_from_cluster)]
+            else:
+                descendants = nx.descendants(graph, node)
+                target_classes = [class_nodes[c] for c in class_nodes if c in descendants]
+            for cls in target_classes:
+                class_feature_counts.setdefault(cls, []).append(feature)
+
+    if not class_feature_counts:
+        return pd.DataFrame()
+
+    series_map = {k: pd.Series(v).value_counts() for k, v in class_feature_counts.items() if v}
+    if not series_map:
+        return pd.DataFrame()
+
+    heat = pd.DataFrame(series_map).T.fillna(0).astype(int)
+    heat = heat.loc[:, heat.sum(axis=0).sort_values(ascending=False).index]
+    return heat
+
+
+def classwise_feature_bounds_from_communities(explanation) -> pd.DataFrame:
+    """Build per-class, per-community finite/unbounded feature ranges from predicates."""
+    node_df = explanation.node_metrics.copy()
+    graph = getattr(explanation, "graph", None)
+    if graph is None:
+        raise ValueError("explanation.graph is required")
+
+    class_nodes = _class_nodes_map(explanation)
+    pred_lookup = _predicate_node_lookup(explanation)
+
+    comm_specs = _community_specs(explanation, graph, node_df)
+    if not comm_specs:
+        comm_specs = [{"community_id": 0, "class_name": None, "nodes": set(pred_lookup.keys())}]
+
+    bucket: Dict[Tuple[str, int, str], Dict[str, List[float]]] = {}
+    for spec in comm_specs:
+        community_id = int(spec["community_id"])
+        class_from_cluster = spec["class_name"]
+        for node in spec["nodes"]:
+            if node not in pred_lookup:
+                continue
+            feature, operator, threshold = pred_lookup[node]
+            if class_from_cluster is not None:
+                target_classes = [str(class_from_cluster)]
+            else:
+                descendants = nx.descendants(graph, node)
+                target_classes = [class_nodes[c] for c in class_nodes if c in descendants]
+            if not target_classes:
+                continue
+            for cls in target_classes:
+                key = (cls, community_id, feature)
+                bucket.setdefault(key, {"gt": [], "le": [], "all": []})
+                if operator == ">":
+                    bucket[key]["gt"].append(threshold)
+                elif operator == "<=":
+                    bucket[key]["le"].append(threshold)
+                bucket[key]["all"].append(threshold)
+
+    rows = []
+    for (cls, community_id, feature), values in bucket.items():
+        lower = min(values["gt"]) if values["gt"] else float("-inf")
+        upper = max(values["le"]) if values["le"] else float("inf")
+        if lower > upper:
+            lower = min(values["all"]) if values["all"] else float("-inf")
+            upper = max(values["all"]) if values["all"] else float("inf")
+        width = (upper - lower) if (np.isfinite(lower) and np.isfinite(upper)) else np.nan
+        rows.append(
+            {
+                "class_name": cls,
+                "community_id": community_id,
+                "feature": feature,
+                "lower_bound": float(lower),
+                "upper_bound": float(upper),
+                "range_width": float(width) if pd.notna(width) else np.nan,
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame(
+            columns=[
+                "class_name",
+                "community_id",
+                "feature",
+                "lower_bound",
+                "upper_bound",
+                "range_width",
+            ]
+        )
+    return pd.DataFrame(rows)
+
+
+def class_feature_predicate_positions(explanation) -> pd.DataFrame:
+    """
+    Collect raw predicate thresholds by class/feature/operator for density overlays.
+    """
+    node_df = explanation.node_metrics.copy()
+    graph = getattr(explanation, "graph", None)
+    if graph is None:
+        raise ValueError("explanation.graph is required")
+
+    class_nodes = _class_nodes_map(explanation)
+    pred_lookup = _predicate_node_lookup(explanation)
+    comm_specs = _community_specs(explanation, graph, node_df)
+    if not comm_specs:
+        comm_specs = [{"community_id": 0, "class_name": None, "nodes": set(pred_lookup.keys())}]
+
+    rows = []
+    for spec in comm_specs:
+        community_id = int(spec["community_id"])
+        class_from_cluster = spec["class_name"]
+        for node in spec["nodes"]:
+            if node not in pred_lookup:
+                continue
+            feature, operator, threshold = pred_lookup[node]
+            if class_from_cluster is not None:
+                target_classes = [str(class_from_cluster)]
+            else:
+                descendants = nx.descendants(graph, node)
+                target_classes = [class_nodes[c] for c in class_nodes if c in descendants]
+            for cls in target_classes:
+                rows.append(
+                    {
+                        "class_name": cls,
+                        "community_id": community_id,
+                        "feature": feature,
+                        "operator": operator,
+                        "threshold": threshold,
+                    }
+                )
+
+    if not rows:
+        return pd.DataFrame(columns=["class_name", "community_id", "feature", "operator", "threshold"])
+    return pd.DataFrame(rows)
+
+
+def _aggregate_close_positions(values, tol: float):
+    vals = np.sort(np.asarray(values, dtype=float))
+    if vals.size == 0:
+        return []
+    groups = [[vals[0]]]
+    for value in vals[1:]:
+        if abs(value - groups[-1][-1]) <= tol:
+            groups[-1].append(value)
+        else:
+            groups.append([value])
+    return [(float(np.mean(group)), len(group)) for group in groups]
+
+
+def class_lookup_from_target_names(target_names: Optional[List[str]]) -> Dict[str, int]:
+    if target_names is None:
+        return {}
+    return {str(name): i for i, name in enumerate(list(target_names))}
+
+
+def _class_mask(class_name: str, y, class_lookup: Optional[Dict[str, int]] = None):
+    y_arr = np.asarray(y)
+
+    # First try direct label matching; this supports string labels (e.g., "F1")
+    # even when a class_lookup mapping is provided.
+    direct_mask = pd.Series(y_arr).astype(str).values == str(class_name)
+    if np.any(direct_mask):
+        return direct_mask
+
+    # Fallback to lookup mapping (e.g., class name -> integer id).
+    if class_lookup and str(class_name) in class_lookup:
+        mapped_mask = y_arr == class_lookup[str(class_name)]
+        if np.any(mapped_mask):
+            return mapped_mask
+    try:
+        as_int = int(class_name)
+        return y_arr == as_int
+    except Exception:
+        pass
+    return direct_mask
+
+
+def dataset_feature_bounds_by_class(
+    X_df: pd.DataFrame,
+    y,
+    class_names: List[str],
+    class_lookup: Optional[Dict[str, int]] = None,
+) -> pd.DataFrame:
+    rows = []
+    for cls in class_names:
+        mask = _class_mask(cls, y, class_lookup=class_lookup)
+        class_frame = X_df.loc[mask]
+        if class_frame.empty:
+            continue
+        for feature in X_df.columns:
+            rows.append(
+                {
+                    "class_name": str(cls),
+                    "feature": str(feature),
+                    "ds_lower_bound": float(class_frame[feature].min()),
+                    "ds_upper_bound": float(class_frame[feature].max()),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def plot_dpg_class_bounds_vs_dataset_feature_ranges(
+    explanation,
+    X_df: pd.DataFrame,
+    y,
+    dataset_name: str = "Dataset",
+    top_features: int = 4,
+    class_lookup: Optional[Dict[str, int]] = None,
+    predicate_positions: Optional[pd.DataFrame] = None,
+    class_bounds: Optional[pd.DataFrame] = None,
+    class_filter: Optional[List[str]] = None,
+    density_tol_ratio: float = 0.03,
+    predicate_alpha: float = 0.55,
+    dataset_range_lw: float = 10,
+    save_path: Optional[str] = None,
+    show: bool = True,
+) -> Optional[plt.Figure]:
+    """
+    Plot DPG class bounds against empirical dataset ranges per feature.
+
+    Args:
+        explanation: DPGExplanation instance.
+        X_df: Feature dataframe.
+        y: Class labels aligned with X_df.
+        class_lookup: Optional class-name to class-id mapping.
+        predicate_positions: Optional precomputed output from class_feature_predicate_positions.
+        class_bounds: Optional precomputed output from classwise_feature_bounds_from_communities.
+        class_filter: Optional class or list of classes to render.
+
+    Returns:
+        Matplotlib figure, or None when no plottable classes exist.
+    """
+    if class_bounds is None:
+        class_bounds = classwise_feature_bounds_from_communities(explanation)
+    if class_bounds.empty:
+        return None
+    if predicate_positions is None:
+        predicate_positions = class_feature_predicate_positions(explanation)
+
+    dpg_bounds = (
+        class_bounds.groupby(["class_name", "feature"], as_index=False)
+        .agg(
+            lower_bound=("lower_bound", "min"),
+            upper_bound=("upper_bound", "max"),
+            community_support=("community_id", "nunique"),
+        )
+    )
+    dpg_bounds["range_width"] = np.where(
+        np.isfinite(dpg_bounds["lower_bound"]) & np.isfinite(dpg_bounds["upper_bound"]),
+        dpg_bounds["upper_bound"] - dpg_bounds["lower_bound"],
+        np.nan,
+    )
+    classes = sorted(dpg_bounds["class_name"].unique())
+    if class_filter is not None:
+        if isinstance(class_filter, (list, tuple, set, np.ndarray, pd.Series)):
+            allowed = {str(value) for value in class_filter}
+        else:
+            allowed = {str(class_filter)}
+        classes = [cls for cls in classes if str(cls) in allowed]
+        if not classes:
+            return None
+
+    ds_bounds = dataset_feature_bounds_by_class(X_df, y, classes, class_lookup=class_lookup)
+    if ds_bounds.empty:
+        return None
+
+    fig, axes = plt.subplots(1, len(classes), figsize=(6 * len(classes), 5), squeeze=False)
+    axes = axes[0]
+    density_gt_labeled = False
+    density_le_labeled = False
+
+    for ax, cls in zip(axes, classes):
+        class_dpg = dpg_bounds[dpg_bounds["class_name"] == cls].copy()
+        class_dpg = class_dpg.sort_values(["community_support", "range_width"], ascending=[False, False]).head(top_features)
+        class_dpg = class_dpg.sort_values("range_width", ascending=True)
+        merged = class_dpg.merge(
+            ds_bounds[ds_bounds["class_name"] == cls],
+            on=["class_name", "feature"],
+            how="left",
+        )
+        if merged.empty:
+            continue
+
+        y_positions = np.arange(len(merged))
+        ds_min = float(merged["ds_lower_bound"].min())
+        ds_max = float(merged["ds_upper_bound"].max())
+        feature_global_min = float(X_df[merged["feature"]].min().min())
+        feature_global_max = float(X_df[merged["feature"]].max().max())
+
+        dpg_lo_axis = merged["lower_bound"].astype(float).to_numpy(copy=True)
+        dpg_hi_axis = merged["upper_bound"].astype(float).to_numpy(copy=True)
+        finite_dpg_lo = dpg_lo_axis[np.isfinite(dpg_lo_axis)]
+        finite_dpg_hi = dpg_hi_axis[np.isfinite(dpg_hi_axis)]
+        dpg_min = float(finite_dpg_lo.min()) if finite_dpg_lo.size else ds_min
+        dpg_max = float(finite_dpg_hi.max()) if finite_dpg_hi.size else ds_max
+
+        x_min = max(0.0, min(ds_min, feature_global_min, dpg_min))
+        x_max = max(ds_max, feature_global_max, dpg_max)
+        pad = max((x_max - x_min) * 0.2, 1e-6)
+        left_lim = max(0.0, x_min - pad)
+        right_lim = x_max + pad
+
+        ax.hlines(
+            y_positions,
+            merged["ds_lower_bound"],
+            merged["ds_upper_bound"],
+            color="lightgray",
+            linewidth=dataset_range_lw,
+            alpha=0.85,
+            label="dataset class range" if cls == classes[0] else None,
+        )
+        ax.scatter(
+            merged["ds_lower_bound"],
+            y_positions,
+            color="dimgray",
+            s=28,
+            label="dataset min/max" if cls == classes[0] else None,
+        )
+        ax.scatter(merged["ds_upper_bound"], y_positions, color="dimgray", s=28)
+
+        dpg_lo = merged["lower_bound"].astype(float).to_numpy(copy=True)
+        dpg_hi = merged["upper_bound"].astype(float).to_numpy(copy=True)
+        lo_inf = ~np.isfinite(dpg_lo)
+        hi_inf = ~np.isfinite(dpg_hi)
+        draw_lo = np.where(lo_inf, left_lim, dpg_lo)
+        draw_hi = np.where(hi_inf, right_lim, dpg_hi)
+
+        ax.hlines(
+            y_positions,
+            draw_lo,
+            draw_hi,
+            color="tab:blue",
+            linewidth=3,
+            alpha=0.95,
+            label="DPG community range" if cls == classes[0] else None,
+        )
+
+        finite_lo = np.isfinite(dpg_lo)
+        finite_hi = np.isfinite(dpg_hi)
+        ax.scatter(
+            dpg_lo[finite_lo],
+            y_positions[finite_lo],
+            color="tab:green",
+            s=38,
+            label="DPG min bound" if cls == classes[0] else None,
+        )
+        ax.scatter(
+            dpg_hi[finite_hi],
+            y_positions[finite_hi],
+            color="tab:red",
+            s=38,
+            label="DPG max bound" if cls == classes[0] else None,
+        )
+
+        if lo_inf.any():
+            ax.scatter(
+                np.full(lo_inf.sum(), left_lim),
+                y_positions[lo_inf],
+                marker="<",
+                color="tab:green",
+                s=70,
+                label="DPG min = -inf" if cls == classes[0] else None,
+            )
+        if hi_inf.any():
+            ax.scatter(
+                np.full(hi_inf.sum(), right_lim),
+                y_positions[hi_inf],
+                marker=">",
+                color="tab:red",
+                s=70,
+                label="DPG max = +inf" if cls == classes[0] else None,
+            )
+
+        if predicate_positions is not None and not predicate_positions.empty:
+            class_pred = predicate_positions[predicate_positions["class_name"] == cls]
+            tol = max((right_lim - left_lim) * float(density_tol_ratio), 1e-9)
+            for y_index, feat in enumerate(merged["feature"]):
+                pred_feature = class_pred[class_pred["feature"] == feat]
+                vals_gt = pred_feature.loc[pred_feature["operator"] == ">", "threshold"].astype(float).to_numpy()
+                vals_le = pred_feature.loc[pred_feature["operator"] == "<=", "threshold"].astype(float).to_numpy()
+                vals_gt = vals_gt[(vals_gt >= left_lim) & (vals_gt <= right_lim)]
+                vals_le = vals_le[(vals_le >= left_lim) & (vals_le <= right_lim)]
+
+                dense_gt = _aggregate_close_positions(vals_gt, tol) if vals_gt.size else []
+                dense_le = _aggregate_close_positions(vals_le, tol) if vals_le.size else []
+
+                if dense_gt:
+                    xs = np.array([d[0] for d in dense_gt], dtype=float)
+                    counts = np.array([d[1] for d in dense_gt], dtype=float)
+                    sizes = 14 + 16 * np.sqrt(counts)
+                    ax.scatter(
+                        xs,
+                        np.full_like(xs, y_index, dtype=float) + 0.18,
+                        s=sizes,
+                        marker="^",
+                        c="tab:green",
+                        alpha=predicate_alpha,
+                        edgecolors="black",
+                        linewidths=0.35,
+                        label="predicate density (>)" if not density_gt_labeled else None,
+                        zorder=4,
+                    )
+                    density_gt_labeled = True
+
+                if dense_le:
+                    xs = np.array([d[0] for d in dense_le], dtype=float)
+                    counts = np.array([d[1] for d in dense_le], dtype=float)
+                    sizes = 14 + 16 * np.sqrt(counts)
+                    ax.scatter(
+                        xs,
+                        np.full_like(xs, y_index, dtype=float) - 0.18,
+                        s=sizes,
+                        marker="v",
+                        c="tab:red",
+                        alpha=predicate_alpha,
+                        edgecolors="black",
+                        linewidths=0.35,
+                        label="predicate density (<=)" if not density_le_labeled else None,
+                        zorder=4,
+                    )
+                    density_le_labeled = True
+
+        ax.set_xlim(left_lim, right_lim)
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels(merged["feature"])
+        ax.set_xlabel("Feature value range")
+        ax.set_title(f"{dataset_name} - Class {cls}: DPG vs dataset range")
+        ax.grid(axis="x", linestyle="--", alpha=0.35)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    if handles:
+        fig.legend(handles, labels, loc="lower center", ncol=3, frameon=True)
+
+    plt.tight_layout(rect=(0, 0.10, 1, 1))
+    if save_path is not None:
+        fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
     return fig
 
 

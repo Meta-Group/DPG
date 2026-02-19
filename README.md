@@ -1,7 +1,11 @@
 # Decision Predicate Graph (DPG)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
+[![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
+
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/DPG.png" width="300" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" width="300" />
 </p>
 
 
@@ -11,7 +15,7 @@ DPG is a graph structure that captures the tree-based ensemble model and learned
 DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
 DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights.
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/custom_l2.jpg?raw=true" width="600" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/custom_l2.jpg?raw=true" width="600" />
 </p>
 
 ---
@@ -22,7 +26,7 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/example.png?raw=true" width="600" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true" width="600" />
 </p>
 
 ## Metrics
@@ -37,7 +41,7 @@ The graph-based nature of DPG provides significant enhancements in the direction
 
 |Constraints | Betweenness centrality | Local reaching centrality | Community|
 |------------|------------|--------------|--------------------|
-![](https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/example_constraints.png) | ![](https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/example_bc.png) | ![](https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/example_lrc.png) | ![](https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/example_community.png) |
+![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_constraints.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_bc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_lrc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_community.png) |
 |Constraints(Class 1) = val3 < F1 ≤ val1, F2 ≤ val2 | BC(F2 ≤ val2) = 4/24 | LRC(F1 ≤ val1) = 6 / 7 | Community(Class 1) = F1 ≤ val1, F2 ≤ val2 |
 
 ---
@@ -46,7 +50,7 @@ The graph-based nature of DPG provides significant enhancements in the direction
 To install DPG locally, first clone the repository:
 
 ```bash
-git clone https://github.com/LeonardoArrighi/DPG.git
+git clone https://github.com/Meta-Group/DPG.git
 cd DPG
 ```
 
@@ -57,7 +61,7 @@ pip install -e .
 
 Alternatively, if using `pip directly`:
 ```bash
-pip install git+https://github.com/LeonardoArrighi/DPG.git
+pip install git+https://github.com/Meta-Group/DPG.git
 ```
 **Troubleshooting:** If you encounter dependency conflicts, we recommend using a virtual environment:
 
@@ -91,34 +95,75 @@ pip install git+https://github.com/LeonardoArrighi/DPG.git
   ```bash
   deactivate
   ```
+
+4- Graph rendering error (`dot` not found):
+  DPG plotting requires the Graphviz system executable (`dot`) in your PATH.  
+  Installing the Python package `graphviz` is not sufficient on its own.
+
+  - macOS (Homebrew):
+    ```bash
+    brew install graphviz
+    ```
+  - Ubuntu/Debian:
+    ```bash
+    sudo apt-get install graphviz
+    ```
+  - Windows (winget):
+    ```powershell
+    winget install Graphviz.Graphviz
+    ```
 ---
 
 ## Example usage (Python)
 
-You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example:
-
-Here is a minimal example of how to use DPG with a trained model and a CSV dataset (e.g., `datasets/custom.csv`) using `scikit-learn` and the DPG API:
+You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example using the high-level API:
 
 ```python
-# Example in Jupyter Notebook
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from dpg.core import DecisionPredicateGraph
-from dpg.visualizer import plot_dpg
-from metrics.nodes import NodeMetrics
-from metrics.graph import GraphMetrics
+from dpg import DPGExplainer
 
 # Load dataset (last column assumed to be target)
 df = pd.read_csv("datasets/custom.csv", index_col=0)
 X = df.iloc[:, :-1]
 y = df.iloc[:, -1]
 
-# Train simple Random Forest
+# Train a simple Random Forest classifier
 model = RandomForestClassifier(n_estimators=10, random_state=27)
 model.fit(X, y)
 
-# Create DPG
+# Build the DPG and extract global explanations
+explainer = DPGExplainer(
+    model=model,
+    feature_names=X.columns,
+    target_names=np.unique(y).astype(str).tolist(),
+)
+explanation = explainer.explain_global(X.values, communities=True)
+
+# Render the graph to disk
+explainer.plot("dpg_output", explanation, save_dir="datasets", export_pdf=True)
+explainer.plot_communities("dpg_output", explanation, save_dir="datasets", export_pdf=True)
+```
+
+### Legacy API (low-level)
+
+```python
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from dpg.core import DecisionPredicateGraph
+from dpg.visualizer import plot_dpg
+from metrics.nodes import NodeMetrics
+from metrics.edges import EdgeMetrics
+
+df = pd.read_csv("datasets/custom.csv", index_col=0)
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
+
+model = RandomForestClassifier(n_estimators=10, random_state=27)
+model.fit(X, y)
+
 feature_names = X.columns.tolist()
 class_names = np.unique(y).astype(str).tolist()
 dpg = DecisionPredicateGraph(
@@ -129,15 +174,34 @@ dpg = DecisionPredicateGraph(
 dot = dpg.fit(X.values)
 dpg_model, nodes_list = dpg.to_networkx(dot)
 
-# Extract and visualize
-dpg_metrics = GraphMetrics.extract_graph_metrics(dpg_model, nodes_list,target_names=np.unique(y_train).astype(str).tolist())
-df = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-plot_dpg("dpg_output.png", dot, df_nodes, dpg_metrics, save_dir="datasets", communities=True, class_flag=True)
+df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
+df_nodes = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
+
+plot_dpg(
+    "dpg_output",
+    dot,
+    df_nodes,
+    df_edges,
+    save_dir="datasets",
+    class_flag=True,
+    export_pdf=True,
+)
 ```
 #### Output:
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/dpg_output.png_communities.png?raw=true" width="600" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/dpg_output_communities.png?raw=true" width="600" />
 </p>
+
+### API overview (high-level)
+
+The high-level API is designed to return structured outputs so downstream tools can use them directly.
+
+- `DPGExplainer.fit(X)`: builds the DPG structure
+- `DPGExplainer.explain_global(X=None, communities=False, community_threshold=0.2)`: returns a `DPGExplanation`
+- `DPGExplainer.plot(...)`: renders the standard DPG
+- `DPGExplainer.plot_communities(...)`: renders a community-colored DPG
+
+`DPGExplanation` includes `dot`, `graph`, `nodes`, `node_metrics`, `edge_metrics`, `class_boundaries`, and optional `communities`.
 
 #### CLI scripts
 The library contains two different scripts to apply DPG:
@@ -157,7 +221,7 @@ The DPG output, through `run_dpg_standard.py` or `run_dpg_custom.py`, produces s
 - a `.txt` file containing the Random Forest statistics (accuracy, confusion matrix, classification report)
 
 ## Easy usage
-Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --class_flag`
+Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
 Where:
 - `dataset` is the name of the standard classification `sklearn` dataset to be analyzed;
 - `n_learners` is the number of base learners for the Random Forest;
@@ -169,32 +233,35 @@ Where:
 - `save_plot_dir` is the path of the directory to save the plot image;
 - `attribute` is the specific node metric which can be visualized on the DPG;
 - `communities` is a store_true variable which can be added to visualize communities on the DPG;
-- `class_flag` is a store_true variable which can be added to highlight class nodes.
+- `clusters` is a store_true variable which can be added to visualize clusters on the DPG;
+- `threshold_clusters` is the threshold used to detect ambiguous nodes in clusters;
+- `class_flag` is a store_true variable which can be added to highlight class nodes;
+- `seed` controls the random split.
   
-Disclaimer: `attribute` and `communities` can not be added together, since DPG supports just one of the two visualizations.
+Disclaimer: `attribute`, `communities`, and `clusters` are mutually exclusive: DPG supports just one visualization mode at a time.
 
 The usage of `run_dpg_custom.py` is similar, but it requires another parameter:
 - `target_column`, which is the name of the column to be used as the target variable;
 - while `ds` is the path of the directory where the dataset is.
 
 #### Example `run_dpg_standard.py`
-Some examples can be appreciated in the `examples` folder: https://github.com/LeonardoArrighi/DPG/tree/main/examples
+Some examples can be appreciated in the `examples` folder: https://github.com/Meta-Group/DPG/tree/main/examples
 
 In particular, the following DPG is obtained by transforming a Random Forest with 5 base learners, trained on Iris dataset.
 The used command is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples`.
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
 </p>
 
 The following visualizations are obtained using the same parameters as the previous example, but they show two different metrics: _Community_ and _Betweenness centrality_.
 The used command for showing communities is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --communities`.
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
 </p>
 
 The used command for showing a specific property is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --attribute "Betweenness centrality" --class_flag`.
 <p align="center">
-  <img src="https://github.com/LeonardoArrighi/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
 </p>
 
 ***
