@@ -1,4 +1,6 @@
 import os
+import copy
+from collections import Counter
 import re
 import warnings
 import numpy as np
@@ -45,6 +47,12 @@ _LAYOUT_TEMPLATES = {
         "node": {},
         "edge": {},
     },
+    # Extra-spaced vertical layout for dense local-path overlays.
+    "vertical_spacious": {
+        "graph": {"rankdir": "TB", "nodesep": "1.85", "ranksep": "3.25"},
+        "node": {"margin": "0.07,0.05"},
+        "edge": {"arrowsize": "0.8"},
+    },
     # Explicitly wide left-to-right style.
     "wide": {
         "graph": {"rankdir": "LR", "nodesep": "0.5", "ranksep": "0.6"},
@@ -56,9 +64,17 @@ _LAYOUT_TEMPLATES = {
 
 def _apply_layout_template(dot, layout_template=None, graph_style=None, node_style=None, edge_style=None):
     """Apply optional graph layout/style settings to Graphviz Digraph."""
-    template_name = (layout_template or "default").lower()
-    template = _LAYOUT_TEMPLATES.get(template_name, _LAYOUT_TEMPLATES["default"])
-
+    raw_name = str(layout_template or "default")
+    template_name = raw_name.strip().strip("'\"").lower()
+    template = _LAYOUT_TEMPLATES.get(template_name)
+    if template is None:
+        warnings.warn(
+            f"Unknown layout_template='{raw_name}'. Falling back to 'default'. "
+            f"Available templates: {sorted(_LAYOUT_TEMPLATES.keys())}",
+            UserWarning,
+            stacklevel=2,
+        )
+        template = _LAYOUT_TEMPLATES["default"]
     merged_graph = dict(template.get("graph", {}))
     merged_node = dict(template.get("node", {}))
     merged_edge = dict(template.get("edge", {}))
@@ -488,13 +504,429 @@ def plot_dpg_communities(
     # Clean up temporary files
     # delete_folder_contents("temp")
 
-def change_node_color(dot, node_id, fillcolor):
+
+def plot_dpg_local_path(
+    plot_name,
+    dot,
+    df,
+    df_edges,
+    path_node_ids,
+    save_dir="results/",
+    path_labels=None,
+    path_confidence=None,
+    sample_id=None,
+    true_class_label=None,
+    class_flag=True,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
+    show=True,
+    export_pdf=False,
+):
+    """
+    Plot DPG with a single local path highlighted.
+
+    Args:
+    plot_name: Output base name for saved files (no extension).
+    dot: Graphviz Digraph instance representing the DPG structure.
+    df: DataFrame with node metrics and labels.
+    df_edges: Edge metrics DataFrame with source/target ids and weights.
+    path_node_ids: Ordered node id sequence representing the local path.
+    save_dir: Directory where output files are written.
+    path_labels: Optional ordered labels for title context.
+    path_confidence: Optional confidence score shown in title.
+    sample_id: Optional sample identifier shown in title.
+    true_class_label: Optional true class label to highlight as green class node.
+    class_flag: If True, keep class nodes visually distinct.
+    """
+    if path_node_ids is None or len(path_node_ids) == 0:
+        raise ValueError("path_node_ids must contain at least one node id.")
+
+    work_dot = copy.deepcopy(dot)
+    _apply_layout_template(
+        work_dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
+
+    # Base node styling
+    base_node_color = "#dce3ea"
+    class_node_color = "#ffe08a"
+    true_class_node_color = "#93c47d"
+    for _, row in df.iterrows():
+        label = str(row.get("Label", ""))
+        if class_flag and label.startswith("Class "):
+            class_name = label.replace("Class ", "", 1)
+            if true_class_label is not None and class_name == str(true_class_label):
+                change_node_color(work_dot, row["Node"], true_class_node_color)
+            else:
+                change_node_color(work_dot, row["Node"], class_node_color)
+        else:
+            change_node_color(work_dot, row["Node"], base_node_color)
+
+    # Base edge styling from edge frequency
+    if df_edges is not None and len(df_edges) > 0:
+        colormap_edge = cm.Greys
+        max_edge_value = df_edges["Weight"].max()
+        min_edge_value = df_edges["Weight"].min()
+        norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
+        for _, row in df_edges.iterrows():
+            edge_value = row["Weight"]
+            color = colormap_edge(norm_edge(edge_value))
+            color_hex = "#{:02x}{:02x}{:02x}".format(
+                int(color[0] * 255),
+                int(color[1] * 255),
+                int(color[2] * 255),
+            )
+            penwidth = 1 + 2 * norm_edge(edge_value)
+            change_edge_color(work_dot, row["Source_id"], row["Target_id"], new_color=color_hex, new_width=penwidth)
+
+    # Highlight path nodes with step-aware color ramp
+    cmap = plt.get_cmap("Blues")
+    n = max(1, len(path_node_ids) - 1)
+    for i, node_id in enumerate(path_node_ids):
+        shade = cmap(0.35 + 0.60 * (i / n))
+        shade_hex = "#{:02x}{:02x}{:02x}".format(
+            int(shade[0] * 255),
+            int(shade[1] * 255),
+            int(shade[2] * 255),
+        )
+        change_node_color(work_dot, node_id, shade_hex)
+
+    # Highlight path edges strongly
+    for src, dst in zip(path_node_ids, path_node_ids[1:]):
+        change_edge_color(work_dot, src, dst, new_color="#0b5394", new_width=4.5)
+
+    # Render graph
+    def _sanitize_dot_source(source: str) -> str:
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    png_bytes = _pipe_graph_png_with_fallback(work_dot.source, _sanitize_dot_source)
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axis_off()
+
+    leaf_label = path_labels[-1] if path_labels else "n/a"
+    sample_text = f"sample_id={sample_id} | " if sample_id is not None else ""
+    if path_confidence is None:
+        ax.set_title(f"{sample_text}{plot_name} | leaf={leaf_label}")
+    else:
+        ax.set_title(f"{sample_text}{plot_name} | leaf={leaf_label} | conf={path_confidence:.3f}")
+    ax.imshow(img)
+
+    os.makedirs(save_dir, exist_ok=True)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=pdf_dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    if not show:
+        plt.close(fig)
+    return fig
+
+
+def plot_dpg_local_paths_aggregate(
+    plot_name,
+    dot,
+    df,
+    df_edges,
+    paths_node_ids,
+    save_dir="results/",
+    path_confidences=None,
+    sample_id=None,
+    true_class_label=None,
+    obtained_class_label=None,
+    sample_metrics=None,
+    class_flag=True,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
+    show=True,
+    export_pdf=False,
+):
+    """
+    Plot DPG with multiple local paths aggregated in a single graph.
+
+    Edges are highlighted by local path frequency (number of selected paths that use each edge).
+    """
+    if paths_node_ids is None or len(paths_node_ids) == 0:
+        raise ValueError("paths_node_ids must contain at least one path.")
+
+    normalized_paths = []
+    for p in paths_node_ids:
+        p_clean = [n for n in p if n is not None]
+        if len(p_clean) >= 1:
+            normalized_paths.append(p_clean)
+    if len(normalized_paths) == 0:
+        raise ValueError("No valid node paths to aggregate.")
+
+    work_dot = copy.deepcopy(dot)
+    _apply_layout_template(
+        work_dot,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
+    node_fontsize = None
+    edge_fontsize = None
+    if isinstance(node_style, dict) and "fontsize" in node_style:
+        node_fontsize = node_style["fontsize"]
+    if isinstance(edge_style, dict) and "fontsize" in edge_style:
+        edge_fontsize = edge_style["fontsize"]
+    try:
+        node_font = float(node_fontsize) if node_fontsize is not None else 20.0
+    except (TypeError, ValueError):
+        node_font = 20.0
+    try:
+        edge_font = float(edge_fontsize) if edge_fontsize is not None else node_font
+    except (TypeError, ValueError):
+        edge_font = node_font
+    node_scale = max(0.6, min(3.0, node_font / 20.0))
+    edge_scale = max(0.6, min(3.0, edge_font / 18.0))
+
+    # Aggregate local path frequencies
+    edge_counter = Counter()
+    node_counter = Counter()
+    for p in normalized_paths:
+        for node_id in p:
+            node_counter[node_id] += 1
+        for src, dst in zip(p, p[1:]):
+            edge_counter[(src, dst)] += 1
+
+    visited_nodes = set(node_counter.keys())
+    max_edge_freq = max(edge_counter.values()) if edge_counter else 1
+    node_cmap = plt.get_cmap("Blues")
+    edge_cmap = plt.get_cmap("YlOrRd")
+
+    # Node styling:
+    # - unvisited predicates = white
+    # - visited predicates = colored by Local Reaching Centrality
+    # - class leaves = green (true class) / red (other classes)
+    node_df = df.copy()
+    node_df["is_class"] = node_df["Label"].astype(str).str.startswith("Class ")
+    lrc_map = node_df.set_index("Node")["Local reaching centrality"].to_dict()
+    visited_pred_lrc = [
+        float(lrc_map[n])
+        for n in visited_nodes
+        if n in lrc_map and n in set(node_df[~node_df["is_class"]]["Node"])
+    ]
+    if visited_pred_lrc:
+        lrc_norm = mcolors.Normalize(vmin=min(visited_pred_lrc), vmax=max(visited_pred_lrc))
+    else:
+        lrc_norm = mcolors.Normalize(vmin=0.0, vmax=1.0)
+
+    for _, row in node_df.iterrows():
+        node_id = row["Node"]
+        label = str(row["Label"])
+        if class_flag and label.startswith("Class "):
+            class_name = label.replace("Class ", "", 1)
+            if true_class_label is not None and class_name == str(true_class_label):
+                change_node_color(
+                    work_dot,
+                    node_id,
+                    "#93c47d",
+                    new_fontsize=node_fontsize,
+                    border_width=1.5 * node_scale,
+                )  # true class leaf
+            else:
+                change_node_color(
+                    work_dot,
+                    node_id,
+                    "#e57373",
+                    new_fontsize=node_fontsize,
+                    border_width=1.3 * node_scale,
+                )  # non-true class leaves
+            continue
+
+        if node_id in visited_nodes:
+            lrc_val = float(lrc_map.get(node_id, 0.0))
+            shade = node_cmap(0.35 + 0.60 * lrc_norm(lrc_val))
+            shade_hex = "#{:02x}{:02x}{:02x}".format(
+                int(shade[0] * 255),
+                int(shade[1] * 255),
+                int(shade[2] * 255),
+            )
+            change_node_color(
+                work_dot,
+                node_id,
+                shade_hex,
+                new_fontsize=node_fontsize,
+                border_width=1.15 * node_scale,
+            )
+        else:
+            change_node_color(
+                work_dot,
+                node_id,
+                "#ffffff",
+                new_fontsize=node_fontsize,
+                border_width=0.9 * node_scale,
+            )
+
+    # Base edge style: all edges light gray and thin.
+    if df_edges is not None and len(df_edges) > 0:
+        for _, row in df_edges.iterrows():
+            change_edge_color(
+                work_dot,
+                row["Source_id"],
+                row["Target_id"],
+                new_color="#d0d0d0",
+                new_width=0.9 * edge_scale,
+                new_fontsize=edge_fontsize,
+            )
+
+    # Highlight visited edges by local path frequency (yellow -> red).
+    for (src, dst), freq in edge_counter.items():
+        frac = freq / max_edge_freq
+        color = edge_cmap(0.20 + 0.75 * frac)
+        color_hex = "#{:02x}{:02x}{:02x}".format(
+            int(color[0] * 255),
+            int(color[1] * 255),
+            int(color[2] * 255),
+        )
+        width = 1.8 + 4.2 * frac
+        change_edge_color(
+            work_dot,
+            src,
+            dst,
+            new_color=color_hex,
+            new_width=width * edge_scale,
+            new_fontsize=edge_fontsize,
+        )
+
+    # Render graph
+    def _sanitize_dot_source(source: str) -> str:
+        def repl(m):
+            label = m.group(1)
+            label = label.replace("\\", "\\\\").replace('"', '\\"')
+            label = label.replace("[", "\\[").replace("]", "\\]")
+            return f'label="{label}"'
+
+        source = re.sub(r'label="([^"]*)"', repl, source)
+        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+        return source
+
+    png_bytes = _pipe_graph_png_with_fallback(work_dot.source, _sanitize_dot_source)
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axis_off()
+
+    sample_text = f"sample_id={sample_id} | " if sample_id is not None else ""
+    expected_text = f"expected={true_class_label}" if true_class_label is not None else "expected=n/a"
+    obtained_text = (
+        f"obtained={obtained_class_label}" if obtained_class_label is not None else "obtained=n/a"
+    )
+    metric_chunks = []
+    if isinstance(sample_metrics, dict):
+        class_scores = sample_metrics.get("class_scores", {}) or {}
+        if obtained_class_label is not None and obtained_class_label in class_scores:
+            metric_chunks.append(f"score_pred={float(class_scores[obtained_class_label]):.3f}")
+        if sample_metrics.get("vote_confidence") is not None:
+            metric_chunks.append(f"vote_conf={float(sample_metrics['vote_confidence']):.3f}")
+        if sample_metrics.get("score_margin") is not None:
+            metric_chunks.append(f"margin={float(sample_metrics['score_margin']):.3f}")
+    metric_chunks.append(f"paths={len(normalized_paths)}")
+    metric_chunks.append(f"max_edge_freq={max_edge_freq}")
+    ax.set_title(
+        f"{sample_text}{plot_name} | {expected_text} | {obtained_text} | " + " | ".join(metric_chunks)
+    )
+    ax.imshow(img)
+
+    # Legend and colorbars
+    handles = [
+        mpatches.Patch(facecolor="#ffffff", edgecolor="black", label="Unvisited predicate"),
+        mpatches.Patch(facecolor="#93c47d", edgecolor="black", label="True class leaf"),
+        mpatches.Patch(facecolor="#e57373", edgecolor="black", label="Other class leaf"),
+    ]
+    ax.legend(
+        handles=handles,
+        loc="upper left",
+        bbox_to_anchor=(1.01, 1.0),
+        borderaxespad=0.0,
+        framealpha=0.92,
+        fontsize=8,
+        title="Legend",
+        title_fontsize=9,
+    )
+
+    # Add colorbars only when meaningful
+    fig.subplots_adjust(bottom=0.18, right=0.80)
+    if visited_pred_lrc:
+        sm_lrc = ScalarMappable(norm=lrc_norm, cmap=node_cmap)
+        sm_lrc.set_array([])
+        cax1 = fig.add_axes([0.18, 0.08, 0.30, 0.018])
+        cbar1 = fig.colorbar(sm_lrc, cax=cax1, orientation="horizontal")
+        cbar1.set_label("Visited predicate LRC", fontsize=8)
+        cbar1.ax.tick_params(labelsize=7)
+    if edge_counter:
+        freq_norm = mcolors.Normalize(vmin=1, vmax=max_edge_freq)
+        sm_edge = ScalarMappable(norm=freq_norm, cmap=edge_cmap)
+        sm_edge.set_array([])
+        cax2 = fig.add_axes([0.56, 0.08, 0.30, 0.018])
+        cbar2 = fig.colorbar(sm_edge, cax=cax2, orientation="horizontal")
+        cbar2.set_label("Edge path frequency", fontsize=8)
+        cbar2.ax.tick_params(labelsize=7)
+
+    os.makedirs(save_dir, exist_ok=True)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=pdf_dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    if not show:
+        plt.close(fig)
+    return fig
+
+def change_node_color(
+    dot,
+    node_id,
+    fillcolor,
+    new_fontsize=None,
+    border_color="#263238",
+    border_width=None,
+):
     r, g, b = int(fillcolor[1:3], 16), int(fillcolor[3:5], 16), int(fillcolor[5:7], 16)
     brightness = (r * 299 + g * 587 + b * 114) / 1000  # fórmula perceptual
     fontcolor = "white" if brightness < 100 else "black"
 
     # Modifica o nó no objeto Graphviz
-    dot.node(node_id, style="filled", fillcolor=fillcolor, fontcolor=fontcolor)
+    attrs = {
+        "style": "filled",
+        "fillcolor": fillcolor,
+        "fontcolor": fontcolor,
+        "color": str(border_color),
+    }
+    if new_fontsize is not None:
+        attrs["fontsize"] = str(new_fontsize)
+    if border_width is not None:
+        attrs["penwidth"] = str(border_width)
+    dot.node(node_id, **attrs)
 
 def normalize_data(df, attribute, colormap):
     norm = Normalize(vmin=df[attribute].min(), vmax=df[attribute].max())
@@ -1652,7 +2084,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     return fig
 
 
-def change_edge_color(graph, source_id, target_id, new_color, new_width):
+def change_edge_color(graph, source_id, target_id, new_color, new_width, new_fontsize=None):
     """
     Changes the color and dimension (penwidth) of a specified edge in the Graphviz Digraph.
 
@@ -1669,7 +2101,16 @@ def change_edge_color(graph, source_id, target_id, new_color, new_width):
     # Look for the existing edge in the graph body
     for i, line in enumerate(graph.body):
         if f'{source_id} -> {target_id}' in line:
-            # Modify the existing edge attributes to include both color and penwidth
-            new_line = line.rstrip().replace(']', f' color="{new_color}" penwidth="{new_width}"]')
+            new_line = line.rstrip()
+            # Replace existing color/penwidth if present to avoid duplicate attrs.
+            new_line = re.sub(r'\scolor="[^"]*"', "", new_line)
+            new_line = re.sub(r'\spenwidth="[^"]*"', "", new_line)
+            if new_fontsize is not None:
+                if re.search(r'\sfontsize="[^"]*"', new_line):
+                    new_line = re.sub(r'\sfontsize="[^"]*"', f' fontsize="{new_fontsize}"', new_line)
+                else:
+                    new_line = new_line.replace("]", f' fontsize="{new_fontsize}"]')
+            # Add updated color + penwidth.
+            new_line = new_line.replace("]", f' color="{new_color}" penwidth="{new_width}"]')
             graph.body[i] = new_line
             break

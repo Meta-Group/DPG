@@ -198,10 +198,20 @@ The high-level API is designed to return structured outputs so downstream tools 
 
 - `DPGExplainer.fit(X)`: builds the DPG structure
 - `DPGExplainer.explain_global(X=None, communities=False, community_threshold=0.2)`: returns a `DPGExplanation`
+- `DPGExplainer.explain_local(sample, sample_id=0, X=None, validate_graph=True)`: returns a `DPGLocalExplanation`
+- `DPGExplainer.local_path_dataframe(local_explanation)`: flattens local paths into a compact table
+- `DPGExplainer.plot_local_on_dpg(...)`: renders one aggregated DPG local plot (selected paths combined) with edge thickness/color by path frequency; optional `true_class_label` highlights the true class node in green
 - `DPGExplainer.plot(...)`: renders the standard DPG
 - `DPGExplainer.plot_communities(...)`: renders a community-colored DPG
 
 `DPGExplanation` includes `dot`, `graph`, `nodes`, `node_metrics`, `edge_metrics`, `class_boundaries`, and optional `communities`.
+`DPGLocalExplanation` includes active DPG paths (source-to-class), predicate truth checks, class votes, and confidence summaries from active-node LRC/BC.
+
+Run the local Iris tutorial with 7 learners:
+
+```bash
+PYTHONPATH=. python tutorials/iris_local_explanations.py
+```
 
 #### CLI scripts
 The library contains two different scripts to apply DPG:

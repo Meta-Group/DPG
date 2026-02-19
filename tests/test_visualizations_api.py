@@ -83,3 +83,24 @@ def test_additional_visualization_apis(tmp_path):
     )
     assert fig_bounds is not None
     assert (tmp_path / "bounds_vs_dataset.png").exists()
+
+
+def test_local_path_on_dpg_plot_api(tmp_path):
+    explainer, _, X, _ = _build_explanation()
+    sample = X.iloc[0].to_numpy()
+    local = explainer.explain_local(sample=sample, sample_id="s0", validate_graph=True)
+    num_paths = len(local.tree_paths)
+    assert num_paths > 0
+
+    selected = [0] if num_paths == 1 else [0, 1]
+    fig = explainer.plot_local_on_dpg(
+        plot_name="local_on_dpg",
+        local_explanation=local,
+        save_dir=str(tmp_path),
+        path_indices=selected,
+        show=False,
+        export_pdf=False,
+    )
+    assert fig is not None
+    sample_token = str(local.sample_id).replace(" ", "_")
+    assert (tmp_path / f"local_on_dpg_sid_{sample_token}.png").exists()
