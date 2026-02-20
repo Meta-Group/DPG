@@ -1,10 +1,13 @@
 name: Telegram On Commit
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
 
 jobs:
   notify:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Send Telegram message
@@ -12,13 +15,13 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPOSITORY: ${{ github.repository }}
-          BRANCH: ${{ github.ref_name }}
-          AUTHOR: ${{ github.actor }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
-          COMMIT_SHA: ${{ github.sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          AUTHOR: ${{ github.event.workflow_run.actor.login }}
+          COMMIT_MESSAGE: ${{ github.event.workflow_run.head_commit.message }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           SHORT_SHA="$(printf '%s' "${COMMIT_SHA}" | cut -c1-7)"
+          COMMIT_URL="https://github.com/${REPOSITORY}/commit/${COMMIT_SHA}"
           MESSAGE="Commit on ${REPOSITORY}%0ABranch: ${BRANCH}%0ABy: ${AUTHOR}%0ACommit: ${SHORT_SHA}%0AMessage: ${COMMIT_MESSAGE}%0ALink: ${COMMIT_URL}"
 
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
