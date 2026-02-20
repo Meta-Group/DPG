@@ -1,161 +1,226 @@
 # DPGExplainer Saga Benchmarks — Episode 2: Wine
 
-This is a compact global-interpretability report for a Random Forest on Wine using **Decision Predicate Graphs (DPG)**.
+Episode 1 (Iris) established the baseline idea: Random Forest can classify well, but DPG reveals the *decision program* behind that accuracy.
 
-The pipeline is:
-1. train a baseline Random Forest,
-2. extract DPG,
-3. analyze LRC, BC, communities, class boundaries, overlap, and class complexity,
-4. compare DPG signals with dataset statistics.
+Episode 2 keeps the same analysis flow, but moves to a harder landscape. Wine has more features, denser interactions, and class regions that demand richer predicate logic.
 
----
-
-## 1. Baseline model sanity check
-
-Before graph analysis, we verify the classifier is doing something reasonable.
-
-![RF confusion matrix](images/rf_confusion_matrix.png)
-
-The confusion matrix checks baseline behavior for the three Wine classes (`class_0`, `class_1`, `class_2`) before graph interpretation. This is exactly the part DPG should help explain structurally.
+The workflow remains unchanged:
+1. Train a Random Forest baseline.
+2. Extract DPG from the trained model.
+3. Analyze LRC, BC, communities, overlap, and class complexity.
+4. Cross-check DPG boundaries against dataset feature ranges.
 
 ---
 
-## 2. Data geometry (feature-level intuition)
+## 1. Wine dataset and data visualization
 
-Pairwise feature distributions give the geometric baseline before any graph metric.
+Like Iris in Episode 1, Wine is a classic benchmark. The difference is complexity: Wine introduces 13 continuous chemical features and 3 classes, with stronger multivariate coupling and less obvious low-dimensional separation.
+
+A pairplot gives the first geometric sanity check:
 
 ![Wine pairplot](images/pairplot.png)
 
-Wine has higher-dimensional and partially overlapping class geometry. The pair plot provides a visual baseline before structural DPG metrics.
+Interpretation before modeling:
+- Some class structure is visible, but separation is less clean than Iris.
+- Multiple features co-move, so the model will likely rely on combinations of thresholds.
+- We should expect broader overlap regions and a larger rule budget than Episode 1.
+
+This sets the hypothesis for DPG: in Wine, communities and bottlenecks should matter even more than in Iris.
+
+---
+
+## 2. Model creation
+
+We keep the same baseline strategy from Episode 1: a compact `RandomForestClassifier` (`n_estimators=10`, `random_state=27`) trained with stratified split (`test_size=0.2`, `random_state=42`).
+
+Baseline performance check:
+
+![RF confusion matrix](images/rf_confusion_matrix.png)
+
+Confusion matrix (`rows=true`, `cols=predicted`):
+
+```text
+[[12  0  0]
+ [ 1 13  0]
+ [ 0  0 10]]
+```
+
+Classification report:
+
+```text
+              precision    recall  f1-score   support
+
+class_0           0.92      1.00      0.96        12
+class_1           1.00      0.93      0.96        14
+class_2           1.00      1.00      1.00        10
+
+accuracy                               0.97        36
+macro avg         0.97      0.98      0.97        36
+weighted avg      0.97      0.97      0.97        36
+```
+
+As in Iris, predictive quality is strong. The key question is now structural: *how* is this performance achieved over a more complex feature space?
 
 ---
 
 ## 3. Why DPG on top of Random Forest
 
-Random Forest importance is good for ranking features, but it does not give explicit decision flow between concrete threshold predicates.
+Episode 1 already showed the core limitation: RF importance is useful, but it is not a blueprint of decision flow.
 
-DPG converts trees into a global predicate graph:
-- nodes: `feature <= threshold` / `feature > threshold`,
-- edges: transitions observed in tree paths,
-- metrics: structural role of predicates in global decision logic.
+DPG converts the forest into a graph where:
+- Nodes are concrete predicates (`feature <= threshold` or `feature > threshold`).
+- Edges represent transitions observed across tree decision paths.
+- Graph metrics expose routing role, bottlenecks, modularity, and class-level structure.
 
-So the rationale is pragmatic:
-- keep RF predictive strength,
-- gain a graph view to inspect routing, bottlenecks, and class-rule organization.
+In Wine, this matters more because global feature relevance alone cannot explain how threshold interactions separate partially overlapping classes.
 
 ---
 
 ## 4. LRC vs RF importance (complementary views)
 
-LRC and RF importance answer different questions.
+As in Iris, RF importance and LRC answer different questions:
+- RF importance: which features reduce impurity globally.
+- LRC: which *specific predicates* are structurally upstream routers.
 
 ![LRC vs RF importance](images/lrc_vs_rf_importance.png)
 
-- **RF importance**: which features reduce impurity most across splits.
-- **LRC**: which specific predicates are globally influential in downstream graph flow.
+Top-10 LRC predicates from the notebook:
 
-If a feature is high in RF and appears in high-LRC predicates, it is both statistically useful and structurally central.
+| Predicate | LRC |
+|---|---:|
+| `color_intensity > 3.46` | 0.504830 |
+| `flavanoids > 0.91` | 0.502640 |
+| `od280/od315_of_diluted_wines > 1.965` | 0.463310 |
+| `flavanoids > 1.655` | 0.377340 |
+| `color_intensity > 3.82` | 0.302024 |
+| `hue > 0.745` | 0.281635 |
+| `alcohol > 13.04` | 0.212821 |
+| `proline > 724.5` | 0.211581 |
+| `od280/od315_of_diluted_wines > 2.005` | 0.204453 |
+| `total_phenols > 2.335` | 0.199512 |
 
-To make this concrete, top LRC split lines are projected on the top feature pair:
+Top RF features:
+
+| Feature | RF importance |
+|---|---:|
+| `od280/od315_of_diluted_wines` | 0.164883 |
+| `proline` | 0.161166 |
+| `color_intensity` | 0.158853 |
+| `alcohol` | 0.147452 |
+| `flavanoids` | 0.087611 |
+| `hue` | 0.079530 |
+| `magnesium` | 0.067015 |
+| `total_phenols` | 0.055643 |
+| `malic_acid` | 0.042399 |
+| `proanthocyanins` | 0.015424 |
+
+Compared with Episode 1, the same complementarity appears, but with richer threshold reuse across more features.
+
+Projected split view:
 
 ![Top LRC predicate splits](images/top_lrc_predicate_splits.png)
 
-This plot shows where high-LRC predicates cut the data manifold.
+This projection shows where high-LRC rules cut the data manifold and where routing pressure accumulates.
 
 ---
 
 ## 5. BC as bottleneck decision logic
 
-BC highlights predicates that connect major decision regions.
+BC captures bridge predicates that connect major decision regions.
 
 ![BC bottleneck PCA cloud](images/bc_bottleneck_pca_cloud.png)
 
-Interpretation: high-BC predicates tend to concentrate around transition zones where class assignment is less trivial between Wine classes.
+Top BC predicates:
+- `hue <= 0.83` (0.002359)
+- `alcohol > 13.04` (0.001993)
+- `ash <= 2.57` (0.001927)
+- `alcohol <= 13.04` (0.001894)
+- `magnesium > 94.5` (0.001761)
+
+Narrative link to Iris: in Episode 1, BC concentrated around the versicolor/virginica transition. In Wine, BC again localizes in overlap-sensitive regions, but now across a broader chemical feature set.
 
 ---
 
 ## 6. Global DPG and communities
 
-Full graph view:
+Global graph:
 
 ![DPG graph](images/wine_dpg.png)
 
-Community-colored view:
+Community-colored graph:
 
 ![DPG communities](images/wine_dpg_communities.png)
 
-Communities represent coherent predicate themes. They help translate “many tree paths” into a smaller number of class-relevant rule groups.
+Community reading follows the same logic as Episode 1:
+- communities behave as decision submodules,
+- cross-community links reveal handoff points,
+- larger communities indicate heavier rule allocation.
+
+In Wine, these modules are denser and more numerous than Iris, consistent with higher feature dimensionality.
 
 ---
 
-## 7. Communities, overlap, and complexity (DPGExplainer-aligned)
+## 7. Communities, overlap, and class complexity
 
 Class-feature predicate concentration:
 
 ![Community class-feature heatmap](images/communities_class_feature_complexity_heatmap.png)
 
-Class predicate volume and feature coverage:
+Class-level complexity summary:
 
 ![Community class complexity bars](images/communities_class_feature_complexity_bars.png)
 
-What this adds:
-- identifies which classes rely on broader or narrower predicate sets,
-- exposes where classes share feature-rule patterns (overlap signal),
-- provides a structural proxy for class simplicity/complexity.
+From notebook counts:
+- `class_1`: `80` predicates across `13` features.
+- `class_0`: `47` predicates across `13` features.
+- `class_2`: `45` predicates across `11` features.
 
-Implementation note for this benchmark:
-- community analysis follows `DPGExplainer` community output (`Clusters`) directly,
-- `community_id` stays tied to a single DPG community,
-- class-community association uses the cluster label when available (with fallback only when needed).
+Key reading:
+- `class_1` receives the largest rule budget, so it is structurally the most complex region in this benchmark.
+- `class_0` and `class_2` require fewer predicates but still much more than the simplest Iris class from Episode 1.
+- Overlap is visible through shared high-use features (`od280/od315_of_diluted_wines`, `color_intensity`, `malic_acid`, `proline`) with class-specific predicate densities.
+
+Implementation note:
+- community analysis uses DPGExplainer cluster output directly (`Clusters`),
+- `community_id` remains tied to a unique DPG community,
+- class association uses cluster labels when present.
 
 ---
 
-## 8. DPG ranges vs dataset ranges
+## 8. DPG community ranges vs dataset ranges
 
 ![DPG vs dataset feature ranges](images/dpg_vs_dataset_feature_ranges.png)
 
-This plot is now the main boundary-validation view and includes:
-- dataset class ranges (gray reference),
-- DPG community-derived ranges (blue),
-- explicit unbounded-side markers (`-inf` / `+inf`) when one predicate side is missing,
-- predicate-threshold density overlays, split by operator:
-  - green for `>` predicates,
-  - red for `<=` predicates,
-  - close thresholds aggregated to emphasize dense decision zones.
+Following the Episode 1 boundary-validation logic, this view compares:
+- dataset class ranges (gray),
+- DPG community ranges (blue),
+- predicate-threshold density by operator (`>` in green, `<=` in red),
+- unbounded-side markers (`-inf`, `+inf`) when the model uses one-sided constraints.
 
-Axis limits are computed from the most extreme values in scope (dataset and finite DPG bounds), with lower bound clamped to `0` when negative.
+Notebook-derived boundary summary:
+- `class_0`: 13 modeled features, 12 finite lower bounds, 5 finite upper bounds.
+- `class_1`: 13 modeled features, 9 finite lower bounds, 13 finite upper bounds.
+- `class_2`: 11 modeled features, 7 finite lower bounds, 6 finite upper bounds.
 
-Why it matters:
-- validates whether model-induced boundaries are consistent with empirical class spreads,
-- shows where DPG uses narrower/wider intervals than raw data,
-- reveals where many predicates concentrate, indicating high decision-detail regions.
+Interpretation:
+- Wine ranges are often asymmetric and partially open-ended, unlike the cleaner intervals seen for easier regions in Iris.
+- This pattern supports a realistic model behavior: classes are carved by mixed one-sided and bounded rules across interacting chemistry dimensions.
 
 ---
 
 ## 9. Main DPG contributions in this benchmark
 
-DPG extends standard RF interpretation with:
+DPG extends standard RF interpretation with the same seven benefits established in Episode 1, now stress-tested on a harder dataset:
 
-1. **Global rule topology**
-   - from isolated feature ranking to connected predicate flow.
+1. Global rule topology.
+2. Predicate-level influence via LRC.
+3. Bottleneck routing via BC.
+4. Community-level class semantics.
+5. Overlap diagnostics.
+6. Class complexity profiling.
+7. Boundary validation against dataset statistics.
 
-2. **Predicate-level influence (LRC)**
-   - identifies which threshold rules organize model reasoning.
-
-3. **Bottleneck routing (BC)**
-   - isolates high-impact transition predicates in overlapping regions.
-
-4. **Community-level class semantics**
-   - class definitions as coherent rule ecosystems, not just split counts.
-
-5. **Overlap diagnostics**
-   - shared/ambiguous community structure marks naturally confusable Wine class zones.
-
-6. **Class complexity profiling**
-   - complexity as a structural property of predicate organization.
-
-7. **Boundary validation against dataset statistics**
-   - checks whether model-induced class ranges are consistent with empirical class distributions, including unbounded intervals and predicate-density concentration.
+What changes from Episode 1 to Episode 2 is not the method, but the evidence scale: Wine shows how the same DPG toolkit remains interpretable when rule interactions become denser and less visually obvious.
 
 ---
 
@@ -178,3 +243,7 @@ DPG extends standard RF interpretation with:
   https://www.mdpi.com/2079-8954/13/11/935
 - Computers and Electronics in Agriculture:
   https://www.sciencedirect.com/science/article/pii/S0168169926000979
+
+### Saga context
+- Episode 1 (Iris):
+  https://medium.com/@sbarbonjr/dpgexplainer-saga-benchmarks-episode-1-iris-c8816db2857d

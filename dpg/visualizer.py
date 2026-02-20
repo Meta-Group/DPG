@@ -980,6 +980,7 @@ def plot_top_lrc_predicate_splits(
     top_predicates: int = 5,
     top_features: int = 2,
     dataset_name: str = "Dataset",
+    class_names: Optional[Any] = None,
     save_path: Optional[str] = None,
     show: bool = True,
 ) -> Optional[plt.Figure]:
@@ -1011,23 +1012,42 @@ def plot_top_lrc_predicate_splits(
 
     y_series = pd.Series(np.asarray(y))
     y_numeric = pd.to_numeric(y_series, errors="coerce")
-    colorbar_label = "Class id"
-    colorbar_ticks = None
-    colorbar_ticklabels = None
+    class_codes = None
+    class_labels: List[str] = []
+
     if y_numeric.notna().all():
-        color_values = y_numeric.to_numpy()
+        # Keep class colors discrete even when labels are numeric.
+        unique_classes = sorted(y_numeric.unique().tolist())
+        class_to_code = {cls: idx for idx, cls in enumerate(unique_classes)}
+        class_codes = y_numeric.map(class_to_code).to_numpy(dtype=int)
+
+        for cls in unique_classes:
+            cls_idx = int(cls) if float(cls).is_integer() else cls
+            if class_names is None:
+                class_labels.append(str(cls_idx))
+            elif isinstance(class_names, dict):
+                class_labels.append(str(class_names.get(cls_idx, cls_idx)))
+            else:
+                if isinstance(cls_idx, int) and 0 <= cls_idx < len(class_names):
+                    class_labels.append(str(class_names[cls_idx]))
+                else:
+                    class_labels.append(str(cls_idx))
     else:
         # Support string/categorical class labels (e.g., "F1", "F2") in scatter coloring.
-        color_values, unique_labels = pd.factorize(y_series.astype(str), sort=True)
-        colorbar_label = "Class"
-        colorbar_ticks = np.arange(len(unique_labels))
-        colorbar_ticklabels = [str(label) for label in unique_labels]
+        class_codes, unique_labels = pd.factorize(y_series.astype(str), sort=True)
+        class_labels = [str(label) for label in unique_labels]
+
+    if not class_labels:
+        class_labels = ["unknown"]
+        class_codes = np.zeros(len(y_series), dtype=int)
+    n_classes = len(class_labels)
+    class_cmap = cm.get_cmap("viridis", n_classes)
 
     scatter = ax.scatter(
         X_df[fx],
         X_df[fy],
-        c=color_values,
-        cmap="viridis",
+        c=class_codes,
+        cmap=class_cmap,
         s=36,
         alpha=0.75,
         edgecolor="white",
@@ -1067,15 +1087,35 @@ def plot_top_lrc_predicate_splits(
     ax.set_title(f"{dataset_name}: Top-{top_predicates} LRC predicate splits")
     ax.set_xlabel(fx)
     ax.set_ylabel(fy)
-    cbar = fig.colorbar(scatter, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label(colorbar_label)
-    if colorbar_ticks is not None and colorbar_ticklabels is not None:
-        cbar.set_ticks(colorbar_ticks)
-        cbar.set_ticklabels(colorbar_ticklabels)
+
+    class_handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="w",
+            markerfacecolor=class_cmap(i),
+            markeredgecolor="white",
+            markeredgewidth=0.5,
+            markersize=7,
+            linestyle="None",
+            alpha=0.85,
+            label=class_labels[i],
+        )
+        for i in range(n_classes)
+    ]
+    class_legend = ax.legend(
+        handles=class_handles,
+        title="Class",
+        loc="upper left",
+        fontsize=8,
+        frameon=True,
+    )
+    ax.add_artist(class_legend)
 
     handles, labels = ax.get_legend_handles_labels()
     if handles:
-        ax.legend(handles, labels, title="Top LRC predicate lines", loc="best", fontsize=8)
+        ax.legend(handles, labels, title="Top LRC predicate lines", loc="lower right", fontsize=8)
 
     plt.tight_layout()
     if save_path is not None:

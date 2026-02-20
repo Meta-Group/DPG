@@ -243,6 +243,7 @@ class DPGExplainer:
         top_predicates: int = 5,
         top_features: int = 2,
         dataset_name: str = "Dataset",
+        class_names: Optional[Any] = None,
         save_path: Optional[str] = None,
         show: bool = True,
     ) -> Optional[Any]:
@@ -256,6 +257,7 @@ class DPGExplainer:
             top_predicates=top_predicates,
             top_features=top_features,
             dataset_name=dataset_name,
+            class_names=class_names,
             save_path=save_path,
             show=show,
         )
