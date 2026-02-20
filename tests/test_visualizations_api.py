@@ -1,4 +1,5 @@
 import os
+import shutil
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 
@@ -86,6 +87,11 @@ def test_additional_visualization_apis(tmp_path):
 
 
 def test_local_path_on_dpg_plot_api(tmp_path):
+    if shutil.which("dot") is None:
+        import pytest
+
+        pytest.skip("Graphviz 'dot' executable not available")
+
     explainer, _, X, _ = _build_explanation()
     sample = X.iloc[0].to_numpy()
     local = explainer.explain_local(sample=sample, sample_id="s0", validate_graph=True)
