@@ -2019,7 +2019,7 @@ def heatmap_techniques(sample, class_sample, cf_list_1, cf_list_2, technique_nam
             'non_decreasing': '⬆️'
         }
         for i, (feat, restr) in enumerate(restrictions.items()):
-            #            if restr in symbol_map:
+            if restr in symbol_map:
                 ax.text(i + 0.5, len(full_df) + 0.5, symbol_map[restr],
                        ha='center', va='top', color='black',
                        fontweight='bold', fontsize=14, transform=ax.transData)
