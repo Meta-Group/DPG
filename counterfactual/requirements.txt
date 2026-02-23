@@ -6,6 +6,7 @@ scipy
 scikit-learn
 deap
 dice-ml
+graphviz
 
 # experiment tracking & configuration
 wandb>=0.16.0
