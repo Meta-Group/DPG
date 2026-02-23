@@ -37,3 +37,11 @@ GitPython
 types-seaborn
 pandas-stubs
 matplotlib-stubs
+
+# docs
+sphinx>=7.3
+pydata-sphinx-theme>=0.15
+sphinx-autoapi>=3.1
+myst-parser>=3.0
+sphinx-copybutton>=0.5
+sphinx-design>=0.6
