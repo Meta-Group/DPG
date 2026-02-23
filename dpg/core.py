@@ -12,7 +12,7 @@ import hashlib
 import yaml
 from joblib import Parallel, delayed
 
-from typing import List, Dict, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from sklearn.base import is_classifier, is_regressor
 
 # Handle OmegaConf DictConfig if available
@@ -43,16 +43,20 @@ class DPGError(Exception):
 class DecisionPredicateGraph:
     """
     Main class for converting tree-based ensemble models into interpretable graphs.
-    
-    Attributes:
-        model: Trained tree ensemble model (RandomForest, AdaBoost, etc.)
-        feature_names: List of feature names
-        target_names: List of target class names
-        perc_var: Minimum path frequency threshold (0-1)
-        decimal_threshold: Rounding precision for feature values
-        n_jobs: Number of parallel jobs (-1 for all cores)
+
+    Converts the internal decision paths of a tree-based ensemble (Random Forest,
+    AdaBoost, Extra Trees, …) into a compact directed graph — the
+    *Decision Predicate Graph* — that exposes which feature conditions the model
+    uses, how often, and in what order.
     """
-    def __init__(self, model, feature_names, target_names=None, config_file="config.yaml", dpg_config=None):
+    def __init__(
+        self,
+        model: Any,
+        feature_names: Iterable[str],
+        target_names: Optional[Iterable[str]] = None,
+        config_file: str = "config.yaml",
+        dpg_config: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """
         Initialize DPG converter with model and configuration.
         
@@ -115,7 +119,7 @@ class DecisionPredicateGraph:
         # Store visualization config for use by utils
         self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
 
-    def fit(self, X_train):
+    def fit(self, X_train: Any) -> Any:
         """
         Main pipeline: Extract decision paths → Build graph → Generate visualization.
         
@@ -158,7 +162,7 @@ class DecisionPredicateGraph:
         print('Extracting graph...')
         return self.generate_dot(dfg)
 
-    def tracing_ensemble(self, case_id, sample):
+    def tracing_ensemble(self, case_id: int, sample: Any) -> Generator[List[str], None, None]:
         """
         Extract decision path for a single sample (generator version).
         
@@ -201,8 +205,18 @@ class DecisionPredicateGraph:
                     node_index = right
                 yield [prefix, condition]
 
-    #for parallel processing, when using n_jobs>1
-    def tracing_ensemble_parallel(self, case_id, sample):
+    def tracing_ensemble_parallel(self, case_id: int, sample: Any) -> List[List[str]]:
+        """
+        Extract decision path for a single sample (list version for parallel workers).
+
+        Args:
+            case_id: Sample identifier used to name each path prefix.
+            sample: Feature values array, shape ``(n_features,)``.
+
+        Returns:
+            List of ``[prefix, event]`` pairs representing the full decision path
+            across all trees in the ensemble.
+        """
         is_regressor = isinstance(self.model, (RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor))
         sample = sample.reshape(-1)
         result = []
@@ -237,7 +251,7 @@ class DecisionPredicateGraph:
         return result
             
 
-    def filter_log(self, log):
+    def filter_log(self, log: Any) -> Any:
         """
         Filter paths based on frequency threshold.
         
@@ -260,7 +274,7 @@ class DecisionPredicateGraph:
                 case_ids_to_keep.update(case_ids)
         return log[log["case:concept:name"].isin(case_ids_to_keep)].copy()
 
-    def discover_dfg(self, log):
+    def discover_dfg(self, log: Any) -> Dict[Tuple[str, str], int]:
         """
         Build directed frequency graph from path logs.
         
@@ -288,7 +302,7 @@ class DecisionPredicateGraph:
         
         return dfg
 
-    def generate_dot(self, dfg):
+    def generate_dot(self, dfg: Dict[Tuple[str, str], int]) -> Any:
         """
         Convert frequency graph to Graphviz format.
         
@@ -357,7 +371,7 @@ class DecisionPredicateGraph:
             )
         return dot
 
-    def to_networkx(self, graphviz_graph):
+    def to_networkx(self, graphviz_graph: Any) -> Tuple[Any, List[List[str]]]:
         """
         Convert Graphviz graph to NetworkX format.
         

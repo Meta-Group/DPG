@@ -1,0 +1,6 @@
+/* Custom overrides for pydata-sphinx-theme */
+
+/* Increase code block font size for readability */
+pre {
+    font-size: 0.88em;
+}

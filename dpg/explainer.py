@@ -1,10 +1,5 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Tuple
-
-import numpy as np
-import pandas as pd
 
 from .core import DecisionPredicateGraph
 from .visualizer import (
@@ -28,8 +23,8 @@ class DPGExplanation:
     graph: Any
     nodes: List[List[str]]
     dot: Any
-    node_metrics: pd.DataFrame
-    edge_metrics: pd.DataFrame
+    node_metrics: Any
+    edge_metrics: Any
     class_boundaries: Dict[str, Any]
     communities: Optional[Dict[str, Any]] = None
     community_threshold: Optional[float] = None
@@ -79,7 +74,7 @@ class DPGExplainer:
     def builder(self) -> DecisionPredicateGraph:
         return self._builder
 
-    def fit(self, X: np.ndarray) -> "DPGExplainer":
+    def fit(self, X: Any) -> "DPGExplainer":
         """Fit the DPG structure from training data."""
         self._dot = self._builder.fit(X)
         self._graph, self._nodes = self._builder.to_networkx(self._dot)
@@ -88,7 +83,7 @@ class DPGExplainer:
 
     def explain_global(
         self,
-        X: Optional[np.ndarray] = None,
+        X: Optional[Any] = None,
         communities: bool = False,
         community_threshold: float = 0.2,
     ) -> DPGExplanation:
@@ -215,7 +210,7 @@ class DPGExplainer:
 
     def plot_lrc_importance(
         self,
-        X_df: pd.DataFrame,
+        X_df: Any,
         explanation: Optional[DPGExplanation] = None,
         top_k: int = 10,
         dataset_name: str = "Dataset",
@@ -237,7 +232,7 @@ class DPGExplainer:
 
     def plot_top_lrc_splits(
         self,
-        X_df: pd.DataFrame,
+        X_df: Any,
         y,
         explanation: Optional[DPGExplanation] = None,
         top_predicates: int = 5,
@@ -266,7 +261,7 @@ class DPGExplainer:
         self,
         explanation: Optional[DPGExplanation] = None,
         community_threshold: float = 0.2,
-    ) -> pd.DataFrame:
+    ) -> Any:
         """Return class-vs-feature predicate count matrix from communities."""
         if explanation is None or explanation.communities is None:
             explanation = self.explain_global(communities=True, community_threshold=community_threshold)
@@ -274,7 +269,7 @@ class DPGExplainer:
 
     def plot_class_bounds_vs_dataset_ranges(
         self,
-        X_df: pd.DataFrame,
+        X_df: Any,
         y,
         explanation: Optional[DPGExplanation] = None,
         dataset_name: str = "Dataset",

@@ -1,0 +1,58 @@
+# DPG — Decision Predicate Graphs
+
+**DPG** is a model-agnostic tool to provide a global interpretation of tree-based ensemble models, addressing transparency and explainability challenges.
+
+DPG is a graph structure that captures the tree-based ensemble model and learned dataset details, preserving the relations among features, logical decisions, and predictions towards emphasising insightful points.
+DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
+DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights
+
+::::{grid} 2
+:::{grid-item-card} Getting Started
+:link: quickstart
+:link-type: doc
+
+Install DPG and run your first explanation in minutes.
+:::
+:::{grid-item-card} API Reference
+:link: api/dpg/index
+:link-type: doc
+
+Full API documentation generated from source docstrings.
+:::
+::::
+
+## Quick example
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
+from dpg import DPGExplainer
+
+X, y = load_iris(return_X_y=True, as_frame=True)
+model = RandomForestClassifier(n_estimators=50, random_state=42).fit(X, y)
+
+explainer = DPGExplainer(
+    model,
+    feature_names=X.columns.tolist(),
+    target_names=["setosa", "versicolor", "virginica"],
+)
+explanation = explainer.fit(X.values)
+explainer.plot(explanation)
+```
+
+## Contents
+
+```{toctree}
+:maxdepth: 2
+:caption: User Guide
+
+quickstart
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: API Reference
+
+api/dpg/index
+api/metrics/index
+```

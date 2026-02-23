@@ -128,27 +128,34 @@ def plot_dpg(
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
 
     Args:
-    plot_name: Output base name for saved files (no extension).
-    dot: Graphviz Digraph instance representing the DPG structure.
-    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
-    df_edges: DataFrame with edge metrics; must include 'Source_id', 'Target_id', and 'Weight'.
-    save_dir: Directory where output images are saved. Default is "results/".
-    attribute: Optional node metric column name to color nodes by (e.g., 'Degree').
-    clusters: Optional mapping {cluster_label: [node_id, ...]} to color nodes by clusters.
-    threshold_clusters: Optional value used only to annotate the output name.
-    class_flag: If True, class nodes are highlighted in yellow before other coloring.
-    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
-    graph_style: Optional dict of Graphviz graph attributes to override template values.
-    node_style: Optional dict of Graphviz node attributes to override template values.
-    edge_style: Optional dict of Graphviz edge attributes to override template values.
-    fig_size: Matplotlib figure size (width, height).
-    dpi: PNG export/display resolution.
-    pdf_dpi: PDF export resolution when export_pdf=True.
-    show: Whether to display the image via matplotlib. Default is True.
-    export_pdf: If True, also writes a PDF next to the PNG.
+        plot_name: Output base name for saved files (no extension).
+        dot: Graphviz Digraph instance representing the DPG structure.
+        df: DataFrame with node metrics; must include ``'Node'`` and ``'Label'`` columns.
+        df_edges: DataFrame with edge metrics; must include ``'Source_id'``,
+            ``'Target_id'``, and ``'Weight'``.
+        save_dir: Directory where output images are saved. Default is ``"results/"``.
+        attribute: Optional node metric column name to color nodes by (e.g. ``'Degree'``).
+        clusters: Optional mapping ``{cluster_label: [node_id, ...]}`` to color nodes
+            by cluster membership.
+        threshold_clusters: Optional value used only to annotate the output filename.
+        class_flag: If ``True``, class nodes are highlighted in yellow before other
+            coloring.
+        layout_template: Optional layout preset. One of
+            ``{'default', 'compact', 'vertical', 'wide'}``.
+        graph_style: Optional dict of Graphviz graph attributes to override template
+            values.
+        node_style: Optional dict of Graphviz node attributes to override template
+            values.
+        edge_style: Optional dict of Graphviz edge attributes to override template
+            values.
+        fig_size: Matplotlib figure size as ``(width, height)``.
+        dpi: PNG export/display resolution.
+        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        show: Whether to display the image via Matplotlib. Default is ``True``.
+        export_pdf: If ``True``, also writes a PDF next to the PNG.
 
     Returns:
-    None
+        None
     """
     print("Plotting DPG...")
     _apply_layout_template(
@@ -341,26 +348,33 @@ def plot_dpg_communities(
     Plot a DPG colored by community assignment.
 
     Args:
-    plot_name: Output base name for saved files (no extension).
-    dot: Graphviz Digraph instance representing the DPG structure.
-    df: DataFrame with node metrics; must include 'Node' and 'Label' columns.
-    dpg_metrics: Dict containing either 'Communities' (list of sets/lists of node labels)
-                 or 'Clusters' (mapping cluster_label -> list of node labels).
-    save_dir: Directory where output images are saved. Default is "results/".
-    class_flag: If True, class nodes are highlighted in yellow before other coloring.
-    df_edges: Optional DataFrame with edge metrics to color edges by weight.
-    layout_template: Optional layout preset. One of {'default','compact','vertical','wide'}.
-    graph_style: Optional dict of Graphviz graph attributes to override template values.
-    node_style: Optional dict of Graphviz node attributes to override template values.
-    edge_style: Optional dict of Graphviz edge attributes to override template values.
-    fig_size: Matplotlib figure size (width, height).
-    dpi: PNG export/display resolution.
-    pdf_dpi: PDF export resolution when export_pdf=True.
-    show: Whether to display the image via matplotlib. Default is True.
-    export_pdf: If True, also writes a PDF next to the PNG.
+        plot_name: Output base name for saved files (no extension).
+        dot: Graphviz Digraph instance representing the DPG structure.
+        df: DataFrame with node metrics; must include ``'Node'`` and ``'Label'``
+            columns.
+        dpg_metrics: Dict containing either ``'Communities'`` (list of sets/lists of
+            node labels) or ``'Clusters'`` (mapping cluster_label -> list of node
+            labels).
+        save_dir: Directory where output images are saved. Default is ``"results/"``.
+        class_flag: If ``True``, class nodes are highlighted in yellow before other
+            coloring.
+        df_edges: Optional DataFrame with edge metrics to color edges by weight.
+        layout_template: Optional layout preset. One of
+            ``{'default', 'compact', 'vertical', 'wide'}``.
+        graph_style: Optional dict of Graphviz graph attributes to override template
+            values.
+        node_style: Optional dict of Graphviz node attributes to override template
+            values.
+        edge_style: Optional dict of Graphviz edge attributes to override template
+            values.
+        fig_size: Matplotlib figure size as ``(width, height)``.
+        dpi: PNG export/display resolution.
+        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        show: Whether to display the image via Matplotlib. Default is ``True``.
+        export_pdf: If ``True``, also writes a PDF next to the PNG.
 
     Returns:
-    None
+        None
     """
     print("Plotting DPG (communities)...")
     _apply_layout_template(
@@ -488,7 +502,14 @@ def plot_dpg_communities(
     # Clean up temporary files
     # delete_folder_contents("temp")
 
-def change_node_color(dot, node_id, fillcolor):
+def change_node_color(dot, node_id: str, fillcolor: str) -> None:
+    """Update a node's fill color and set an appropriate contrasting font color.
+
+    Args:
+        dot: Graphviz Digraph object to modify in-place.
+        node_id: Node identifier string as used in the Digraph.
+        fillcolor: Hex color string (e.g. ``"#a4c2f4"``).
+    """
     r, g, b = int(fillcolor[1:3], 16), int(fillcolor[3:5], 16), int(fillcolor[5:7], 16)
     brightness = (r * 299 + g * 587 + b * 114) / 1000  # fórmula perceptual
     fontcolor = "white" if brightness < 100 else "black"
@@ -496,12 +517,44 @@ def change_node_color(dot, node_id, fillcolor):
     # Modifica o nó no objeto Graphviz
     dot.node(node_id, style="filled", fillcolor=fillcolor, fontcolor=fontcolor)
 
-def normalize_data(df, attribute, colormap):
+def normalize_data(df: Any, attribute: str, colormap) -> Dict[Any, str]:
+    """Map a numeric DataFrame column to hex color strings via a colormap.
+
+    Args:
+        df: DataFrame containing at least a ``'Node'`` column and the ``attribute`` column.
+        attribute: Column name whose values drive the colormap.
+        colormap: Matplotlib colormap instance.
+
+    Returns:
+        Dict mapping node identifier to hex color string.
+    """
     norm = Normalize(vmin=df[attribute].min(), vmax=df[attribute].max())
     colors = [colormap(norm(value)) for value in df[attribute]]
     return {node: "#{:02x}{:02x}{:02x}".format(int(color[0]*255), int(color[1]*255), int(color[2]*255)) for node, color in zip(df['Node'], colors)}
 
-def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, communities=False, leaf_flag=False):
+def plot_dpg_reg(
+    plot_name: str,
+    dot,
+    df: Any,
+    df_dpg: Dict[str, Any],
+    save_dir: str = "examples/",
+    attribute: Optional[str] = None,
+    communities: bool = False,
+    leaf_flag: bool = False,
+) -> None:
+    """Plot a regression DPG with optional node coloring by attribute or community.
+
+    Args:
+        plot_name: Output base name for saved files (no extension).
+        dot: Graphviz Digraph instance representing the DPG structure.
+        df: DataFrame with node metrics; must include ``'Node'`` and ``'Label'`` columns.
+        df_dpg: Dict of DPG metrics; used for ``'Communities'`` when ``communities=True``.
+        save_dir: Directory where output images are saved. Default is ``"examples/"``.
+        attribute: Optional node metric column name to color nodes by.
+        communities: If True, color nodes by community index instead of a single attribute.
+        leaf_flag: If True and ``attribute`` is set, exclude prediction (leaf) nodes from
+            attribute coloring.
+    """
     print("Rendering plot...")
     
     node_colors = {}
@@ -559,7 +612,7 @@ def plot_dpg_constraints_overview(
     original_sample: Dict = None,
     original_class: int = None,
     target_class: int = None
-) -> plt.Figure:
+) -> Any:
     """Create a horizontal bar chart showing DPG constraints for all features.
 
     Similar to the "Feature Changes" chart style, this shows:
@@ -824,6 +877,14 @@ def parse_predicate_parts(label: str) -> Optional[Tuple[str, str, float]]:
 
 
 def parse_feature_from_predicate(label: str) -> str:
+    """Extract the feature name from a predicate label string.
+
+    Args:
+        label: Predicate string such as ``"petal_length <= 2.45"``.
+
+    Returns:
+        Feature name, or the original ``label`` string if parsing fails.
+    """
     parsed = parse_predicate_parts(label)
     return parsed[0] if parsed else str(label)
 
@@ -838,7 +899,7 @@ def _feature_color_map(features: List[str]) -> Dict[str, Any]:
     return {feature: cmap(i / (len(unique) - 1)) for i, feature in enumerate(unique)}
 
 
-def lrc_predicate_scores(explanation, top_k: int = 10) -> pd.DataFrame:
+def lrc_predicate_scores(explanation, top_k: int = 10) -> Any:
     """Return top-k predicate rows ranked by Local reaching centrality."""
     nm = explanation.node_metrics.copy()
     mask = (
@@ -868,12 +929,12 @@ def lrc_predicate_scores(explanation, top_k: int = 10) -> pd.DataFrame:
 def plot_lrc_vs_rf_importance(
     explanation,
     model,
-    X_df: pd.DataFrame,
+    X_df: Any,
     top_k: int = 10,
     dataset_name: str = "Dataset",
     save_path: Optional[str] = None,
     show: bool = True,
-) -> plt.Figure:
+) -> Any:
     """
     Compare top LRC predicates and top RF feature importances side-by-side.
 
@@ -959,7 +1020,7 @@ def plot_lrc_vs_rf_importance(
     return fig
 
 
-def plot_lec_vs_rf_importance(*args, **kwargs) -> plt.Figure:
+def plot_lec_vs_rf_importance(*args, **kwargs) -> Any:
     """
     Backward-compatible alias for a common typo.
 
@@ -975,7 +1036,7 @@ def plot_lec_vs_rf_importance(*args, **kwargs) -> plt.Figure:
 
 def plot_top_lrc_predicate_splits(
     explanation,
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     top_predicates: int = 5,
     top_features: int = 2,
@@ -983,7 +1044,7 @@ def plot_top_lrc_predicate_splits(
     class_names: Optional[Any] = None,
     save_path: Optional[str] = None,
     show: bool = True,
-) -> Optional[plt.Figure]:
+) -> Optional[Any]:
     """
     Scatter the top-2 LRC features and overlay top-LRC predicate split lines.
 
@@ -1144,7 +1205,7 @@ def _normalize_class_label(label: Any) -> str:
     return text
 
 
-def _community_specs(explanation, graph: nx.DiGraph, node_df: pd.DataFrame) -> List[Dict[str, Any]]:
+def _community_specs(explanation, graph: nx.DiGraph, node_df: Any) -> List[Dict[str, Any]]:
     communities = getattr(explanation, "communities", None)
     if not communities:
         return []
@@ -1222,7 +1283,7 @@ def _predicate_node_lookup(explanation) -> Dict[Any, Tuple[str, str, float]]:
     return lookup
 
 
-def class_feature_predicate_counts(explanation) -> pd.DataFrame:
+def class_feature_predicate_counts(explanation) -> Any:
     """
     Compute class-vs-feature predicate frequency table from DPG communities.
 
@@ -1270,7 +1331,7 @@ def class_feature_predicate_counts(explanation) -> pd.DataFrame:
     return heat
 
 
-def classwise_feature_bounds_from_communities(explanation) -> pd.DataFrame:
+def classwise_feature_bounds_from_communities(explanation) -> Any:
     """Build per-class, per-community finite/unbounded feature ranges from predicates."""
     node_df = explanation.node_metrics.copy()
     graph = getattr(explanation, "graph", None)
@@ -1341,7 +1402,7 @@ def classwise_feature_bounds_from_communities(explanation) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def class_feature_predicate_positions(explanation) -> pd.DataFrame:
+def class_feature_predicate_positions(explanation) -> Any:
     """
     Collect raw predicate thresholds by class/feature/operator for density overlays.
     """
@@ -1399,6 +1460,16 @@ def _aggregate_close_positions(values, tol: float):
 
 
 def class_lookup_from_target_names(target_names: Optional[List[str]]) -> Dict[str, int]:
+    """Build a class-name to class-index mapping from a target names list.
+
+    Args:
+        target_names: Ordered list of class name strings (e.g. from
+            ``sklearn.LabelEncoder.classes_``), or ``None``.
+
+    Returns:
+        Dict mapping class name string to integer index, or an empty dict when
+        ``target_names`` is ``None``.
+    """
     if target_names is None:
         return {}
     return {str(name): i for i, name in enumerate(list(target_names))}
@@ -1427,11 +1498,22 @@ def _class_mask(class_name: str, y, class_lookup: Optional[Dict[str, int]] = Non
 
 
 def dataset_feature_bounds_by_class(
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     class_names: List[str],
     class_lookup: Optional[Dict[str, int]] = None,
-) -> pd.DataFrame:
+) -> Any:
+    """Compute empirical per-class min/max ranges for every feature in ``X_df``.
+
+    Args:
+        X_df: Feature matrix with named columns.
+        y: Target labels aligned with ``X_df`` rows.
+        class_names: List of class name strings to compute bounds for.
+        class_lookup: Optional mapping from class name to numeric label used in ``y``.
+
+    Returns:
+        DataFrame with columns ``['class_name', 'feature', 'ds_lower_bound', 'ds_upper_bound']``.
+    """
     rows = []
     for cls in class_names:
         mask = _class_mask(cls, y, class_lookup=class_lookup)
@@ -1452,20 +1534,20 @@ def dataset_feature_bounds_by_class(
 
 def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     explanation,
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     dataset_name: str = "Dataset",
     top_features: int = 4,
     class_lookup: Optional[Dict[str, int]] = None,
-    predicate_positions: Optional[pd.DataFrame] = None,
-    class_bounds: Optional[pd.DataFrame] = None,
+    predicate_positions: Optional[Any] = None,
+    class_bounds: Optional[Any] = None,
     class_filter: Optional[List[str]] = None,
     density_tol_ratio: float = 0.03,
     predicate_alpha: float = 0.55,
     dataset_range_lw: float = 10,
     save_path: Optional[str] = None,
     show: bool = True,
-) -> Optional[plt.Figure]:
+) -> Optional[Any]:
     """
     Plot DPG class bounds against empirical dataset ranges per feature.
 

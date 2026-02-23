@@ -41,10 +41,59 @@ six = "1.16.0"
 threadpoolctl = "3.5.0"
 tqdm = "4.67.1"
 tzdata = "2024.1"
-pyyaml = "^6.0.2" 
+pyyaml = "^6.0.2"
+
+# -- optional docs dependencies (pip install ".[docs]") --
+sphinx = {version = ">=7.3", optional = true}
+pydata-sphinx-theme = {version = ">=0.15", optional = true}
+sphinx-autoapi = {version = ">=3.1", optional = true}
+myst-parser = {version = ">=3.0", optional = true}
+sphinx-copybutton = {version = ">=0.5", optional = true}
+myst-nb = {version = ">=1.1", optional = true}
+sphinx-design = {version = ">=0.6", optional = true}
 
 [tool.poetry.extras]
 dev = ["pytest"]
+docs = ["sphinx", "pydata-sphinx-theme", "sphinx-autoapi", "myst-parser", "sphinx-copybutton", "myst-nb", "sphinx-design"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.0"
+mypy = ">=1.9"
+types-PyYAML = ">=6.0"
+types-seaborn = "*"
+pandas-stubs = "*"
+matplotlib-stubs = "*"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=7.3"
+pydata-sphinx-theme = ">=0.15"
+sphinx-autoapi = ">=3.1"
+myst-parser = ">=3.0"
+sphinx-copybutton = ">=0.5"
+myst-nb = ">=1.1"
+sphinx-design = ">=0.6"
+
+[tool.mypy]
+python_version = "3.10"
+disallow_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+pretty = true
+show_error_codes = true
+# Ignore third-party libraries that don't ship stubs
+[[tool.mypy.overrides]]
+module = [
+    "graphviz.*",
+    "networkx.*",
+    "sklearn.*",
+    "joblib.*",
+    "tqdm.*",
+    "scipy.*",
+    "omegaconf.*",
+    "PIL.*",
+]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
