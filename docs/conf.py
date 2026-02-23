@@ -3,6 +3,18 @@
 
 import os
 import sys
+import logging
+
+# sphinx-autoapi emits "Unknown type: placeholder" via Python's logging module
+# (without a Sphinx warning type= parameter), so suppress_warnings cannot catch
+# it. Filter at the Python logging level instead.
+logging.getLogger("sphinx_autoapi").addFilter(
+    type(
+        "_NoPlaceholder",
+        (logging.Filter,),
+        {"filter": lambda self, r: "placeholder" not in r.getMessage()},
+    )()
+)
 
 # If the package is not installed, point Sphinx at the source tree so autoapi
 # can discover the modules without needing an editable install.
@@ -45,11 +57,6 @@ source_suffix = {
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
-# Suppress the "Unknown type: placeholder" warning that autoapi emits when it
-# encounters type annotations referencing external objects it cannot resolve
-# (e.g. numpy arrays, sklearn estimators). This is a known autoapi limitation.
-suppress_warnings = ["autoapi"]
 
 # ---------------------------------------------------------------------------
 # sphinx-autoapi

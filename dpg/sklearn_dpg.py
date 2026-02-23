@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import ntpath
 import os
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 import yaml
 
 from sklearn.ensemble import (RandomForestClassifier, RandomForestRegressor,GradientBoostingClassifier, BaggingClassifier,ExtraTreesClassifier, AdaBoostClassifier, AdaBoostRegressor)
@@ -20,7 +20,7 @@ from metrics.graph import GraphMetrics
 from metrics.edges import EdgeMetrics
 
 
-def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def select_dataset(source: str, target_column: Optional[str] = None) -> Tuple[Any, Any, Any]:
     """
     Selects either a standard sklearn dataset or loads a custom CSV dataset.
     
@@ -88,7 +88,7 @@ def test_dpg(datasets: str,
              clusters_flag: bool = False,
              threshold_clusters: Optional[float] = None,
              class_flag: bool = False,
-             seed:int = 160898) -> Tuple[pd.DataFrame, dict]:
+             seed:int = 160898) -> Optional[Tuple[Any, Any]]:
     
     """
     Unified function to train models and extract DPG for both standard and custom datasets.
