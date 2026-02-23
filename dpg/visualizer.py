@@ -488,7 +488,14 @@ def plot_dpg_communities(
     # Clean up temporary files
     # delete_folder_contents("temp")
 
-def change_node_color(dot, node_id, fillcolor):
+def change_node_color(dot, node_id: str, fillcolor: str) -> None:
+    """Update a node's fill color and set an appropriate contrasting font color.
+
+    Args:
+        dot: Graphviz Digraph object to modify in-place.
+        node_id: Node identifier string as used in the Digraph.
+        fillcolor: Hex color string (e.g. ``"#a4c2f4"``).
+    """
     r, g, b = int(fillcolor[1:3], 16), int(fillcolor[3:5], 16), int(fillcolor[5:7], 16)
     brightness = (r * 299 + g * 587 + b * 114) / 1000  # fórmula perceptual
     fontcolor = "white" if brightness < 100 else "black"
@@ -496,12 +503,44 @@ def change_node_color(dot, node_id, fillcolor):
     # Modifica o nó no objeto Graphviz
     dot.node(node_id, style="filled", fillcolor=fillcolor, fontcolor=fontcolor)
 
-def normalize_data(df, attribute, colormap):
+def normalize_data(df: pd.DataFrame, attribute: str, colormap) -> Dict[Any, str]:
+    """Map a numeric DataFrame column to hex color strings via a colormap.
+
+    Args:
+        df: DataFrame containing at least a ``'Node'`` column and the ``attribute`` column.
+        attribute: Column name whose values drive the colormap.
+        colormap: Matplotlib colormap instance.
+
+    Returns:
+        Dict mapping node identifier to hex color string.
+    """
     norm = Normalize(vmin=df[attribute].min(), vmax=df[attribute].max())
     colors = [colormap(norm(value)) for value in df[attribute]]
     return {node: "#{:02x}{:02x}{:02x}".format(int(color[0]*255), int(color[1]*255), int(color[2]*255)) for node, color in zip(df['Node'], colors)}
 
-def plot_dpg_reg(plot_name, dot, df, df_dpg, save_dir="examples/", attribute=None, communities=False, leaf_flag=False):
+def plot_dpg_reg(
+    plot_name: str,
+    dot,
+    df: pd.DataFrame,
+    df_dpg: Dict[str, Any],
+    save_dir: str = "examples/",
+    attribute: Optional[str] = None,
+    communities: bool = False,
+    leaf_flag: bool = False,
+) -> None:
+    """Plot a regression DPG with optional node coloring by attribute or community.
+
+    Args:
+        plot_name: Output base name for saved files (no extension).
+        dot: Graphviz Digraph instance representing the DPG structure.
+        df: DataFrame with node metrics; must include ``'Node'`` and ``'Label'`` columns.
+        df_dpg: Dict of DPG metrics; used for ``'Communities'`` when ``communities=True``.
+        save_dir: Directory where output images are saved. Default is ``"examples/"``.
+        attribute: Optional node metric column name to color nodes by.
+        communities: If True, color nodes by community index instead of a single attribute.
+        leaf_flag: If True and ``attribute`` is set, exclude prediction (leaf) nodes from
+            attribute coloring.
+    """
     print("Rendering plot...")
     
     node_colors = {}
@@ -824,6 +863,14 @@ def parse_predicate_parts(label: str) -> Optional[Tuple[str, str, float]]:
 
 
 def parse_feature_from_predicate(label: str) -> str:
+    """Extract the feature name from a predicate label string.
+
+    Args:
+        label: Predicate string such as ``"petal_length <= 2.45"``.
+
+    Returns:
+        Feature name, or the original ``label`` string if parsing fails.
+    """
     parsed = parse_predicate_parts(label)
     return parsed[0] if parsed else str(label)
 
@@ -1399,6 +1446,16 @@ def _aggregate_close_positions(values, tol: float):
 
 
 def class_lookup_from_target_names(target_names: Optional[List[str]]) -> Dict[str, int]:
+    """Build a class-name to class-index mapping from a target names list.
+
+    Args:
+        target_names: Ordered list of class name strings (e.g. from
+            ``sklearn.LabelEncoder.classes_``), or ``None``.
+
+    Returns:
+        Dict mapping class name string to integer index, or an empty dict when
+        ``target_names`` is ``None``.
+    """
     if target_names is None:
         return {}
     return {str(name): i for i, name in enumerate(list(target_names))}
@@ -1432,6 +1489,17 @@ def dataset_feature_bounds_by_class(
     class_names: List[str],
     class_lookup: Optional[Dict[str, int]] = None,
 ) -> pd.DataFrame:
+    """Compute empirical per-class min/max ranges for every feature in ``X_df``.
+
+    Args:
+        X_df: Feature matrix with named columns.
+        y: Target labels aligned with ``X_df`` rows.
+        class_names: List of class name strings to compute bounds for.
+        class_lookup: Optional mapping from class name to numeric label used in ``y``.
+
+    Returns:
+        DataFrame with columns ``['class_name', 'feature', 'ds_lower_bound', 'ds_upper_bound']``.
+    """
     rows = []
     for cls in class_names:
         mask = _class_mask(cls, y, class_lookup=class_lookup)
