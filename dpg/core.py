@@ -251,7 +251,7 @@ class DecisionPredicateGraph:
         return result
             
 
-    def filter_log(self, log: pd.DataFrame) -> pd.DataFrame:
+    def filter_log(self, log: Any) -> Any:
         """
         Filter paths based on frequency threshold.
         
@@ -274,7 +274,7 @@ class DecisionPredicateGraph:
                 case_ids_to_keep.update(case_ids)
         return log[log["case:concept:name"].isin(case_ids_to_keep)].copy()
 
-    def discover_dfg(self, log: pd.DataFrame) -> Dict[Tuple[str, str], int]:
+    def discover_dfg(self, log: Any) -> Dict[Tuple[str, str], int]:
         """
         Build directed frequency graph from path logs.
         

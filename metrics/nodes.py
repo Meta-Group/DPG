@@ -1,11 +1,11 @@
 import pandas as pd
 import networkx as nx
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 class NodeMetrics:
     """Handles node-level metric calculations."""
 
-    def extract_node_metrics(dpg_model, nodes_list: List[Tuple]) -> pd.DataFrame:
+    def extract_node_metrics(dpg_model, nodes_list: List[Tuple]) -> Any:
         """Compute per-node graph metrics for a DPG model.
 
         Args:

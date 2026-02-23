@@ -517,7 +517,7 @@ def change_node_color(dot, node_id: str, fillcolor: str) -> None:
     # Modifica o nó no objeto Graphviz
     dot.node(node_id, style="filled", fillcolor=fillcolor, fontcolor=fontcolor)
 
-def normalize_data(df: pd.DataFrame, attribute: str, colormap) -> Dict[Any, str]:
+def normalize_data(df: Any, attribute: str, colormap) -> Dict[Any, str]:
     """Map a numeric DataFrame column to hex color strings via a colormap.
 
     Args:
@@ -535,7 +535,7 @@ def normalize_data(df: pd.DataFrame, attribute: str, colormap) -> Dict[Any, str]
 def plot_dpg_reg(
     plot_name: str,
     dot,
-    df: pd.DataFrame,
+    df: Any,
     df_dpg: Dict[str, Any],
     save_dir: str = "examples/",
     attribute: Optional[str] = None,
@@ -612,7 +612,7 @@ def plot_dpg_constraints_overview(
     original_sample: Dict = None,
     original_class: int = None,
     target_class: int = None
-) -> plt.Figure:
+) -> Any:
     """Create a horizontal bar chart showing DPG constraints for all features.
 
     Similar to the "Feature Changes" chart style, this shows:
@@ -899,7 +899,7 @@ def _feature_color_map(features: List[str]) -> Dict[str, Any]:
     return {feature: cmap(i / (len(unique) - 1)) for i, feature in enumerate(unique)}
 
 
-def lrc_predicate_scores(explanation, top_k: int = 10) -> pd.DataFrame:
+def lrc_predicate_scores(explanation, top_k: int = 10) -> Any:
     """Return top-k predicate rows ranked by Local reaching centrality."""
     nm = explanation.node_metrics.copy()
     mask = (
@@ -929,12 +929,12 @@ def lrc_predicate_scores(explanation, top_k: int = 10) -> pd.DataFrame:
 def plot_lrc_vs_rf_importance(
     explanation,
     model,
-    X_df: pd.DataFrame,
+    X_df: Any,
     top_k: int = 10,
     dataset_name: str = "Dataset",
     save_path: Optional[str] = None,
     show: bool = True,
-) -> plt.Figure:
+) -> Any:
     """
     Compare top LRC predicates and top RF feature importances side-by-side.
 
@@ -1020,7 +1020,7 @@ def plot_lrc_vs_rf_importance(
     return fig
 
 
-def plot_lec_vs_rf_importance(*args, **kwargs) -> plt.Figure:
+def plot_lec_vs_rf_importance(*args, **kwargs) -> Any:
     """
     Backward-compatible alias for a common typo.
 
@@ -1036,7 +1036,7 @@ def plot_lec_vs_rf_importance(*args, **kwargs) -> plt.Figure:
 
 def plot_top_lrc_predicate_splits(
     explanation,
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     top_predicates: int = 5,
     top_features: int = 2,
@@ -1044,7 +1044,7 @@ def plot_top_lrc_predicate_splits(
     class_names: Optional[Any] = None,
     save_path: Optional[str] = None,
     show: bool = True,
-) -> Optional[plt.Figure]:
+) -> Optional[Any]:
     """
     Scatter the top-2 LRC features and overlay top-LRC predicate split lines.
 
@@ -1205,7 +1205,7 @@ def _normalize_class_label(label: Any) -> str:
     return text
 
 
-def _community_specs(explanation, graph: nx.DiGraph, node_df: pd.DataFrame) -> List[Dict[str, Any]]:
+def _community_specs(explanation, graph: nx.DiGraph, node_df: Any) -> List[Dict[str, Any]]:
     communities = getattr(explanation, "communities", None)
     if not communities:
         return []
@@ -1283,7 +1283,7 @@ def _predicate_node_lookup(explanation) -> Dict[Any, Tuple[str, str, float]]:
     return lookup
 
 
-def class_feature_predicate_counts(explanation) -> pd.DataFrame:
+def class_feature_predicate_counts(explanation) -> Any:
     """
     Compute class-vs-feature predicate frequency table from DPG communities.
 
@@ -1331,7 +1331,7 @@ def class_feature_predicate_counts(explanation) -> pd.DataFrame:
     return heat
 
 
-def classwise_feature_bounds_from_communities(explanation) -> pd.DataFrame:
+def classwise_feature_bounds_from_communities(explanation) -> Any:
     """Build per-class, per-community finite/unbounded feature ranges from predicates."""
     node_df = explanation.node_metrics.copy()
     graph = getattr(explanation, "graph", None)
@@ -1402,7 +1402,7 @@ def classwise_feature_bounds_from_communities(explanation) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def class_feature_predicate_positions(explanation) -> pd.DataFrame:
+def class_feature_predicate_positions(explanation) -> Any:
     """
     Collect raw predicate thresholds by class/feature/operator for density overlays.
     """
@@ -1498,11 +1498,11 @@ def _class_mask(class_name: str, y, class_lookup: Optional[Dict[str, int]] = Non
 
 
 def dataset_feature_bounds_by_class(
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     class_names: List[str],
     class_lookup: Optional[Dict[str, int]] = None,
-) -> pd.DataFrame:
+) -> Any:
     """Compute empirical per-class min/max ranges for every feature in ``X_df``.
 
     Args:
@@ -1534,20 +1534,20 @@ def dataset_feature_bounds_by_class(
 
 def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     explanation,
-    X_df: pd.DataFrame,
+    X_df: Any,
     y,
     dataset_name: str = "Dataset",
     top_features: int = 4,
     class_lookup: Optional[Dict[str, int]] = None,
-    predicate_positions: Optional[pd.DataFrame] = None,
-    class_bounds: Optional[pd.DataFrame] = None,
+    predicate_positions: Optional[Any] = None,
+    class_bounds: Optional[Any] = None,
     class_filter: Optional[List[str]] = None,
     density_tol_ratio: float = 0.03,
     predicate_alpha: float = 0.55,
     dataset_range_lw: float = 10,
     save_path: Optional[str] = None,
     show: bool = True,
-) -> Optional[plt.Figure]:
+) -> Optional[Any]:
     """
     Plot DPG class bounds against empirical dataset ranges per feature.
 

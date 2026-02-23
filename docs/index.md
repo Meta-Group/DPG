@@ -14,7 +14,7 @@ DPG provides descriptive metrics that enhance the understanding of the decisions
 Install DPG and run your first explanation in minutes.
 :::
 :::{grid-item-card} API Reference
-:link: api/index
+:link: api/dpg/index
 :link-type: doc
 
 Full API documentation generated from source docstrings.
@@ -53,5 +53,6 @@ quickstart
 :maxdepth: 1
 :caption: API Reference
 
-api/index
+api/dpg/index
+api/metrics/index
 ```

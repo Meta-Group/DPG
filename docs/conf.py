@@ -3,29 +3,6 @@
 
 import os
 import sys
-import logging
-
-# ---------------------------------------------------------------------------
-# Silence "Unknown type: placeholder" from sphinx-autoapi
-# ---------------------------------------------------------------------------
-# autoapi uses Python's standard logging (not sphinx.util.logging), so Sphinx's
-# suppress_warnings config cannot intercept it.  The warning is emitted by the
-# "autoapi.domains.python" logger (or its parent "autoapi") when astroid, the
-# static analysis backend, cannot fully resolve C-extension types (e.g. sklearn
-# Cython classes) and produces Placeholder AST nodes.
-#
-# Two-pronged defence:
-# 1. autoapi_ignore (below) excludes sklearn_dpg.py, the main offender, since
-#    it bulk-imports many sklearn C-extension classes at module level.
-# 2. A filter on the relevant loggers silences any residual occurrences from
-#    other files without suppressing genuinely useful autoapi diagnostics.
-_placeholder_filter = type(
-    "_NoPlaceholder",
-    (logging.Filter,),
-    {"filter": lambda self, r: "placeholder" not in r.getMessage()},
-)()
-for _lg_name in ["autoapi", "autoapi.domains", "autoapi.domains.python"]:
-    logging.getLogger(_lg_name).addFilter(_placeholder_filter)
 
 # If the package is not installed, point Sphinx at the source tree so autoapi
 # can discover the modules without needing an editable install.
@@ -68,6 +45,12 @@ source_suffix = {
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# "Unknown type: placeholder" is a known sphinx-autoapi/astroid limitation
+# that fires when a C-extension-backed type (e.g. from pandas._libs) cannot
+# be statically resolved.  It does not affect doc output.  Suppress it via
+# Sphinx's own warning-filter mechanism (requires Sphinx >= 7.3).
+suppress_warnings = ["autoapi"]
 
 # ---------------------------------------------------------------------------
 # sphinx-autoapi
