@@ -5,16 +5,27 @@ import os
 import sys
 import logging
 
-# sphinx-autoapi emits "Unknown type: placeholder" via Python's logging module
-# (without a Sphinx warning type= parameter), so suppress_warnings cannot catch
-# it. Filter at the Python logging level instead.
-logging.getLogger("sphinx_autoapi").addFilter(
-    type(
-        "_NoPlaceholder",
-        (logging.Filter,),
-        {"filter": lambda self, r: "placeholder" not in r.getMessage()},
-    )()
-)
+# ---------------------------------------------------------------------------
+# Silence "Unknown type: placeholder" from sphinx-autoapi
+# ---------------------------------------------------------------------------
+# autoapi uses Python's standard logging (not sphinx.util.logging), so Sphinx's
+# suppress_warnings config cannot intercept it.  The warning is emitted by the
+# "autoapi.domains.python" logger (or its parent "autoapi") when astroid, the
+# static analysis backend, cannot fully resolve C-extension types (e.g. sklearn
+# Cython classes) and produces Placeholder AST nodes.
+#
+# Two-pronged defence:
+# 1. autoapi_ignore (below) excludes sklearn_dpg.py, the main offender, since
+#    it bulk-imports many sklearn C-extension classes at module level.
+# 2. A filter on the relevant loggers silences any residual occurrences from
+#    other files without suppressing genuinely useful autoapi diagnostics.
+_placeholder_filter = type(
+    "_NoPlaceholder",
+    (logging.Filter,),
+    {"filter": lambda self, r: "placeholder" not in r.getMessage()},
+)()
+for _lg_name in ["autoapi", "autoapi.domains", "autoapi.domains.python"]:
+    logging.getLogger(_lg_name).addFilter(_placeholder_filter)
 
 # If the package is not installed, point Sphinx at the source tree so autoapi
 # can discover the modules without needing an editable install.
@@ -69,6 +80,12 @@ autoapi_options = [
     "show-inheritance",
     "show-module-summary",
 ]
+# sklearn_dpg.py is an internal utility/runner module that bulk-imports sklearn
+# C-extension classes (RandomForestClassifier, etc.).  astroid cannot fully
+# introspect those Cython types and emits "Unknown type: placeholder".
+# Excluding the file from autoapi avoids this and is correct — the module is
+# not part of the public API that we want documented via autoapi.
+autoapi_ignore = ["*sklearn_dpg*"]
 # Don't re-document members imported from other modules (avoids duplicates
 # when e.g. DecisionPredicateGraph is in both dpg.core and dpg.__init__).
 autoapi_keep_files = False
