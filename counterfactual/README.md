@@ -23,6 +23,8 @@ This repository provides a framework for generating and analyzing counterfactual
 
 ## Installation
 
+This module uses the root repository's virtual environment. From the repository root:
+
 ```bash
 # Create a virtual environment
 python -m venv .venv
@@ -31,7 +33,7 @@ python -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install -r ./requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Usage

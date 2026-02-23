@@ -8,9 +8,6 @@ __pycache__/
 *$py.class
 *.so
 
-# Exception: track requirements.txt (despite root .gitignore *.txt rule)
-!requirements.txt
-
 # Distribution / packaging
 .Python
 build/

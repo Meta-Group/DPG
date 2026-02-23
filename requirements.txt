@@ -20,3 +20,20 @@ threadpoolctl==3.5.0
 tqdm==4.67.1
 tzdata==2024.1
 pyyaml==6.0.2
+
+# counterfactual dependencies
+seaborn
+deap
+dice-ml
+wandb>=0.16.0
+huggingface_hub
+ipywidgets
+ipython
+jupyter
+nbstripout
+GitPython
+
+# type stubs
+types-seaborn
+pandas-stubs
+matplotlib-stubs
