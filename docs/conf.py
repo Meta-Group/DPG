@@ -46,6 +46,11 @@ source_suffix = {
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Suppress the "Unknown type: placeholder" warning that autoapi emits when it
+# encounters type annotations referencing external objects it cannot resolve
+# (e.g. numpy arrays, sklearn estimators). This is a known autoapi limitation.
+suppress_warnings = ["autoapi"]
+
 # ---------------------------------------------------------------------------
 # sphinx-autoapi
 # ---------------------------------------------------------------------------

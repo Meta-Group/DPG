@@ -86,7 +86,7 @@ def test_dpg(datasets: str,
              attribute: Optional[str] = None,
              communities: bool = False,
              clusters_flag: bool = False,
-             threshold_clusters:float = None,
+             threshold_clusters: Optional[float] = None,
              class_flag: bool = False,
              seed:int = 160898) -> Tuple[pd.DataFrame, dict]:
     
