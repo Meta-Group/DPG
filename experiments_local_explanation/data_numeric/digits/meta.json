@@ -1,0 +1,35 @@
+{
+  "dataset_name": "digits",
+  "source": "sklearn",
+  "openml_id": null,
+  "n_train": 1437,
+  "n_test": 360,
+  "n_features": 64,
+  "n_classes": 10,
+  "class_counts_train": {
+    "0": 142,
+    "1": 146,
+    "2": 142,
+    "3": 146,
+    "4": 145,
+    "5": 145,
+    "6": 145,
+    "7": 143,
+    "8": 139,
+    "9": 144
+  },
+  "class_counts_test": {
+    "0": 36,
+    "1": 36,
+    "2": 35,
+    "3": 37,
+    "4": 36,
+    "5": 37,
+    "6": 36,
+    "7": 36,
+    "8": 35,
+    "9": 36
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

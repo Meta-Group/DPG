@@ -1,0 +1,29 @@
+{
+  "dataset_name": "segment",
+  "source": "openml",
+  "openml_id": 36,
+  "n_train": 1848,
+  "n_test": 462,
+  "n_features": 19,
+  "n_classes": 7,
+  "class_counts_train": {
+    "0": 264,
+    "1": 264,
+    "2": 264,
+    "3": 264,
+    "4": 264,
+    "5": 264,
+    "6": 264
+  },
+  "class_counts_test": {
+    "0": 66,
+    "1": 66,
+    "2": 66,
+    "3": 66,
+    "4": 66,
+    "5": 66,
+    "6": 66
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

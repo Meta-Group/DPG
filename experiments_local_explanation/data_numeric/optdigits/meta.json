@@ -1,0 +1,35 @@
+{
+  "dataset_name": "optdigits",
+  "source": "openml",
+  "openml_id": 28,
+  "n_train": 4496,
+  "n_test": 1124,
+  "n_features": 64,
+  "n_classes": 10,
+  "class_counts_train": {
+    "0": 443,
+    "1": 457,
+    "2": 446,
+    "3": 458,
+    "4": 454,
+    "5": 446,
+    "6": 446,
+    "7": 453,
+    "8": 443,
+    "9": 450
+  },
+  "class_counts_test": {
+    "0": 111,
+    "1": 114,
+    "2": 111,
+    "3": 114,
+    "4": 114,
+    "5": 112,
+    "6": 112,
+    "7": 113,
+    "8": 111,
+    "9": 112
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

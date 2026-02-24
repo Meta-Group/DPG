@@ -657,6 +657,9 @@ def plot_dpg_local_paths_aggregate(
     sample_metrics=None,
     class_flag=True,
     layout_template="default",
+    graph_width=None,
+    graph_height=None,
+    graph_size_lock=False,
     graph_style=None,
     node_style=None,
     edge_style=None,
@@ -683,10 +686,21 @@ def plot_dpg_local_paths_aggregate(
         raise ValueError("No valid node paths to aggregate.")
 
     work_dot = copy.deepcopy(dot)
+    local_graph_style = dict(graph_style or {})
+    if graph_width is not None or graph_height is not None:
+        # Be permissive: if only one side is provided, infer the other from fig_size.
+        if graph_width is None:
+            graph_width = fig_size[0]
+        if graph_height is None:
+            graph_height = fig_size[1]
+        if float(graph_width) <= 0 or float(graph_height) <= 0:
+            raise ValueError("graph_width and graph_height must be positive.")
+        size_suffix = "!" if graph_size_lock else ""
+        local_graph_style["size"] = f"{float(graph_width)},{float(graph_height)}{size_suffix}"
     _apply_layout_template(
         work_dot,
         layout_template=layout_template,
-        graph_style=graph_style,
+        graph_style=local_graph_style,
         node_style=node_style,
         edge_style=edge_style,
     )
@@ -840,13 +854,18 @@ def plot_dpg_local_paths_aggregate(
     )
     metric_chunks = []
     if isinstance(sample_metrics, dict):
-        class_scores = sample_metrics.get("class_scores", {}) or {}
-        if obtained_class_label is not None and obtained_class_label in class_scores:
-            metric_chunks.append(f"score_pred={float(class_scores[obtained_class_label]):.3f}")
-        if sample_metrics.get("vote_confidence") is not None:
-            metric_chunks.append(f"vote_conf={float(sample_metrics['vote_confidence']):.3f}")
-        if sample_metrics.get("score_margin") is not None:
-            metric_chunks.append(f"margin={float(sample_metrics['score_margin']):.3f}")
+        evidence_score_pred = sample_metrics.get("evidence_score_pred", sample_metrics.get("vote_confidence"))
+        if evidence_score_pred is not None:
+            metric_chunks.append(f"evidence_score_pred={float(evidence_score_pred):.3f}")
+        competitor = sample_metrics.get("top_competitor_class_pred")
+        if competitor is not None:
+            metric_chunks.append(f"top_competitor={competitor}")
+        competitor_score = sample_metrics.get("evidence_score_competitor_pred")
+        if competitor_score is not None:
+            metric_chunks.append(f"evidence_score_competitor={float(competitor_score):.3f}")
+        competitor_margin = sample_metrics.get("evidence_margin_pred_vs_competitor")
+        if competitor_margin is not None:
+            metric_chunks.append(f"pred_vs_competitor={float(competitor_margin):.3f}")
     metric_chunks.append(f"paths={len(normalized_paths)}")
     metric_chunks.append(f"max_edge_freq={max_edge_freq}")
     ax.set_title(

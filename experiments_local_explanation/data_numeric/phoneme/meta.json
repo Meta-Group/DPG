@@ -1,0 +1,19 @@
+{
+  "dataset_name": "phoneme",
+  "source": "openml",
+  "openml_id": 1489,
+  "n_train": 4323,
+  "n_test": 1081,
+  "n_features": 5,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 3054,
+    "1": 1269
+  },
+  "class_counts_test": {
+    "0": 764,
+    "1": 317
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

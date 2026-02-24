@@ -1,0 +1,19 @@
+{
+  "dataset_name": "ionosphere",
+  "source": "openml",
+  "openml_id": 59,
+  "n_train": 280,
+  "n_test": 71,
+  "n_features": 34,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 101,
+    "1": 179
+  },
+  "class_counts_test": {
+    "0": 25,
+    "1": 46
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

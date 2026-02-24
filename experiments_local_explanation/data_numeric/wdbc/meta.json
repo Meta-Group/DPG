@@ -1,0 +1,19 @@
+{
+  "dataset_name": "wdbc",
+  "source": "openml",
+  "openml_id": 1510,
+  "n_train": 455,
+  "n_test": 114,
+  "n_features": 30,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 285,
+    "1": 170
+  },
+  "class_counts_test": {
+    "0": 72,
+    "1": 42
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

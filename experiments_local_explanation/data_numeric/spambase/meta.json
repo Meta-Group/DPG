@@ -1,0 +1,19 @@
+{
+  "dataset_name": "spambase",
+  "source": "openml",
+  "openml_id": 44,
+  "n_train": 3680,
+  "n_test": 921,
+  "n_features": 57,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 2230,
+    "1": 1450
+  },
+  "class_counts_test": {
+    "0": 558,
+    "1": 363
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

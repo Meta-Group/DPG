@@ -37,7 +37,7 @@ def main():
     class_names = [str(n) for n in iris.target_names]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.20, random_state=1, stratify=y
+        X, y, test_size=0.05, random_state=1, stratify=y
     )
 
     model = RandomForestClassifier(n_estimators=20, max_depth=2, random_state=27)
@@ -84,6 +84,10 @@ def main():
             node_style={"fontsize": 100},
             edge_style={"fontsize": 100},
             graph_style={"fontsize": 100},
+            graph_width=28,
+            graph_height=6,
+            graph_size_lock=True,   # important: forces Graphviz size with "!"
+            fig_size=(28, 6), 
             save_dir=out_dir,
             show=False,
         )
@@ -94,7 +98,7 @@ def main():
             first_wrong_pos = sample_pos
 
         class_support = local.sample_confidence.get("class_support", {}) or {}
-        class_scores = local.sample_confidence.get("class_scores", {}) or {}
+        evidence_scores = local.sample_confidence.get("evidence_scores", {}) or {}
         total_support = float(sum(class_support.values()))
         attraction_true = float(class_support.get(y_true_name, 0.0))
         attraction_pred = float(class_support.get(y_hat_name, 0.0))
@@ -108,14 +112,18 @@ def main():
                 "pred_class": y_hat_name,
                 "correct": bool(correct),
                 "majority_vote": local.majority_vote,
-                "vote_confidence": local.sample_confidence.get("vote_confidence"),
-                "score_margin": local.sample_confidence.get("score_margin"),
+                "evidence_score_pred": local.sample_confidence.get("evidence_score_pred"),
+                "top_competitor_class_pred": local.sample_confidence.get("top_competitor_class_pred"),
+                "evidence_score_competitor_pred": local.sample_confidence.get("evidence_score_competitor_pred"),
+                "evidence_margin_pred_vs_competitor": local.sample_confidence.get(
+                    "evidence_margin_pred_vs_competitor"
+                ),
                 "attraction_true": attraction_true,
                 "repulsion_true": repulsion_true,
-                "score_true": class_scores.get(y_true_name),
+                "evidence_score_true": evidence_scores.get(y_true_name),
                 "attraction_pred": attraction_pred,
                 "repulsion_pred": repulsion_pred,
-                "score_pred": class_scores.get(y_hat_name),
+                "evidence_score_pred_class": evidence_scores.get(y_hat_name),
                 "num_paths": int(local.sample_confidence.get("num_paths") or 0),
                 "num_active_nodes": int(local.sample_confidence.get("num_active_nodes") or 0),
             }

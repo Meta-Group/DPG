@@ -71,11 +71,25 @@ def test_explain_local_returns_class_votes_and_confidence():
     assert local.sample_confidence["num_active_nodes"] >= 1
     assert local.sample_confidence["mean_lrc_active_nodes"] is not None
     assert local.sample_confidence["mean_bc_active_nodes"] is not None
-    assert local.sample_confidence["vote_confidence"] is not None
+    assert local.sample_confidence["evidence_score_pred"] is not None
+    assert "top_competitor_class_pred" in local.sample_confidence
+    assert "evidence_margin_pred_vs_competitor" in local.sample_confidence
 
     sample_df = X.iloc[[sample_idx]]
     model_pred = str(model.predict(sample_df)[0])
     assert model_pred in local.class_votes
+
+    pred = local.majority_vote
+    scores = local.sample_confidence.get("evidence_scores", {})
+    competitor = local.sample_confidence.get("top_competitor_class_pred")
+    margin = local.sample_confidence.get("evidence_margin_pred_vs_competitor")
+    if pred in scores:
+        if competitor is None:
+            assert len(scores) <= 1
+            assert margin == scores[pred]
+        else:
+            assert competitor in scores
+            assert np.isclose(margin, scores[pred] - scores[competitor])
 
 
 def test_explain_local_stress_randomized_samples():

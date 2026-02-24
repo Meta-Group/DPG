@@ -1,0 +1,19 @@
+{
+  "dataset_name": "breast_cancer",
+  "source": "sklearn",
+  "openml_id": null,
+  "n_train": 455,
+  "n_test": 114,
+  "n_features": 30,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 170,
+    "1": 285
+  },
+  "class_counts_test": {
+    "0": 42,
+    "1": 72
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

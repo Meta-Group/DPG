@@ -288,9 +288,20 @@ class DPGExplainer:
             key=lambda n: node_to_label[n],
         )
         if not source_nodes:
-            raise ValueError(
-                "No valid local path: no starting predicate node (in-degree 0) matched this sample."
+            # Fallback 1: roots in the active subgraph (after local filtering).
+            source_nodes = sorted(
+                [n for n in true_pred_nodes if active_graph.in_degree(n) == 0],
+                key=lambda n: node_to_label[n],
             )
+        if not source_nodes:
+            # Fallback 2: dense/merged graphs may remove root status; start from
+            # low in-degree true predicates instead of failing hard.
+            source_nodes = sorted(
+                list(true_pred_nodes),
+                key=lambda n: (self._graph.in_degree(n), node_to_label[n]),
+            )
+        if not source_nodes:
+            raise ValueError("No valid local path: no predicate node matched this sample.")
 
         raw_paths: List[List[str]] = []
         max_paths = 5000
@@ -428,16 +439,35 @@ class DPGExplainer:
             if cls is None:
                 continue
             class_support[cls] = class_support.get(cls, 0.0) + float(rec["path_confidence"])
-        class_scores: Dict[str, float] = {}
+        evidence_scores: Dict[str, float] = {}
         total_support = float(sum(class_support.values()))
         for cls, att in class_support.items():
             rep = max(0.0, total_support - att)
-            class_scores[cls] = float(att / (att + repulsion_lambda * rep + eps))
-        # Normalize scores to sum to 1 for comparability/reporting.
-        score_sum = float(sum(class_scores.values()))
+            evidence_scores[cls] = float(att / (att + repulsion_lambda * rep + eps))
+        # Normalize evidence scores to sum to 1 for comparability/reporting.
+        score_sum = float(sum(evidence_scores.values()))
         if score_sum > 0:
-            class_scores = {k: float(v / score_sum) for k, v in class_scores.items()}
-        majority_vote = max(class_scores, key=class_scores.get) if class_scores else next(iter(class_votes.keys()), None)
+            evidence_scores = {k: float(v / score_sum) for k, v in evidence_scores.items()}
+        majority_vote = (
+            max(evidence_scores, key=evidence_scores.get)
+            if evidence_scores
+            else next(iter(class_votes.keys()), None)
+        )
+        top_competitor_class_pred = None
+        evidence_score_competitor_pred = None
+        evidence_margin_pred_vs_competitor = None
+        if majority_vote is not None and evidence_scores:
+            competitor_items = [(c, s) for c, s in evidence_scores.items() if c != majority_vote]
+            if competitor_items:
+                top_competitor_class_pred, top_competitor_score = max(
+                    competitor_items, key=lambda kv: kv[1]
+                )
+                evidence_score_competitor_pred = float(top_competitor_score)
+                evidence_margin_pred_vs_competitor = float(
+                    float(evidence_scores.get(majority_vote, 0.0)) - top_competitor_score
+                )
+            else:
+                evidence_margin_pred_vs_competitor = float(evidence_scores.get(majority_vote, 0.0))
         all_trees_valid = all(p.graph_path_valid for p in tree_paths) if tree_paths else False
 
         active_metric_nodes = metric_by_node.loc[
@@ -456,14 +486,28 @@ class DPGExplainer:
                 if len(active_metric_nodes)
                 else None
             ),
-            # Backward-compatible key; now based on class evidence score (not path count).
-            "vote_confidence": (float(class_scores.get(majority_vote)) if majority_vote in class_scores else None),
+            "evidence_score_pred": (
+                float(evidence_scores.get(majority_vote)) if majority_vote in evidence_scores else None
+            ),
+            "top_competitor_class_pred": top_competitor_class_pred,
+            "evidence_score_competitor_pred": evidence_score_competitor_pred,
+            "evidence_margin_pred_vs_competitor": evidence_margin_pred_vs_competitor,
             "class_support": class_support,
-            "class_scores": class_scores,
+            "evidence_scores": evidence_scores,
+            "evidence_score_margin": (
+                float(sorted(evidence_scores.values(), reverse=True)[0] - sorted(evidence_scores.values(), reverse=True)[1])
+                if len(evidence_scores) >= 2
+                else (float(next(iter(evidence_scores.values()))) if len(evidence_scores) == 1 else None)
+            ),
+            # Backward-compatible aliases (deprecated).
+            "vote_confidence": (
+                float(evidence_scores.get(majority_vote)) if majority_vote in evidence_scores else None
+            ),
+            "class_scores": evidence_scores,
             "score_margin": (
-                float(sorted(class_scores.values(), reverse=True)[0] - sorted(class_scores.values(), reverse=True)[1])
-                if len(class_scores) >= 2
-                else (float(next(iter(class_scores.values()))) if len(class_scores) == 1 else None)
+                float(sorted(evidence_scores.values(), reverse=True)[0] - sorted(evidence_scores.values(), reverse=True)[1])
+                if len(evidence_scores) >= 2
+                else (float(next(iter(evidence_scores.values()))) if len(evidence_scores) == 1 else None)
             ),
         }
 
@@ -533,6 +577,9 @@ class DPGExplainer:
         save_dir: str = "results/",
         path_indices: Optional[Iterable[int]] = None,
         layout_template: str = "wide",
+        graph_width: Optional[float] = None,
+        graph_height: Optional[float] = None,
+        graph_size_lock: bool = False,
         graph_style: Optional[Dict[str, Any]] = None,
         node_style: Optional[Dict[str, Any]] = None,
         edge_style: Optional[Dict[str, Any]] = None,
@@ -590,6 +637,9 @@ class DPGExplainer:
             save_dir=save_dir,
             class_flag=True,
             layout_template=layout_template,
+            graph_width=graph_width,
+            graph_height=graph_height,
+            graph_size_lock=graph_size_lock,
             graph_style=graph_style,
             node_style=node_style,
             edge_style=edge_style,
