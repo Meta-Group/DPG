@@ -115,6 +115,14 @@ pip install git+https://github.com/Meta-Group/DPG.git
     ```
 ---
 
+## Documentation
+
+For full documentation, visit [https://dpg.readthedocs.io/](https://dpg.readthedocs.io/).
+
+To build and serve documentation locally, see [docs/README.md](docs/README.md).
+
+---
+
 ## Example usage (Python)
 
 You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example using the high-level API:
