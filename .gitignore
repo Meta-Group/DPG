@@ -52,5 +52,5 @@ htmlcov/
 docs/_build/
 
 outputs/
-
+examples/results
 wandb/
