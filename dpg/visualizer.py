@@ -1538,6 +1538,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     y,
     dataset_name: str = "Dataset",
     top_features: int = 4,
+    feature_cols_per_row: int = 4,
     class_lookup: Optional[Dict[str, int]] = None,
     predicate_positions: Optional[Any] = None,
     class_bounds: Optional[Any] = None,
@@ -1555,6 +1556,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
         explanation: DPGExplanation instance.
         X_df: Feature dataframe.
         y: Class labels aligned with X_df.
+        feature_cols_per_row: Number of feature panels per row block.
         class_lookup: Optional class-name to class-id mapping.
         predicate_positions: Optional precomputed output from class_feature_predicate_positions.
         class_bounds: Optional precomputed output from classwise_feature_bounds_from_communities.
@@ -1597,173 +1599,241 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     if ds_bounds.empty:
         return None
 
-    fig, axes = plt.subplots(1, len(classes), figsize=(6 * len(classes), 5), squeeze=False)
-    axes = axes[0]
-    density_gt_labeled = False
-    density_le_labeled = False
-
-    for ax, cls in zip(axes, classes):
-        class_dpg = dpg_bounds[dpg_bounds["class_name"] == cls].copy()
-        class_dpg = class_dpg.sort_values(["community_support", "range_width"], ascending=[False, False]).head(top_features)
-        class_dpg = class_dpg.sort_values("range_width", ascending=True)
-        merged = class_dpg.merge(
-            ds_bounds[ds_bounds["class_name"] == cls],
-            on=["class_name", "feature"],
-            how="left",
+    feature_rank = (
+        dpg_bounds.groupby("feature", as_index=False)
+        .agg(
+            total_support=("community_support", "sum"),
+            class_coverage=("class_name", "nunique"),
+            finite_width_mean=("range_width", "mean"),
         )
-        if merged.empty:
+        .sort_values(
+            ["total_support", "class_coverage", "finite_width_mean"],
+            ascending=[False, False, False],
+        )
+        .head(top_features)
+    )
+    selected_features = feature_rank["feature"].tolist()
+    if not selected_features:
+        return None
+
+    n_cols = max(1, min(int(feature_cols_per_row), len(selected_features)))
+    n_feature_blocks = int(np.ceil(len(selected_features) / n_cols))
+    # Insert one separator row between feature blocks to improve visual grouping.
+    n_rows = (len(classes) * n_feature_blocks) + max(0, n_feature_blocks - 1)
+
+    fig, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(
+            5.2 * n_cols,
+            (2.6 * len(classes) * n_feature_blocks) + (0.8 * max(0, n_feature_blocks - 1)),
+        ),
+        squeeze=False,
+    )
+
+    feature_axis_limits: Dict[str, Tuple[float, float]] = {}
+    for feat in selected_features:
+        ds_feat = ds_bounds[ds_bounds["feature"] == feat]
+        dpg_feat = dpg_bounds[dpg_bounds["feature"] == feat]
+        if ds_feat.empty and dpg_feat.empty:
             continue
 
-        y_positions = np.arange(len(merged))
-        ds_min = float(merged["ds_lower_bound"].min())
-        ds_max = float(merged["ds_upper_bound"].max())
-        feature_global_min = float(X_df[merged["feature"]].min().min())
-        feature_global_max = float(X_df[merged["feature"]].max().max())
+        ds_min = float(ds_feat["ds_lower_bound"].min()) if not ds_feat.empty else np.inf
+        ds_max = float(ds_feat["ds_upper_bound"].max()) if not ds_feat.empty else -np.inf
+        feat_global_min = float(X_df[feat].min()) if feat in X_df.columns else ds_min
+        feat_global_max = float(X_df[feat].max()) if feat in X_df.columns else ds_max
 
-        dpg_lo_axis = merged["lower_bound"].astype(float).to_numpy(copy=True)
-        dpg_hi_axis = merged["upper_bound"].astype(float).to_numpy(copy=True)
-        finite_dpg_lo = dpg_lo_axis[np.isfinite(dpg_lo_axis)]
-        finite_dpg_hi = dpg_hi_axis[np.isfinite(dpg_hi_axis)]
+        dpg_lo = dpg_feat["lower_bound"].astype(float).to_numpy(copy=True)
+        dpg_hi = dpg_feat["upper_bound"].astype(float).to_numpy(copy=True)
+        finite_dpg_lo = dpg_lo[np.isfinite(dpg_lo)]
+        finite_dpg_hi = dpg_hi[np.isfinite(dpg_hi)]
         dpg_min = float(finite_dpg_lo.min()) if finite_dpg_lo.size else ds_min
         dpg_max = float(finite_dpg_hi.max()) if finite_dpg_hi.size else ds_max
 
-        x_min = max(0.0, min(ds_min, feature_global_min, dpg_min))
-        x_max = max(ds_max, feature_global_max, dpg_max)
+        x_min = max(0.0, min(ds_min, feat_global_min, dpg_min))
+        x_max = max(ds_max, feat_global_max, dpg_max)
         pad = max((x_max - x_min) * 0.2, 1e-6)
-        left_lim = max(0.0, x_min - pad)
-        right_lim = x_max + pad
+        feature_axis_limits[feat] = (max(0.0, x_min - pad), x_max + pad)
 
-        ax.hlines(
-            y_positions,
-            merged["ds_lower_bound"],
-            merged["ds_upper_bound"],
-            color="lightgray",
-            linewidth=dataset_range_lw,
-            alpha=0.85,
-            label="dataset class range" if cls == classes[0] else None,
-        )
-        ax.scatter(
-            merged["ds_lower_bound"],
-            y_positions,
-            color="dimgray",
-            s=28,
-            label="dataset min/max" if cls == classes[0] else None,
-        )
-        ax.scatter(merged["ds_upper_bound"], y_positions, color="dimgray", s=28)
+    density_gt_labeled = False
+    density_le_labeled = False
+    for block_idx in range(n_feature_blocks):
+        start = block_idx * n_cols
+        end = min(len(selected_features), start + n_cols)
+        block_features = selected_features[start:end]
 
-        dpg_lo = merged["lower_bound"].astype(float).to_numpy(copy=True)
-        dpg_hi = merged["upper_bound"].astype(float).to_numpy(copy=True)
-        lo_inf = ~np.isfinite(dpg_lo)
-        hi_inf = ~np.isfinite(dpg_hi)
-        draw_lo = np.where(lo_inf, left_lim, dpg_lo)
-        draw_hi = np.where(hi_inf, right_lim, dpg_hi)
-
-        ax.hlines(
-            y_positions,
-            draw_lo,
-            draw_hi,
-            color="tab:blue",
-            linewidth=3,
-            alpha=0.95,
-            label="DPG community range" if cls == classes[0] else None,
-        )
-
-        finite_lo = np.isfinite(dpg_lo)
-        finite_hi = np.isfinite(dpg_hi)
-        ax.scatter(
-            dpg_lo[finite_lo],
-            y_positions[finite_lo],
-            color="tab:green",
-            s=38,
-            label="DPG min bound" if cls == classes[0] else None,
-        )
-        ax.scatter(
-            dpg_hi[finite_hi],
-            y_positions[finite_hi],
-            color="tab:red",
-            s=38,
-            label="DPG max bound" if cls == classes[0] else None,
-        )
-
-        if lo_inf.any():
-            ax.scatter(
-                np.full(lo_inf.sum(), left_lim),
-                y_positions[lo_inf],
-                marker="<",
-                color="tab:green",
-                s=70,
-                label="DPG min = -inf" if cls == classes[0] else None,
-            )
-        if hi_inf.any():
-            ax.scatter(
-                np.full(hi_inf.sum(), right_lim),
-                y_positions[hi_inf],
-                marker=">",
-                color="tab:red",
-                s=70,
-                label="DPG max = +inf" if cls == classes[0] else None,
+        for r, cls in enumerate(classes):
+            class_ds = ds_bounds[ds_bounds["class_name"] == cls]
+            class_dpg = dpg_bounds[dpg_bounds["class_name"] == cls]
+            class_pred = (
+                predicate_positions[predicate_positions["class_name"] == cls]
+                if predicate_positions is not None and not predicate_positions.empty
+                else pd.DataFrame(columns=["feature", "operator", "threshold"])
             )
 
-        if predicate_positions is not None and not predicate_positions.empty:
-            class_pred = predicate_positions[predicate_positions["class_name"] == cls]
-            tol = max((right_lim - left_lim) * float(density_tol_ratio), 1e-9)
-            for y_index, feat in enumerate(merged["feature"]):
-                pred_feature = class_pred[class_pred["feature"] == feat]
-                vals_gt = pred_feature.loc[pred_feature["operator"] == ">", "threshold"].astype(float).to_numpy()
-                vals_le = pred_feature.loc[pred_feature["operator"] == "<=", "threshold"].astype(float).to_numpy()
-                vals_gt = vals_gt[(vals_gt >= left_lim) & (vals_gt <= right_lim)]
-                vals_le = vals_le[(vals_le >= left_lim) & (vals_le <= right_lim)]
+            row_idx = block_idx * (len(classes) + 1) + r
+            for c in range(n_cols):
+                ax = axes[row_idx, c]
+                if c >= len(block_features):
+                    ax.axis("off")
+                    continue
 
-                dense_gt = _aggregate_close_positions(vals_gt, tol) if vals_gt.size else []
-                dense_le = _aggregate_close_positions(vals_le, tol) if vals_le.size else []
+                feat = block_features[c]
+                left_lim, right_lim = feature_axis_limits.get(feat, (0.0, 1.0))
 
-                if dense_gt:
-                    xs = np.array([d[0] for d in dense_gt], dtype=float)
-                    counts = np.array([d[1] for d in dense_gt], dtype=float)
-                    sizes = 14 + 16 * np.sqrt(counts)
-                    ax.scatter(
-                        xs,
-                        np.full_like(xs, y_index, dtype=float) + 0.18,
-                        s=sizes,
-                        marker="^",
-                        c="tab:green",
-                        alpha=predicate_alpha,
-                        edgecolors="black",
-                        linewidths=0.35,
-                        label="predicate density (>)" if not density_gt_labeled else None,
-                        zorder=4,
+                ds_row = class_ds[class_ds["feature"] == feat]
+                dpg_row = class_dpg[class_dpg["feature"] == feat]
+                y0 = 0.0
+
+                if not ds_row.empty:
+                    ds_lo = float(ds_row["ds_lower_bound"].iloc[0])
+                    ds_hi = float(ds_row["ds_upper_bound"].iloc[0])
+                    ax.hlines(
+                        y0,
+                        ds_lo,
+                        ds_hi,
+                        color="lightgray",
+                        linewidth=dataset_range_lw,
+                        alpha=0.85,
+                        label="dataset class range" if (row_idx == 0 and c == 0) else None,
                     )
-                    density_gt_labeled = True
-
-                if dense_le:
-                    xs = np.array([d[0] for d in dense_le], dtype=float)
-                    counts = np.array([d[1] for d in dense_le], dtype=float)
-                    sizes = 14 + 16 * np.sqrt(counts)
                     ax.scatter(
-                        xs,
-                        np.full_like(xs, y_index, dtype=float) - 0.18,
-                        s=sizes,
-                        marker="v",
-                        c="tab:red",
-                        alpha=predicate_alpha,
-                        edgecolors="black",
-                        linewidths=0.35,
-                        label="predicate density (<=)" if not density_le_labeled else None,
-                        zorder=4,
+                        [ds_lo, ds_hi],
+                        [y0, y0],
+                        color="dimgray",
+                        s=28,
+                        label="dataset min/max" if (row_idx == 0 and c == 0) else None,
                     )
-                    density_le_labeled = True
 
-        ax.set_xlim(left_lim, right_lim)
-        ax.set_yticks(y_positions)
-        ax.set_yticklabels(merged["feature"])
-        ax.set_xlabel("Feature value range")
-        ax.set_title(f"{dataset_name} - Class {cls}: DPG vs dataset range")
-        ax.grid(axis="x", linestyle="--", alpha=0.35)
+                if not dpg_row.empty:
+                    dpg_lo = float(dpg_row["lower_bound"].iloc[0])
+                    dpg_hi = float(dpg_row["upper_bound"].iloc[0])
+                    lo_inf = not np.isfinite(dpg_lo)
+                    hi_inf = not np.isfinite(dpg_hi)
+                    draw_lo = left_lim if lo_inf else dpg_lo
+                    draw_hi = right_lim if hi_inf else dpg_hi
 
-    handles, labels = axes[0].get_legend_handles_labels()
+                    ax.hlines(
+                        y0,
+                        draw_lo,
+                        draw_hi,
+                        color="tab:blue",
+                        linewidth=3,
+                        alpha=0.95,
+                        label="DPG community range" if (row_idx == 0 and c == 0) else None,
+                    )
+
+                    if np.isfinite(dpg_lo):
+                        ax.scatter(
+                            [dpg_lo],
+                            [y0],
+                            color="tab:green",
+                            s=38,
+                            label="DPG min bound" if (row_idx == 0 and c == 0) else None,
+                        )
+                    if np.isfinite(dpg_hi):
+                        ax.scatter(
+                            [dpg_hi],
+                            [y0],
+                            color="tab:red",
+                            s=38,
+                            label="DPG max bound" if (row_idx == 0 and c == 0) else None,
+                        )
+                    if lo_inf:
+                        ax.scatter(
+                            [left_lim],
+                            [y0],
+                            marker="<",
+                            color="tab:green",
+                            s=70,
+                            label="DPG min = -inf" if (row_idx == 0 and c == 0) else None,
+                        )
+                    if hi_inf:
+                        ax.scatter(
+                            [right_lim],
+                            [y0],
+                            marker=">",
+                            color="tab:red",
+                            s=70,
+                            label="DPG max = +inf" if (row_idx == 0 and c == 0) else None,
+                        )
+
+                if not class_pred.empty:
+                    pred_feature = class_pred[class_pred["feature"] == feat]
+                    tol = max((right_lim - left_lim) * float(density_tol_ratio), 1e-9)
+                    vals_gt = pred_feature.loc[pred_feature["operator"] == ">", "threshold"].astype(float).to_numpy()
+                    vals_le = pred_feature.loc[pred_feature["operator"] == "<=", "threshold"].astype(float).to_numpy()
+                    vals_gt = vals_gt[(vals_gt >= left_lim) & (vals_gt <= right_lim)]
+                    vals_le = vals_le[(vals_le >= left_lim) & (vals_le <= right_lim)]
+                    dense_gt = _aggregate_close_positions(vals_gt, tol) if vals_gt.size else []
+                    dense_le = _aggregate_close_positions(vals_le, tol) if vals_le.size else []
+
+                    if dense_gt:
+                        xs = np.array([d[0] for d in dense_gt], dtype=float)
+                        counts = np.array([d[1] for d in dense_gt], dtype=float)
+                        sizes = 14 + 16 * np.sqrt(counts)
+                        ax.scatter(
+                            xs,
+                            np.full_like(xs, y0 + 0.10, dtype=float),
+                            s=sizes,
+                            marker="^",
+                            c="tab:green",
+                            alpha=predicate_alpha,
+                            edgecolors="black",
+                            linewidths=0.35,
+                            label="predicate density (>)" if not density_gt_labeled else None,
+                            zorder=4,
+                        )
+                        density_gt_labeled = True
+
+                    if dense_le:
+                        xs = np.array([d[0] for d in dense_le], dtype=float)
+                        counts = np.array([d[1] for d in dense_le], dtype=float)
+                        sizes = 14 + 16 * np.sqrt(counts)
+                        ax.scatter(
+                            xs,
+                            np.full_like(xs, y0 - 0.10, dtype=float),
+                            s=sizes,
+                            marker="v",
+                            c="tab:red",
+                            alpha=predicate_alpha,
+                            edgecolors="black",
+                            linewidths=0.35,
+                            label="predicate density (<=)" if not density_le_labeled else None,
+                            zorder=4,
+                        )
+                        density_le_labeled = True
+
+                ax.set_xlim(left_lim, right_lim)
+                ax.set_ylim(-0.35, 0.35)
+                ax.set_yticks([])
+                ax.grid(axis="x", linestyle="--", alpha=0.35)
+
+                if r == 0:
+                    ax.set_title(str(feat))
+                is_bottom_class_row = r == len(classes) - 1
+                ax.tick_params(axis="x", labelbottom=is_bottom_class_row)
+                if not is_bottom_class_row:
+                    ax.set_xticklabels([])
+                if is_bottom_class_row:
+                    ax.set_xlabel("Feature value range")
+                if c == 0:
+                    ax.set_ylabel(f"Class {cls}")
+
+        # Hide separator row axes between feature blocks.
+        if block_idx < n_feature_blocks - 1:
+            sep_row = block_idx * (len(classes) + 1) + len(classes)
+            for c in range(n_cols):
+                axes[sep_row, c].axis("off")
+
+    handles, labels = axes[0, 0].get_legend_handles_labels()
     if handles:
         fig.legend(handles, labels, loc="lower center", ncol=3, frameon=True)
 
+    fig.suptitle(
+        f"{dataset_name}: DPG vs dataset ranges "
+        f"(rows=classes, features/row={n_cols})"
+    )
     plt.tight_layout(rect=(0, 0.10, 1, 1))
     if save_path is not None:
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
