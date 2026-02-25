@@ -1,10 +1,5 @@
 # Quickstart
 
-```{contents} On this page
-:local:
-:depth: 2
-```
-
 ## Installation
 
 ```bash

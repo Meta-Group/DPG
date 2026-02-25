@@ -131,6 +131,7 @@ html_theme_options = {
     "github_url": "https://github.com/Meta-Group/DPG",
     "use_edit_page_button": True,
     "show_toc_level": 2,
+    "show_nav_level": 10,
     "navigation_with_keys": False,
     "navbar_align": "left",
     "header_links_before_dropdown": 5,
@@ -156,3 +157,9 @@ html_context = {
 html_title = "DPG"
 html_short_title = "DPG"
 html_css_files = ["custom.css"]
+
+# Remove the left sidebar from pages that don't need it.
+html_sidebars = {
+    "index": [],
+    "quickstart": [],
+}

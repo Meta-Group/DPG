@@ -4,3 +4,16 @@
 pre {
     font-size: 0.88em;
 }
+
+/* Keep all sidebar navigation items expanded so every module
+   is visible at once without collapsing other sections. */
+.bd-sidebar-primary nav ul {
+    display: block !important;
+}
+.bd-sidebar-primary nav .toctree-checkbox {
+    /* Force hidden checkboxes to checked so items stay expanded */
+    display: none;
+}
+.bd-sidebar-primary nav .toctree-checkbox ~ ul {
+    display: block !important;
+}
