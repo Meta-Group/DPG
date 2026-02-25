@@ -48,6 +48,8 @@ htmlcov/
 # Jupyter Notebooks
 .ipynb_checkpoints/
 
+# Documentation
+docs/_build/
 
 outputs/
 
