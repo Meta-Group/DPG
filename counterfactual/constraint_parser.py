@@ -14,6 +14,7 @@ except ImportError:
 
 from dpg import DecisionPredicateGraph
 from metrics.graph import GraphMetrics
+from metrics.nodes import NodeMetrics
 
 class ConstraintParser:
     """Parse, normalise, and extract feature constraints from DPG models.
@@ -205,16 +206,20 @@ class ConstraintParser:
                 'communities': []
             }
         
-        # Extract graph metrics which includes Class Bounds and Communities
+        # Extract class boundaries using absorbing Markov chain method
         target_names = [str(c) for c in np.unique(train_labels)]
-        df_dpg = GraphMetrics.extract_graph_metrics(
+        df_dpg = GraphMetrics.extract_class_boundaries(
             dpg_model,
             nodes_list,
-            target_names=target_names
+            target_names=target_names,
         )
         
-        # Extract communities from DPG graph
-        communities = df_dpg.get("Communities", [])
+        # Extract communities using absorbing Markov chain clustering
+        node_metrics = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
+        communities_result = GraphMetrics.extract_communities(
+            dpg_model, node_metrics, nodes_list
+        )
+        communities = communities_result.get("Clusters", {})
         
         # Parse Class Bounds into expected format
         parsed_constraints = {}
