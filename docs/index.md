@@ -6,7 +6,7 @@ DPG is a graph structure that captures the tree-based ensemble model and learned
 DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
 DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights
 
-::::{grid} 3
+::::{grid} 4
 :::{grid-item-card} Getting Started
 :link: quickstart
 :link-type: doc
@@ -24,6 +24,12 @@ Full API documentation for dpg, metrics, and counterfactual.
 :link-type: doc
 
 Counterfactual generation and constraint explanation on DPG models.
+:::
+:::{grid-item-card} Development
+:link: development/index
+:link-type: doc
+
+Internal change logs, design decisions, and migration notes.
 :::
 ::::
 
@@ -60,4 +66,11 @@ quickstart
 :caption: API Reference
 
 api_reference
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Development
+
+development/index
 ```
