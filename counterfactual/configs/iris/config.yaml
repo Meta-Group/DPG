@@ -28,3 +28,7 @@ experiment_params:
 methods:
   dpg:
     verbose: false
+  dpg_dice:
+    counterfactual:
+      proximity_weight: 1.5   # was 0.5 — higher = closer to original
+      diversity_weight: 0.5  
