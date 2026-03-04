@@ -102,13 +102,13 @@ flowchart TB
     style D fill:#d4e4f7,color:#000,stroke:#89a
     style E fill:#d4e4f7,color:#000,stroke:#89a
     style FF fill:#d4e4f7,color:#000,stroke:#89a
-    style T1LL fill:transparent,stroke:transparent,color:#666
-    style T1LR fill:transparent,stroke:transparent,color:#666
-    style T2RL fill:transparent,stroke:transparent,color:#666
-    style T2RR fill:transparent,stroke:transparent,color:#666
-    style EoutLL fill:transparent,stroke:transparent,color:#666
-    style EoutLR fill:transparent,stroke:transparent,color:#666
-    style EoutLR fill:transparent,stroke:transparent,color:#666
+    style T1LL fill:transparent,stroke:transparent
+    style T1LR fill:transparent,stroke:transparent
+    style T2RL fill:transparent,stroke:transparent
+    style T2RR fill:transparent,stroke:transparent
+    style EoutLL fill:transparent,stroke:transparent
+    style EoutLR fill:transparent,stroke:transparent
+    style EoutLR fill:transparent,stroke:transparent
 ```
 
 ## Metrics
