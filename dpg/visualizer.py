@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import warnings
@@ -104,6 +105,213 @@ def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
         except Exception:
             raise first_exc
 
+
+def _pipe_graph_svg_with_fallback(dot_source: str, sanitizer) -> bytes:
+    try:
+        return Source(dot_source).pipe(format="svg")
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
+    except Exception as first_exc:
+        try:
+            return Source(sanitizer(dot_source)).pipe(format="svg")
+        except ExecutableNotFound as exc:
+            raise _graphviz_not_found_error() from exc
+        except Exception:
+            raise first_exc
+
+def _parse_dot_node_data(dot) -> Dict[str, Dict[str, str]]:
+    """Extract node labels and fill colours from a Graphviz Digraph body.
+
+    Handles both quoted (``"id"``) and unquoted (bare integer hash) node IDs.
+    """
+    _DOT_KEYWORDS = {"graph", "node", "edge", "subgraph", "digraph", "strict"}
+    node_data: Dict[str, Dict[str, str]] = {}
+    for line in dot.body:
+        if "->" in line:
+            continue
+        # Match optional-quoted node ID followed by an attribute block.
+        id_match = re.match(r'^\s*"?([^"\s\[]+)"?\s*\[', line)
+        if not id_match:
+            continue
+        nid = id_match.group(1).strip()
+        if nid.lower() in _DOT_KEYWORDS:
+            continue
+        if nid not in node_data:
+            node_data[nid] = {}
+        label_m = re.search(r'label="([^"]*)"', line)
+        color_m = re.search(r'fillcolor="(#[0-9a-fA-F]{6})"', line)
+        if label_m:
+            node_data[nid]["label"] = label_m.group(1)
+        if color_m:
+            node_data[nid]["fillcolor"] = color_m.group(1)
+    return node_data
+
+
+def _get_graphviz_layout_positions(dot_source: str) -> Dict[str, Tuple[float, float]]:
+    """Return Graphviz-computed {node_name: (x, y)} positions in vis.js coordinates."""
+    try:
+        raw = Source(dot_source).pipe(format="json")
+        layout = json.loads(raw)
+        bb = layout.get("bb", "")
+        bb_vals = [float(v) for v in bb.split(",")] if bb else []
+        graph_height = bb_vals[3] if len(bb_vals) >= 4 else 0.0
+        positions: Dict[str, Tuple[float, float]] = {}
+        for obj in layout.get("objects", []):
+            pos_str = obj.get("pos", "")
+            if not pos_str or "," not in pos_str:
+                continue
+            x_str, y_str = pos_str.split(",", 1)
+            # Flip Y: Graphviz origin is bottom-left; vis.js origin is top-left.
+            positions[obj["name"]] = (float(x_str), graph_height - float(y_str))
+        return positions
+    except Exception:
+        return {}
+
+
+def export_dpg_html(
+    dot,
+    df_edges: pd.DataFrame,
+    output_path: str,
+    height: str = "750px",
+    width: str = "100%",
+    physics: bool = False,
+) -> None:
+    """Export an interactive pan/zoom HTML visualisation of the DPG using pyvis.
+
+    Preserves the Graphviz-computed layout by default (``physics=False``).
+    The resulting ``.html`` file is fully self-contained and can be opened in
+    any browser or hosted on GitHub Pages for a link in the README.
+
+    Args:
+        dot: Fully-styled Graphviz Digraph (after ``plot_dpg`` / ``plot_dpg_communities`` coloring).
+        df_edges: DataFrame with edge metrics; must include ``'Source_id'``,
+            ``'Target_id'``, and ``'Weight'`` columns.
+        output_path: Destination ``.html`` file path.
+        height: CSS height of the vis.js canvas (default ``"750px"``).  Accepts
+            any valid CSS unit, e.g. ``"100vh"``.
+        width: CSS width of the vis.js canvas (default ``"100%"``).  Use
+            ``"100vw"`` for a full-viewport layout.
+        physics: If ``True``, enable vis.js force-directed physics so nodes
+            rearrange freely.  Default is ``False`` (fixed Graphviz layout).
+
+    Raises:
+        ImportError: When ``pyvis`` is not installed.
+    """
+    try:
+        from pyvis.network import Network
+    except ImportError:
+        raise ImportError(
+            "pyvis is required for HTML export. "
+            "Install it with: pip install pyvis"
+        )
+
+    node_data = _parse_dot_node_data(dot)
+    positions = _get_graphviz_layout_positions(dot.source)
+
+    net = Network(
+        height=height,
+        width=width,
+        directed=True,
+        bgcolor="#ffffff",
+        cdn_resources="in_line",
+    )
+    net.set_options(json.dumps({
+        "physics": {"enabled": physics},
+        "interaction": {"navigationButtons": True, "keyboard": True},
+        "edges": {"arrows": {"to": {"enabled": True, "scaleFactor": 0.6}}},
+    }))
+
+    for nid, attrs in node_data.items():
+        label = attrs.get("label", nid)
+        color = attrs.get("fillcolor", "#dee1f7")
+        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        brightness = (r * 299 + g * 587 + b * 114) / 1000
+        font_color = "white" if brightness < 100 else "black"
+        kwargs: Dict[str, Any] = dict(
+            label=label,
+            color={"background": color, "border": color,
+                   "highlight": {"background": color, "border": "#333333"}},
+            font={"color": font_color, "size": 12},
+            shape="box",
+            title=label,
+        )
+        if nid in positions:
+            kwargs["x"], kwargs["y"] = positions[nid]
+        net.add_node(nid, **kwargs)
+
+    if df_edges is not None and not df_edges.empty:
+        max_w = df_edges["Weight"].max()
+        min_w = df_edges["Weight"].min()
+        w_range = max(max_w - min_w, 1e-9)
+        for _, row in df_edges.iterrows():
+            norm_w = (row["Weight"] - min_w) / w_range
+            grey_val = int(180 - 130 * norm_w)  # dark grey for heavier edges
+            net.add_edge(
+                str(row["Source_id"]),
+                str(row["Target_id"]),
+                width=1.0 + 4.0 * norm_w,
+                color="#{v:02x}{v:02x}{v:02x}".format(v=grey_val),
+                title=f"Weight: {row['Weight']:.4f}",
+            )
+
+    out_dir = os.path.dirname(output_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    net.write_html(output_path)
+    print(f"Interactive HTML exported → {output_path}")
+
+
+def export_dpg_mermaid(
+    dot,
+    df_edges: pd.DataFrame,
+    output_path: str,
+) -> None:
+    """Export the DPG as a Mermaid flowchart markdown file.
+
+    Args:
+        dot: Fully-styled Graphviz Digraph.
+        df_edges: DataFrame with edge metrics; must include ``'Source_id'``,
+            ``'Target_id'``, and ``'Weight'`` columns.
+        output_path: Destination ``.md`` file path.
+    """
+    node_data = _parse_dot_node_data(dot)
+
+    def _sanitize_mermaid_id(raw: str) -> str:
+        return re.sub(r'[^A-Za-z0-9_]', '_', raw)
+
+    def _escape_mermaid_label(label: str) -> str:
+        return label.replace('"', '#quot;').replace('<', '&lt;').replace('>', '&gt;')
+
+    lines: list[str] = ["```mermaid", "flowchart LR"]
+
+    for nid, attrs in node_data.items():
+        safe_id = _sanitize_mermaid_id(nid)
+        label = _escape_mermaid_label(attrs.get("label", nid))
+        fill = attrs.get("fillcolor", "")
+        lines.append(f'    {safe_id}["{label}"]')
+        if fill:
+            lines.append(f'    style {safe_id} fill:{fill}')
+
+    if df_edges is not None and not df_edges.empty:
+        for _, row in df_edges.iterrows():
+            src = _sanitize_mermaid_id(str(row["Source_id"]))
+            tgt = _sanitize_mermaid_id(str(row["Target_id"]))
+            weight = row["Weight"]
+            lines.append(f'    {src} -->|"{weight:.4f}"| {tgt}')
+
+    lines.append("```")
+
+    out_dir = os.path.dirname(output_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Mermaid markdown exported → {output_path}")
+
+
+_VALID_EXPORT_FORMATS = {"png", "svg", "pdf", "html", "mermaid"}
+
+
 def plot_dpg(
     plot_name,
     dot,
@@ -122,7 +330,7 @@ def plot_dpg(
     dpi=300,
     pdf_dpi=600,
     show=True,
-    export_pdf=False,
+    export_format="svg",
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -150,13 +358,17 @@ def plot_dpg(
             values.
         fig_size: Matplotlib figure size as ``(width, height)``.
         dpi: PNG export/display resolution.
-        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        pdf_dpi: PDF export resolution when ``export_format`` is ``"pdf"``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
-        export_pdf: If ``True``, also writes a PDF next to the PNG.
+        export_format: Image format to export. One of
+            ``{'svg', 'png', 'pdf', 'html', 'mermaid'}``. Default is ``"svg"``.
 
     Returns:
         None
     """
+    if export_format not in _VALID_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported export_format '{export_format}'. "
+                         f"Choose from {sorted(_VALID_EXPORT_FORMATS)}.")
     print("Plotting DPG...")
     _apply_layout_template(
         dot,
@@ -309,8 +521,13 @@ def plot_dpg(
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
-    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
-    if export_pdf:
+    if export_format == "png":
+        fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    elif export_format == "svg":
+        svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+        with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+            f.write(svg_bytes)
+    elif export_format == "pdf":
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
@@ -318,11 +535,10 @@ def plot_dpg(
             bbox_inches="tight",
             pad_inches=0.02,
         )
-    #plt.show()
-    # No PDF output by default
-    
-    # Clean up temporary files
-    # delete_folder_contents("temp")
+    elif export_format == "html":
+        export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
+    elif export_format == "mermaid":
+        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
     if not show:
         plt.close(fig)
 
@@ -342,7 +558,7 @@ def plot_dpg_communities(
     dpi=300,
     pdf_dpi=600,
     show=True,
-    export_pdf=False,
+    export_format="svg",
 ):
     """
     Plot a DPG colored by community assignment.
@@ -369,13 +585,17 @@ def plot_dpg_communities(
             values.
         fig_size: Matplotlib figure size as ``(width, height)``.
         dpi: PNG export/display resolution.
-        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        pdf_dpi: PDF export resolution when ``export_format`` is ``"pdf"``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
-        export_pdf: If ``True``, also writes a PDF next to the PNG.
+        export_format: Image format to export. One of
+            ``{'svg', 'png', 'pdf', 'html', 'mermaid'}``. Default is ``"svg"``.
 
     Returns:
         None
     """
+    if export_format not in _VALID_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported export_format '{export_format}'. "
+                         f"Choose from {sorted(_VALID_EXPORT_FORMATS)}.")
     print("Plotting DPG (communities)...")
     _apply_layout_template(
         dot,
@@ -481,13 +701,18 @@ def plot_dpg_communities(
 
     # Save the plot to the specified directory with tight borders
     os.makedirs(save_dir, exist_ok=True)
-    fig.savefig(
-        os.path.join(save_dir, plot_name + ".png"),
-        dpi=dpi,
-        bbox_inches="tight",
-        pad_inches=0.02,
-    )
-    if export_pdf:
+    if export_format == "png":
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".png"),
+            dpi=dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    elif export_format == "svg":
+        svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+        with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+            f.write(svg_bytes)
+    elif export_format == "pdf":
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
@@ -495,12 +720,12 @@ def plot_dpg_communities(
             bbox_inches="tight",
             pad_inches=0.02,
         )
+    elif export_format == "html":
+        export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
+    elif export_format == "mermaid":
+        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
     if not show:
         plt.close(fig)
-    # No PDF output by default
-
-    # Clean up temporary files
-    # delete_folder_contents("temp")
 
 def change_node_color(dot, node_id: str, fillcolor: str) -> None:
     """Update a node's fill color and set an appropriate contrasting font color.

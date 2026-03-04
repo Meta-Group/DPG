@@ -88,7 +88,8 @@ def test_dpg(datasets: str,
              clusters_flag: bool = False,
              threshold_clusters: Optional[float] = None,
              class_flag: bool = False,
-             seed:int = 160898) -> Optional[Tuple[Any, Any]]:
+             seed:int = 160898,
+             export_format: str = "svg") -> Optional[Tuple[Any, Any]]:
     
     """
     Unified function to train models and extract DPG for both standard and custom datasets.
@@ -193,7 +194,40 @@ def test_dpg(datasets: str,
             if '.' in datasets else datasets
         )
         plot_name +=  f"_{model_name}_l{n_learners}_pv{perc_var}_t{decimal_threshold}_{seed}"
-        
+
+        # 1. Basic (plain) DPG
+        plot_dpg(
+            plot_name,
+            dot,
+            df,
+            df_edges,
+            save_dir=save_plot_dir,
+            class_flag=class_flag,
+            export_format=export_format,
+        )
+
+        # 2. One plot per node-metric attribute
+        node_attributes = [
+            "Degree",
+            "In degree nodes",
+            "Out degree nodes",
+            "Betweenness centrality",
+            "Local reaching centrality",
+        ]
+        for attr in node_attributes:
+            if attr in df.columns:
+                plot_dpg(
+                    plot_name,
+                    dot,
+                    df,
+                    df_edges,
+                    save_dir=save_plot_dir,
+                    attribute=attr,
+                    class_flag=class_flag,
+                    export_format=export_format,
+                )
+
+        # 3. Communities plot
         if communities:
             plot_dpg_communities(
                 plot_name,
@@ -203,18 +237,21 @@ def test_dpg(datasets: str,
                 save_dir=save_plot_dir,
                 class_flag=class_flag,
                 df_edges=df_edges,
+                export_format=export_format,
             )
-        else:
+
+        # 4. Clusters plot
+        if clusters is not None:
             plot_dpg(
                 plot_name,
                 dot,
                 df,
                 df_edges,
                 save_dir=save_plot_dir,
-                attribute=attribute,
                 clusters=clusters,
                 threshold_clusters=threshold_clusters,
                 class_flag=class_flag,
+                export_format=export_format,
             )
     
     return df, df_edges, df_dpg, clusters, node_prob, confidence

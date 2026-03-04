@@ -21,7 +21,11 @@ if __name__ == "__main__":
     parser.add_argument("--l", "--n_learners", type=int, default=5, help="Number of learners for the Random Forest")
     parser.add_argument("--model_name", type=str, default="RandomForestClassifier", help="Chosen tree-based ensemble model")
     parser.add_argument("--dir", type=str, default=os.path.join(SCRIPT_DIR, "results"), help="Directory to save results")
-    parser.add_argument("--plot", action='store_true', help="Plot the DPG, add the argument to use it as True")
+    parser.add_argument("--no-plot", dest='plot', action='store_false', help="Disable exporting the DPG plot image (exported by default)")
+    parser.set_defaults(plot=True)
+    parser.add_argument("--format", dest='export_format', type=str, default='svg',
+                        choices=['svg', 'png', 'pdf', 'html', 'mermaid'],
+                        help="Export format for DPG plots (default: svg)")
     parser.add_argument("--save_plot_dir", type=str, default=os.path.join(SCRIPT_DIR, "results"), help="Directory to save the plot image")
     parser.add_argument("--attribute", type=str, default=None, help="A specific node attribute to visualize")
     parser.add_argument("--communities", action='store_true', help="Boolean indicating whether to visualize communities, add the argument to use it as True")
@@ -60,14 +64,15 @@ if __name__ == "__main__":
                                         n_jobs = j,
                                         model_name = args.model_name,
                                         file_name = os.path.join(args.dir, f'{args.ds}_l{args.l}_seed{args.seed}_stats.txt'), 
-                                        plot = args.plot, 
+                                        plot = args.plot,
                                         save_plot_dir = args.save_plot_dir, 
                                         attribute = args.attribute, 
                                         communities = args.communities,
                                         clusters_flag = args.clusters,
                                         threshold_clusters = args.threshold_clusters,
                                         class_flag = args.class_flag,
-                                        seed = args.seed)
+                                        seed = args.seed,
+                                        export_format = args.export_format)
         
     df.sort_values(['Degree'])
 
