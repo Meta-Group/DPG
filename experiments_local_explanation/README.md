@@ -1,17 +1,17 @@
 # DPG Local Explanation Experiments
 
-This folder provides a reproducible pipeline to evaluate `DPGExplainer.explain_local` on numeric tabular classification datasets.
+This folder provides the experiment pipeline used for the DPG fidelity and DPG 2.0 graph-construction studies on numeric tabular classification datasets.
 
 ## Scope
 
 Current implementation supports:
 - Dataset preparation (`prepare_datasets.py`)
-- Experiment sweeps for RandomForest + DPG local explanations (`run_local_experiments.py`)
+- DPG local explanation sweeps (`run_local_experiments.py`)
+- Per-dataset orchestration (`run_per_dataset.py`)
+- Baseline comparison runs for `shap`, `lime`, and `ice`
+- DPG 2.0 graph-construction experiments (`aggregated_transitions` vs `execution_trace`)
+- DPG 2.0 next-phase metrics for path faithfulness, explanation confidence, and misclassification cohorts
 - CSV outputs for per-run and per-sample analysis
-
-Planned (not implemented yet in this folder):
-- Direct baseline comparison with LIME/SHAP
-- Deletion/insertion and infidelity curves
 
 ## Folder Structure
 
@@ -96,15 +96,22 @@ Useful columns in `summary.csv`:
 - `avg_evidence_margin_pred_vs_competitor`
 - `avg_num_paths`
 - `avg_num_active_nodes`
+- `avg_node_recall`, `avg_edge_precision`, `avg_recombination_rate`
+- `avg_path_purity`, `avg_competitor_exposure`
+- `avg_explanation_confidence`, `avg_critical_split_depth`
 
 ## 4. Research Questions Supported
 
 With current outputs, you can already study:
 
-1. Fidelity: how often local DPG vote matches model prediction.
-2. Accuracy: how often local DPG vote matches ground truth.
-3. Confidence behavior: evidence margin on correct vs incorrect model predictions.
+1. Fidelity: how often the local DPG prediction matches the model prediction.
+2. Accuracy: how often the local DPG prediction matches the ground truth.
+3. Graph-construction effects: `aggregated_transitions` vs `execution_trace`.
 4. Complexity tradeoff: path/node counts across DPG settings (`perc_var`, `decimal_threshold`).
+5. Trace coverage diagnostics for DPG 2.0 execution-trace explanations.
+6. Path-level faithfulness via node/edge recall and precision.
+7. Recombination artifacts via `recombination_rate`.
+8. Misclassification/disagreement cohorts via `cohort_label`.
 
 ## 5. Reproducibility Notes
 
@@ -132,12 +139,30 @@ Optional (avoid huge datasets during development):
 python prepare_datasets.py --out_dir data_numeric --standardize --max_datasets 20 --max_rows 20000
 ```
 
-### 7.2 Run experiments (example)
-
-Planned command for the upcoming multi-explainer pipeline:
+### 7.2 Run DPG 2.0 graph-construction experiments
 
 ```bash
-python experiments/run_all.py --data_dir data_numeric --out_dir results --config experiments/config.yaml
+bash experiments_local_explanation/run_selected_datasets_dpg2_graph_construction.sh
+```
+
+### 7.2b Run DPG 2.0 next-phase experiments on the curated 15 datasets
+
+```bash
+bash experiments_local_explanation/run_selected_datasets_dpg2_next_phase.sh
+```
+
+Aggregate the per-dataset outputs and build best-config cohort summaries:
+
+```bash
+python3 experiments_local_explanation/analyze_dpg2_next_phase.py \
+  --out_root experiments_local_explanation/experiment_dpg2_next_phase \
+  --analysis_dir experiments_local_explanation/experiment_dpg2_next_phase/_analysis
+```
+
+One dataset per CPU with `tmux`:
+
+```bash
+bash experiments_local_explanation/run_selected_datasets_dpg2_graph_construction_tmux_per_cpu.sh
 ```
 
 ### 7.3 Run one process per dataset
@@ -149,7 +174,7 @@ Sequential:
 ```bash
 python3 experiments_local_explanation/run_per_dataset.py \
   --data_dir experiments_local_explanation/data_numeric \
-  --out_root experiments_local_explanation/results_by_dataset \
+  --out_root experiments_local_explanation/experiment_dpg2_graph_construction \
   --parallel 1
 ```
 
@@ -158,15 +183,66 @@ Parallel (example with 4 dataset processes):
 ```bash
 python3 experiments_local_explanation/run_per_dataset.py \
   --data_dir experiments_local_explanation/data_numeric \
-  --out_root experiments_local_explanation/results_by_dataset \
+  --out_root experiments_local_explanation/experiment_dpg2_graph_construction \
   --parallel 4
+```
+
+### 7.4 Run baseline comparisons (SHAP, LIME, ICE)
+
+Single process:
+
+```bash
+PYTHONPATH=. python3 experiments_local_explanation/run_baseline_experiments.py \
+  --data_dir experiments_local_explanation/data_numeric \
+  --out_dir experiments_local_explanation/results_baselines \
+  --methods shap,lime,ice
+```
+
+One process per dataset (parallel):
+
+```bash
+PYTHONPATH=. python3 experiments_local_explanation/run_per_dataset_baselines.py \
+  --data_dir experiments_local_explanation/data_numeric \
+  --out_root experiments_local_explanation/results_baselines_by_dataset \
+  --methods shap,lime,ice \
+  --parallel 4
+```
+
+Note:
+- `shap` and `lime` Python packages must be installed for those methods.
+- `ice` here is implemented as a per-sample response-curve diagnostic (feature perturbation curve), not route/path competition evidence.
+
+### 7.5 Telegram Progress Notifications
+
+You can monitor the DPG 2.0 and baseline runs and send progress updates to Telegram.
+
+Set credentials:
+
+```bash
+export TELEGRAM_BOT_TOKEN="<your_bot_token>"
+export TELEGRAM_CHAT_ID="<your_chat_id>"
+```
+
+One-shot message:
+
+```bash
+python3 experiments_local_explanation/monitor_progress_telegram.py --one_shot
+```
+
+Continuous monitoring (every 5 minutes, send only on progress change):
+
+```bash
+python3 experiments_local_explanation/monitor_progress_telegram.py \
+  --interval_sec 300 \
+  --baseline_methods shap,lime,ice \
+  --notify_on_change_only
 ```
 
 ## 8. Methodological Notes and Reproducibility
 
-- Fix global seeds for:
-- dataset split
-- explainer randomness (LIME sampling, KernelSHAP sampling)
+- Keep the DPG 2.0 experiment fixed on the same local evidence rule when comparing graph-construction modes.
+- Compare `aggregated_transitions` and `execution_trace` on the same datasets, seeds, RF hyperparameters, and `perc_var`.
+- Fix global seeds for dataset split and explainer randomness where applicable.
 - CKI neighbor sampling
 - Use paired evaluation: the same test points are explained by all methods.
 - Prefer bootstrapped confidence intervals and paired tests (Wilcoxon signed-rank) for metric comparisons.

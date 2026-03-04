@@ -6,6 +6,7 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
 
 from dpg.core import DecisionPredicateGraph
 from dpg.visualizer import plot_dpg, plot_dpg_communities
@@ -93,3 +94,58 @@ def test_dpg_plots_render(tmp_path):
 
     assert (tmp_path / "test_dpg_plot.png").exists()
     assert (tmp_path / "test_dpg_plot_communities.png").exists()
+
+
+def test_graph_construction_modes_can_change_global_graph():
+    X, y = make_classification(
+        n_samples=220,
+        n_features=10,
+        n_informative=7,
+        n_redundant=1,
+        n_classes=3,
+        random_state=17,
+    )
+    feature_names = [f"f{i}" for i in range(X.shape[1])]
+    X_df = pd.DataFrame(X, columns=feature_names)
+    y_s = pd.Series(y.astype(str))
+
+    model = RandomForestClassifier(n_estimators=11, max_depth=4, random_state=11)
+    model.fit(X_df, y_s)
+
+    common_cfg = {
+        "dpg": {
+            "default": {"perc_var": 0.02, "decimal_threshold": 6, "n_jobs": 1},
+        }
+    }
+    agg_builder = DecisionPredicateGraph(
+        model=model,
+        feature_names=feature_names,
+        target_names=model.classes_.astype(str).tolist(),
+        dpg_config={
+            "dpg": {
+                **common_cfg["dpg"],
+                "graph_construction": {"mode": "aggregated_transitions"},
+            }
+        },
+    )
+    trace_builder = DecisionPredicateGraph(
+        model=model,
+        feature_names=feature_names,
+        target_names=model.classes_.astype(str).tolist(),
+        dpg_config={
+            "dpg": {
+                **common_cfg["dpg"],
+                "graph_construction": {"mode": "execution_trace"},
+            }
+        },
+    )
+
+    agg_graph, _ = agg_builder.to_networkx(agg_builder.fit(X_df.values))
+    trace_graph, _ = trace_builder.to_networkx(trace_builder.fit(X_df.values))
+
+    agg_edges = {(u, v, round(float(d.get("weight", 0.0)), 6)) for u, v, d in agg_graph.edges(data=True)}
+    trace_edges = {(u, v, round(float(d.get("weight", 0.0)), 6)) for u, v, d in trace_graph.edges(data=True)}
+
+    assert len(agg_edges) > 0
+    assert len(trace_edges) > 0
+    assert agg_edges != trace_edges

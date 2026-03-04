@@ -41,6 +41,7 @@ class ExperimentConfig:
     perc_var: float
     decimal_threshold: int
     random_state: int
+    graph_construction_mode: str
 
 
 @dataclass
@@ -131,6 +132,9 @@ def _make_configs(args: argparse.Namespace) -> List[ExperimentConfig]:
     perc_var_list = _parse_float_list(args.perc_var)
     decimal_threshold_list = _parse_int_list(args.decimal_threshold)
     seeds = _parse_int_list(args.seeds)
+    graph_construction_modes = [
+        x.strip().lower() for x in args.graph_construction_modes.split(",") if x.strip()
+    ]
 
     configs: List[ExperimentConfig] = []
     for n_estimators in n_estimators_list:
@@ -138,15 +142,17 @@ def _make_configs(args: argparse.Namespace) -> List[ExperimentConfig]:
             for perc_var in perc_var_list:
                 for decimal_threshold in decimal_threshold_list:
                     for seed in seeds:
-                        configs.append(
-                            ExperimentConfig(
-                                n_estimators=n_estimators,
-                                max_depth=max_depth,
-                                perc_var=perc_var,
-                                decimal_threshold=decimal_threshold,
-                                random_state=seed,
+                        for graph_construction_mode in graph_construction_modes:
+                            configs.append(
+                                ExperimentConfig(
+                                    n_estimators=n_estimators,
+                                    max_depth=max_depth,
+                                    perc_var=perc_var,
+                                    decimal_threshold=decimal_threshold,
+                                    random_state=seed,
+                                    graph_construction_mode=graph_construction_mode,
+                                )
                             )
-                        )
     return configs
 
 
@@ -155,7 +161,7 @@ def _config_id(cfg: ExperimentConfig) -> str:
     depth = "unlimited" if cfg.max_depth is None else str(cfg.max_depth)
     return (
         f"rf{cfg.n_estimators}_d{depth}_pv{cfg.perc_var:g}"
-        f"_dt{cfg.decimal_threshold}_s{cfg.random_state}"
+        f"_dt{cfg.decimal_threshold}_gm{cfg.graph_construction_mode}_s{cfg.random_state}"
     )
 
 
@@ -180,6 +186,36 @@ def _atomic_write_csv(df: pd.DataFrame, path: Path) -> None:
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     df.to_csv(tmp_path, index=False)
     tmp_path.replace(path)
+
+
+def _mode_or_default(series: pd.Series, default: str | int | None = None) -> str | int | None:
+    clean = series.dropna()
+    if clean.empty:
+        return default
+    mode = clean.mode()
+    if mode.empty:
+        return default
+    return mode.iloc[0]
+
+
+def _string_or_none(value: str | int | None) -> str | None:
+    return None if value is None else str(value)
+
+
+def _cohort_label(y_true: str, y_model_pred: str, y_local_pred: str | None) -> str:
+    if y_local_pred is None:
+        return "LOCAL_FAILED"
+    model_correct = y_model_pred == y_true
+    local_correct = y_local_pred == y_true
+    if model_correct and local_correct:
+        return "MC-EC"
+    if model_correct and not local_correct:
+        return "MC-EW"
+    if not model_correct and y_local_pred == y_model_pred:
+        return "MW-EM"
+    if not model_correct and local_correct:
+        return "MW-EC"
+    return "MW-EW"
 
 
 def _save_run_checkpoint(
@@ -220,15 +256,17 @@ def _read_checkpoints(out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     detail_df = pd.concat(detail_frames, ignore_index=True) if detail_frames else pd.DataFrame()
 
     if len(summary_df):
+        summary_sort_cols = [c for c in ["dataset", "method", "config_id"] if c in summary_df.columns]
         summary_df = (
             summary_df.drop_duplicates(subset=["dataset", "config_id", "seed"], keep="last")
-            .sort_values(["dataset", "config_id"])
+            .sort_values(summary_sort_cols)
             .reset_index(drop=True)
         )
     if len(detail_df):
+        detail_sort_cols = [c for c in ["dataset", "method", "config_id", "sample_idx"] if c in detail_df.columns]
         detail_df = (
             detail_df.drop_duplicates(subset=["dataset", "config_id", "seed", "sample_idx"], keep="last")
-            .sort_values(["dataset", "config_id", "sample_idx"])
+            .sort_values(detail_sort_cols)
             .reset_index(drop=True)
         )
     return summary_df, detail_df
@@ -239,6 +277,7 @@ def _run_one_dataset(
     cfg: ExperimentConfig,
     max_test_samples: int,
     progress_every: int,
+    rf_n_jobs: int,
 ) -> tuple[pd.DataFrame, Dict[str, float | int | str | None]]:
     if not hasattr(DPGExplainer, "explain_local"):
         loaded_path = sys.modules[DPGExplainer.__module__].__file__
@@ -251,7 +290,7 @@ def _run_one_dataset(
         n_estimators=cfg.n_estimators,
         max_depth=cfg.max_depth,
         random_state=cfg.random_state,
-        n_jobs=-1,
+        n_jobs=rf_n_jobs,
     )
     model.fit(bundle.X_train, bundle.y_train)
 
@@ -269,7 +308,14 @@ def _run_one_dataset(
                     "perc_var": cfg.perc_var,
                     "decimal_threshold": cfg.decimal_threshold,
                     "n_jobs": 1,
-                }
+                },
+                "graph_construction": {
+                    "mode": cfg.graph_construction_mode,
+                },
+                "local_evidence": {
+                    "variant": "top_competitor",
+                    "base_lambda": 0.8,
+                },
             }
         },
     )
@@ -304,11 +350,61 @@ def _run_one_dataset(
             top_comp_score = local.sample_confidence.get("evidence_score_competitor_pred")
             margin = local.sample_confidence.get("evidence_margin_pred_vs_competitor")
             num_paths = int(local.sample_confidence.get("num_paths") or 0)
+            num_paths_raw = int(local.sample_confidence.get("num_paths_raw") or 0)
+            num_paths_pruned = int(local.sample_confidence.get("num_paths_pruned") or 0)
             num_active_nodes = int(local.sample_confidence.get("num_active_nodes") or 0)
+            num_active_edges_raw = int(local.sample_confidence.get("num_active_edges_raw") or 0)
+            num_active_edges_filtered = int(local.sample_confidence.get("num_active_edges_filtered") or 0)
+            path_confidence_max = local.sample_confidence.get("path_confidence_max")
+            path_confidence_min_kept = local.sample_confidence.get("path_confidence_min_kept")
             mean_lrc_active_nodes = local.sample_confidence.get("mean_lrc_active_nodes")
             mean_bc_active_nodes = local.sample_confidence.get("mean_bc_active_nodes")
             class_support_total = float(sum(float(v) for v in support.values())) if support else 0.0
             n_class_support = int(len(support))
+            evidence_lambda = local.sample_confidence.get("evidence_lambda")
+            evidence_lambda_rule = local.sample_confidence.get("evidence_lambda_rule")
+            evidence_score_rule = local.sample_confidence.get("evidence_score_rule")
+            n_model_classes = local.sample_confidence.get("n_model_classes")
+            n_features = local.sample_confidence.get("n_features")
+            graph_construction_mode = local.sample_confidence.get("graph_construction_mode")
+            num_executed_paths = local.sample_confidence.get("num_executed_paths")
+            num_executed_predicates = local.sample_confidence.get("num_executed_predicates")
+            num_executed_edges = local.sample_confidence.get("num_executed_edges")
+            num_trace_predicates_missing_from_dpg = local.sample_confidence.get(
+                "num_trace_predicates_missing_from_dpg"
+            )
+            num_trace_edges_missing_from_dpg = local.sample_confidence.get(
+                "num_trace_edges_missing_from_dpg"
+            )
+            trace_node_coverage = local.sample_confidence.get("trace_node_coverage")
+            trace_edge_coverage = local.sample_confidence.get("trace_edge_coverage")
+            support_pred_class = local.sample_confidence.get("support_pred_class")
+            support_top_competitor_class = local.sample_confidence.get("support_top_competitor_class")
+            support_pred_score = local.sample_confidence.get("support_pred_score")
+            support_top_competitor_score = local.sample_confidence.get("support_top_competitor_score")
+            support_margin = local.sample_confidence.get("support_margin")
+            predicted_class_concentration_top3 = local.sample_confidence.get(
+                "predicted_class_concentration_top3"
+            )
+            model_vote_agreement = local.sample_confidence.get("model_vote_agreement")
+            trace_coverage_score = local.sample_confidence.get("trace_coverage_score")
+            explanation_confidence = local.sample_confidence.get("explanation_confidence")
+            node_recall = local.sample_confidence.get("node_recall")
+            node_precision = local.sample_confidence.get("node_precision")
+            edge_recall = local.sample_confidence.get("edge_recall")
+            edge_precision = local.sample_confidence.get("edge_precision")
+            path_purity = local.sample_confidence.get("path_purity")
+            competitor_exposure = local.sample_confidence.get("competitor_exposure")
+            recombination_rate = local.sample_confidence.get("recombination_rate")
+            critical_node_label = local.sample_confidence.get("critical_node_label")
+            critical_split_depth = local.sample_confidence.get("critical_split_depth")
+            critical_successor_pred = local.sample_confidence.get("critical_successor_pred")
+            critical_successor_comp = local.sample_confidence.get("critical_successor_comp")
+            critical_node_contrast = local.sample_confidence.get("critical_node_contrast")
+            trace_node_count_unique = local.sample_confidence.get("trace_node_count_unique")
+            trace_edge_count_unique = local.sample_confidence.get("trace_edge_count_unique")
+            explanation_node_count_unique = local.sample_confidence.get("explanation_node_count_unique")
+            explanation_edge_count_unique = local.sample_confidence.get("explanation_edge_count_unique")
         except Exception as exc:
             local_failures += 1
             local_status = "failed"
@@ -325,28 +421,90 @@ def _run_one_dataset(
             top_comp_score = np.nan
             margin = np.nan
             num_paths = 0
+            num_paths_raw = 0
+            num_paths_pruned = 0
             num_active_nodes = 0
+            num_active_edges_raw = 0
+            num_active_edges_filtered = 0
+            path_confidence_max = np.nan
+            path_confidence_min_kept = np.nan
             mean_lrc_active_nodes = np.nan
             mean_bc_active_nodes = np.nan
             class_support_total = 0.0
             n_class_support = 0
+            evidence_lambda = np.nan
+            evidence_lambda_rule = None
+            evidence_score_rule = None
+            n_model_classes = np.nan
+            n_features = np.nan
+            graph_construction_mode = cfg.graph_construction_mode
+            num_executed_paths = np.nan
+            num_executed_predicates = np.nan
+            num_executed_edges = np.nan
+            num_trace_predicates_missing_from_dpg = np.nan
+            num_trace_edges_missing_from_dpg = np.nan
+            trace_node_coverage = np.nan
+            trace_edge_coverage = np.nan
+            support_pred_class = None
+            support_top_competitor_class = None
+            support_pred_score = np.nan
+            support_top_competitor_score = np.nan
+            support_margin = np.nan
+            predicted_class_concentration_top3 = np.nan
+            model_vote_agreement = np.nan
+            trace_coverage_score = np.nan
+            explanation_confidence = np.nan
+            node_recall = np.nan
+            node_precision = np.nan
+            edge_recall = np.nan
+            edge_precision = np.nan
+            path_purity = np.nan
+            competitor_exposure = np.nan
+            recombination_rate = np.nan
+            critical_node_label = None
+            critical_split_depth = np.nan
+            critical_successor_pred = None
+            critical_successor_comp = None
+            critical_node_contrast = np.nan
+            trace_node_count_unique = np.nan
+            trace_edge_count_unique = np.nan
+            explanation_node_count_unique = np.nan
+            explanation_edge_count_unique = np.nan
 
+        method = "dpg" if cfg.graph_construction_mode == "aggregated_transitions" else "dpg_execution_trace"
+        cohort_label = _cohort_label(y_true=y_true, y_model_pred=y_hat, y_local_pred=local_pred)
         sample_rows.append(
             {
                 "dataset": bundle.name,
+                "method": method,
+                "graph_construction_mode": graph_construction_mode,
                 "config_id": _config_id(cfg),
                 "seed": cfg.random_state,
                 "sample_idx": idx,
                 "y_true": y_true,
                 "y_model_pred": y_hat,
                 "y_local_pred": local_pred,
+                "y_support_pred": support_pred_class,
                 "local_status": local_status,
                 "local_error": local_error,
                 "model_correct": y_hat == y_true,
                 "local_matches_model": local_pred == y_hat if local_pred is not None else False,
                 "local_correct": local_pred == y_true if local_pred is not None else False,
+                "support_pred_matches_model": support_pred_class == y_hat if support_pred_class is not None else False,
+                "support_pred_correct": support_pred_class == y_true if support_pred_class is not None else False,
+                "support_pred_matches_local": (
+                    support_pred_class == local_pred if support_pred_class is not None and local_pred is not None else False
+                ),
+                "cohort_label": cohort_label,
+                "disagree_with_model": local_pred != y_hat if local_pred is not None else False,
+                "num_paths_raw": num_paths_raw,
+                "num_paths_pruned": num_paths_pruned,
                 "num_paths": num_paths,
                 "num_active_nodes": num_active_nodes,
+                "num_active_edges_raw": num_active_edges_raw,
+                "num_active_edges_filtered": num_active_edges_filtered,
+                "path_confidence_max": path_confidence_max,
+                "path_confidence_min_kept": path_confidence_min_kept,
                 "mean_lrc_active_nodes": mean_lrc_active_nodes,
                 "mean_bc_active_nodes": mean_bc_active_nodes,
                 "evidence_score_local_pred": local_pred_score,
@@ -354,6 +512,42 @@ def _run_one_dataset(
                 "evidence_margin_pred_vs_competitor": margin,
                 "top_competitor_class_pred": top_comp,
                 "evidence_score_competitor_pred": top_comp_score,
+                "evidence_lambda": evidence_lambda,
+                "evidence_lambda_rule": evidence_lambda_rule,
+                "evidence_score_rule": evidence_score_rule,
+                "n_model_classes": n_model_classes,
+                "n_features": n_features,
+                "num_executed_paths": num_executed_paths,
+                "num_executed_predicates": num_executed_predicates,
+                "num_executed_edges": num_executed_edges,
+                "num_trace_predicates_missing_from_dpg": num_trace_predicates_missing_from_dpg,
+                "num_trace_edges_missing_from_dpg": num_trace_edges_missing_from_dpg,
+                "trace_node_coverage": trace_node_coverage,
+                "trace_edge_coverage": trace_edge_coverage,
+                "support_top_competitor_class": support_top_competitor_class,
+                "support_pred_score": support_pred_score,
+                "support_top_competitor_score": support_top_competitor_score,
+                "support_margin": support_margin,
+                "predicted_class_concentration_top3": predicted_class_concentration_top3,
+                "model_vote_agreement": model_vote_agreement,
+                "trace_coverage_score": trace_coverage_score,
+                "explanation_confidence": explanation_confidence,
+                "node_recall": node_recall,
+                "node_precision": node_precision,
+                "edge_recall": edge_recall,
+                "edge_precision": edge_precision,
+                "path_purity": path_purity,
+                "competitor_exposure": competitor_exposure,
+                "recombination_rate": recombination_rate,
+                "critical_node_label": critical_node_label,
+                "critical_split_depth": critical_split_depth,
+                "critical_successor_pred": critical_successor_pred,
+                "critical_successor_comp": critical_successor_comp,
+                "critical_node_contrast": critical_node_contrast,
+                "trace_node_count_unique": trace_node_count_unique,
+                "trace_edge_count_unique": trace_edge_count_unique,
+                "explanation_node_count_unique": explanation_node_count_unique,
+                "explanation_edge_count_unique": explanation_edge_count_unique,
                 "class_support_total": class_support_total,
                 "n_class_support": n_class_support,
             }
@@ -361,21 +555,62 @@ def _run_one_dataset(
 
     df = pd.DataFrame(sample_rows)
 
+    method = "dpg" if cfg.graph_construction_mode == "aggregated_transitions" else "dpg_execution_trace"
     summary: Dict[str, float | int | str | None] = {
         "dataset": bundle.name,
+        "method": method,
+        "graph_construction_mode": cfg.graph_construction_mode,
         "config_id": _config_id(cfg),
         "seed": cfg.random_state,
         "n_estimators": cfg.n_estimators,
         "max_depth": cfg.max_depth,
         "perc_var": cfg.perc_var,
         "decimal_threshold": cfg.decimal_threshold,
+        "evidence_lambda_rule": _string_or_none(_mode_or_default(df["evidence_lambda_rule"])) if len(df) else None,
+        "evidence_score_rule": _string_or_none(_mode_or_default(df["evidence_score_rule"])) if len(df) else None,
+        "avg_effective_lambda": float(df["evidence_lambda"].mean()) if len(df) else np.nan,
+        "n_model_classes": int(_mode_or_default(df["n_model_classes"], 0)) if len(df) else 0,
+        "n_features": int(_mode_or_default(df["n_features"], 0)) if len(df) else 0,
+        "avg_num_executed_paths": float(df["num_executed_paths"].mean()) if len(df) else np.nan,
+        "avg_num_executed_predicates": float(df["num_executed_predicates"].mean()) if len(df) else np.nan,
+        "avg_num_executed_edges": float(df["num_executed_edges"].mean()) if len(df) else np.nan,
+        "avg_num_trace_predicates_missing_from_dpg": (
+            float(df["num_trace_predicates_missing_from_dpg"].mean()) if len(df) else np.nan
+        ),
+        "avg_num_trace_edges_missing_from_dpg": (
+            float(df["num_trace_edges_missing_from_dpg"].mean()) if len(df) else np.nan
+        ),
+        "avg_trace_node_coverage": float(df["trace_node_coverage"].mean()) if len(df) else np.nan,
+        "avg_trace_edge_coverage": float(df["trace_edge_coverage"].mean()) if len(df) else np.nan,
         "n_test_total": int(n_test),
         "n_test_evaluated": int(n_eval),
         "model_accuracy": model_acc,
         "local_matches_model_rate": float(df["local_matches_model"].mean()) if len(df) else np.nan,
         "local_accuracy": float(df["local_correct"].mean()) if len(df) else np.nan,
+        "avg_num_paths_raw": float(df["num_paths_raw"].mean()) if len(df) else np.nan,
+        "avg_num_paths_pruned": float(df["num_paths_pruned"].mean()) if len(df) else np.nan,
         "avg_num_paths": float(df["num_paths"].mean()) if len(df) else np.nan,
         "avg_num_active_nodes": float(df["num_active_nodes"].mean()) if len(df) else np.nan,
+        "avg_num_active_edges_raw": float(df["num_active_edges_raw"].mean()) if len(df) else np.nan,
+        "avg_num_active_edges_filtered": float(df["num_active_edges_filtered"].mean()) if len(df) else np.nan,
+        "avg_node_recall": float(df["node_recall"].mean()) if len(df) else np.nan,
+        "avg_node_precision": float(df["node_precision"].mean()) if len(df) else np.nan,
+        "avg_edge_recall": float(df["edge_recall"].mean()) if len(df) else np.nan,
+        "avg_edge_precision": float(df["edge_precision"].mean()) if len(df) else np.nan,
+        "avg_recombination_rate": float(df["recombination_rate"].mean()) if len(df) else np.nan,
+        "avg_path_purity": float(df["path_purity"].mean()) if len(df) else np.nan,
+        "avg_competitor_exposure": float(df["competitor_exposure"].mean()) if len(df) else np.nan,
+        "avg_support_margin": float(df["support_margin"].mean()) if len(df) else np.nan,
+        "avg_predicted_class_concentration_top3": (
+            float(df["predicted_class_concentration_top3"].mean()) if len(df) else np.nan
+        ),
+        "avg_model_vote_agreement": float(df["model_vote_agreement"].mean()) if len(df) else np.nan,
+        "avg_trace_coverage_score": float(df["trace_coverage_score"].mean()) if len(df) else np.nan,
+        "avg_explanation_confidence": float(df["explanation_confidence"].mean()) if len(df) else np.nan,
+        "avg_critical_split_depth": float(df["critical_split_depth"].mean()) if len(df) else np.nan,
+        "avg_critical_node_contrast": float(df["critical_node_contrast"].mean()) if len(df) else np.nan,
+        "avg_path_confidence_max": float(df["path_confidence_max"].mean()) if len(df) else np.nan,
+        "avg_path_confidence_min_kept": float(df["path_confidence_min_kept"].mean()) if len(df) else np.nan,
         "avg_evidence_score_local_pred": float(df["evidence_score_local_pred"].mean()) if len(df) else np.nan,
         "avg_evidence_margin_pred_vs_competitor": float(df["evidence_margin_pred_vs_competitor"].mean())
         if len(df)
@@ -387,6 +622,8 @@ def _run_one_dataset(
     if len(df):
         correct_df = df[df["model_correct"]]
         wrong_df = df[~df["model_correct"]]
+        disagree_df = df[df["disagree_with_model"]]
+        agree_df = df[~df["disagree_with_model"]]
         summary["avg_margin_model_correct"] = (
             float(correct_df["evidence_margin_pred_vs_competitor"].mean())
             if len(correct_df)
@@ -397,9 +634,34 @@ def _run_one_dataset(
             if len(wrong_df)
             else np.nan
         )
+        summary["disagree_rate"] = float(df["disagree_with_model"].mean())
+        for cohort in ["MC-EC", "MC-EW", "MW-EM", "MW-EC", "MW-EW", "LOCAL_FAILED"]:
+            cohort_df = df[df["cohort_label"] == cohort]
+            key_prefix = cohort.lower().replace("-", "_")
+            summary[f"{key_prefix}_count"] = int(len(cohort_df))
+            summary[f"{key_prefix}_rate"] = float(len(cohort_df) / len(df))
+            summary[f"{key_prefix}_avg_explanation_confidence"] = (
+                float(cohort_df["explanation_confidence"].mean()) if len(cohort_df) else np.nan
+            )
+            summary[f"{key_prefix}_avg_recombination_rate"] = (
+                float(cohort_df["recombination_rate"].mean()) if len(cohort_df) else np.nan
+            )
+            summary[f"{key_prefix}_avg_path_purity"] = (
+                float(cohort_df["path_purity"].mean()) if len(cohort_df) else np.nan
+            )
+            summary[f"{key_prefix}_avg_critical_split_depth"] = (
+                float(cohort_df["critical_split_depth"].mean()) if len(cohort_df) else np.nan
+            )
+        summary["agree_avg_explanation_confidence"] = (
+            float(agree_df["explanation_confidence"].mean()) if len(agree_df) else np.nan
+        )
+        summary["disagree_avg_explanation_confidence"] = (
+            float(disagree_df["explanation_confidence"].mean()) if len(disagree_df) else np.nan
+        )
     else:
         summary["avg_margin_model_correct"] = np.nan
         summary["avg_margin_model_wrong"] = np.nan
+        summary["disagree_rate"] = np.nan
 
     return df, summary
 
@@ -415,8 +677,9 @@ def _write_report(
 
     grouped = pd.DataFrame()
     if len(summary_df):
+        group_cols = ["dataset", "method"] if "method" in summary_df.columns else ["dataset"]
         grouped = (
-            summary_df.groupby("dataset", as_index=False)
+            summary_df.groupby(group_cols, as_index=False)
             .agg(
                 runs=("config_id", "count"),
                 best_model_accuracy=("model_accuracy", "max"),
@@ -461,6 +724,12 @@ def main() -> None:
         help="Comma-separated RandomForest n_estimators values.",
     )
     parser.add_argument(
+        "--rf_n_jobs",
+        type=int,
+        default=-1,
+        help="RandomForest n_jobs per process. Use with --parallel to control total CPU usage.",
+    )
+    parser.add_argument(
         "--max_depth",
         type=str,
         default="2,4,None",
@@ -483,6 +752,12 @@ def main() -> None:
         type=str,
         default="27,42",
         help="Comma-separated random seeds.",
+    )
+    parser.add_argument(
+        "--graph_construction_modes",
+        type=str,
+        default="aggregated_transitions",
+        help="Comma-separated DPG graph construction modes.",
     )
     parser.add_argument(
         "--max_test_samples",
@@ -544,6 +819,7 @@ def main() -> None:
                 cfg=cfg,
                 max_test_samples=args.max_test_samples,
                 progress_every=args.progress_every,
+                rf_n_jobs=int(args.rf_n_jobs),
             )
             _save_run_checkpoint(out_dir=out_dir, run_id=run_id, summary=summary, detail_df=detail_df)
             executed_runs += 1

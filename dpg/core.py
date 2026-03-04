@@ -31,6 +31,9 @@ DEFAULT_DPG_CONFIG = {
             "decimal_threshold": 6,
             "n_jobs": -1,
         },
+        "graph_construction": {
+            "mode": "aggregated_transitions",
+        },
         "visualization": {},
     }
 }
@@ -98,10 +101,21 @@ class DecisionPredicateGraph:
         # Get config values with defaults
         dpg_config_section = config.get('dpg', {})
         default_config = dpg_config_section.get('default', {})
+        graph_construction_config = dpg_config_section.get(
+            'graph_construction',
+            DEFAULT_DPG_CONFIG["dpg"]["graph_construction"],
+        )
 
         self.perc_var = default_config.get('perc_var', DEFAULT_DPG_CONFIG["dpg"]["default"]["perc_var"])
         self.decimal_threshold = default_config.get('decimal_threshold', DEFAULT_DPG_CONFIG["dpg"]["default"]["decimal_threshold"])
         self.n_jobs = default_config.get('n_jobs', DEFAULT_DPG_CONFIG["dpg"]["default"]["n_jobs"])
+        self.graph_construction_mode = str(
+            graph_construction_config.get('mode', DEFAULT_DPG_CONFIG["dpg"]["graph_construction"]["mode"])
+        ).strip().lower()
+        if self.graph_construction_mode not in {"aggregated_transitions", "execution_trace"}:
+            raise DPGError(
+                "graph_construction.mode must be 'aggregated_transitions' or 'execution_trace'"
+            )
         
         # Validate required config values
         if self.perc_var is None:
@@ -111,7 +125,10 @@ class DecisionPredicateGraph:
         if self.n_jobs is None:
             raise DPGError("n_jobs not found in DPG config")
         
-        print(f"DPG initialized with perc_var={self.perc_var}, decimal_threshold={self.decimal_threshold}, n_jobs={self.n_jobs}")
+        print(
+            f"DPG initialized with perc_var={self.perc_var}, decimal_threshold={self.decimal_threshold}, "
+            f"n_jobs={self.n_jobs}, graph_construction_mode={self.graph_construction_mode}"
+        )
         # Store visualization config for use by utils
         self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
 
@@ -132,31 +149,36 @@ class DecisionPredicateGraph:
         print("Model Params: ", self.model.get_params())
         print("*****************************************************************")
 
-        # Extract decision paths (parallel or sequential)
-        if self.n_jobs == 1:
-            log = Parallel(n_jobs=self.n_jobs)(
-                delayed(self.tracing_ensemble)(i, sample) for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
-            )
-        else:
-            log = Parallel(n_jobs=self.n_jobs)(
-                delayed(self.tracing_ensemble_parallel)(i, sample) for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
-            )
-
-        # Process extracted paths
-        log = [item for sublist in log for item in sublist]
-        log_df = pd.DataFrame(log, columns=["case:concept:name", "concept:name"])
+        log_df = self._extract_trace_log(X_train)
 
         print(f'Total of paths: {len(log_df["case:concept:name"].unique())}')
 
-        # Filter infrequent paths if threshold set
-        if self.perc_var > 0:
-            log_df = self.filter_log(log_df)
-
         print('Building DPG...')
-        dfg = self.discover_dfg(log_df)
+        if self.graph_construction_mode == "aggregated_transitions":
+            if self.perc_var > 0:
+                log_df = self.filter_log(log_df)
+            dfg = self.discover_dfg(log_df)
+        else:
+            dfg = self.discover_dfg_execution_trace(log_df)
 
         print('Extracting graph...')
         return self.generate_dot(dfg)
+
+    def _extract_trace_log(self, X_train):
+        # Extract decision paths (parallel or sequential)
+        if self.n_jobs == 1:
+            log = Parallel(n_jobs=self.n_jobs)(
+                delayed(self.tracing_ensemble)(i, sample)
+                for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
+            )
+        else:
+            log = Parallel(n_jobs=self.n_jobs)(
+                delayed(self.tracing_ensemble_parallel)(i, sample)
+                for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
+            )
+
+        log = [item for sublist in log for item in sublist]
+        return pd.DataFrame(log, columns=["case:concept:name", "concept:name"])
 
     def tracing_ensemble(self, case_id, sample):
         """
@@ -287,6 +309,19 @@ class DecisionPredicateGraph:
                 dfg[key] = dfg.get(key, 0) + 1
         
         return dfg
+
+    def discover_dfg_execution_trace(self, log):
+        """
+        Build a directed graph directly from exact executed traces, then apply
+        filtering at the edge level rather than the whole-path level.
+        """
+        dfg = self.discover_dfg(log)
+        if self.perc_var <= 0:
+            return dfg
+
+        total_cases = len(log["case:concept:name"].unique())
+        min_count = total_cases * self.perc_var
+        return {edge: count for edge, count in dfg.items() if count >= min_count}
 
     def generate_dot(self, dfg):
         """

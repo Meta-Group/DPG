@@ -20,3 +20,6 @@ threadpoolctl==3.5.0
 tqdm==4.67.1
 tzdata==2024.1
 pyyaml==6.0.2
+# Optional baseline explainers for experiments_local_explanation/run_baseline_experiments.py
+shap==0.46.0
+lime==0.2.0.1
