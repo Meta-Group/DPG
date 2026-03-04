@@ -26,9 +26,76 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Nodes represent predicates, i.e., the feature-value associations present in each node of every tree;
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true" width="600" />
-</p>
+```mermaid
+flowchart TB
+    subgraph trees ["Tree Base Learners"]
+        direction TB
+        subgraph tree1 [" "]
+            direction TB
+            T1R(("F1, val1"))
+            T1L(("F2, val2"))
+            T1C["Class"]
+            T1LL["·"]
+            T1LR["·"]
+            T1R -- "≤" --> T1L
+            T1R -- ">" --> T1C
+            T1L -- "≤" --> T1LL
+            T1L -- ">" --> T1LR
+        end
+        subgraph tree2 [" "]
+            direction TB
+            T2R(("F1, val3"))
+            T2C["Class"]
+            T2L(("F2, val2"))
+            T2RL["·"]
+            T2RR["·"]
+            T2R -- "≤" --> T2C
+            T2R -- ">" --> T2L
+            T2L -- "≤" --> T2RL
+            T2L -- ">" --> T2RR
+        end
+    end
+
+    trees ==> dpg
+
+    subgraph dpg ["DPG"]
+        direction TB
+        A["F1 ≤ val1"]
+        B["F1 > val3"]
+        C["F1 > val1"]
+        D["F1 ≤ val3"]
+        E["F2 ≤ val2"]
+        FF["F2 > val2"]
+        G["Class"]
+        Eout((" "))
+        Fout((" "))
+
+        A -- "w1" --> E
+        A -- "w2" --> FF
+        B -- "w6" --> E
+        B -- "w7" --> FF
+        C -- "w3" --> G
+        D -- "w8" --> G
+        E -- "w4" --> Eout
+        FF -- "w5" --> Fout
+    end
+
+    style T1C fill:#4a86c8,color:#fff,stroke:#336
+    style T2C fill:#4a86c8,color:#fff,stroke:#336
+    style G fill:#4a86c8,color:#fff,stroke:#336
+    style A fill:#d4e4f7,color:#000,stroke:#89a
+    style B fill:#d4e4f7,color:#000,stroke:#89a
+    style C fill:#d4e4f7,color:#000,stroke:#89a
+    style D fill:#d4e4f7,color:#000,stroke:#89a
+    style E fill:#d4e4f7,color:#000,stroke:#89a
+    style FF fill:#d4e4f7,color:#000,stroke:#89a
+    style T1LL fill:#eee,color:#eee,stroke:#eee
+    style T1LR fill:#eee,color:#eee,stroke:#eee
+    style T2RL fill:#eee,color:#eee,stroke:#eee
+    style T2RR fill:#eee,color:#eee,stroke:#eee
+    style Eout fill:transparent,stroke:transparent,color:transparent
+    style Fout fill:transparent,stroke:transparent,color:transparent
+```
 
 ## Metrics
 The graph-based nature of DPG provides significant enhancements in the direction of a complete mapping of the ensemble structure.
