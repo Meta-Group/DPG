@@ -30,18 +30,6 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 flowchart TB
     subgraph trees ["Tree Base Learners"]
         direction TB
-        subgraph tree1 [" "]
-            direction TB
-            T1R(("F1, val1"))
-            T1L(("F2, val2"))
-            T1C["Class"]
-            T1LL["·"]
-            T1LR["·"]
-            T1R -- "≤" --> T1L
-            T1R -- ">" --> T1C
-            T1L -- "≤" --> T1LL
-            T1L -- ">" --> T1LR
-        end
         subgraph tree2 [" "]
             direction TB
             T2R(("F1, val3"))
@@ -54,19 +42,38 @@ flowchart TB
             T2L -- "≤" --> T2RL
             T2L -- ">" --> T2RR
         end
+        subgraph tree1 [" "]
+            direction TB
+            T1R(("F1, val1"))
+            T1L(("F2, val2"))
+            T1C["Class"]
+            T1LL["·"]
+            T1LR["·"]
+            T1R -- "≤" --> T1L
+            T1R -- ">" --> T1C
+            T1L -- "≤" --> T1LL
+            T1L -- ">" --> T1LR
+        end
     end
 
     trees ==> dpg
 
     subgraph dpg ["DPG"]
         direction TB
+        
+        E["F2 ≤ val2"]
+        FF["F2 > val2"]
+        G["Class"]
+
+        E -- "w4" --> Eout
+        FF -- "w5" --> Fout
+
+
+
         A["F1 ≤ val1"]
         B["F1 > val3"]
         C["F1 > val1"]
         D["F1 ≤ val3"]
-        E["F2 ≤ val2"]
-        FF["F2 > val2"]
-        G["Class"]
         Eout((" "))
         Fout((" "))
 
@@ -76,8 +83,6 @@ flowchart TB
         B -- "w7" --> FF
         C -- "w3" --> G
         D -- "w8" --> G
-        E -- "w4" --> Eout
-        FF -- "w5" --> Fout
     end
 
     style T1C fill:#4a86c8,color:#fff,stroke:#336
