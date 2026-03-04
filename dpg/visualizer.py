@@ -124,6 +124,7 @@ def _parse_dot_node_data(dot) -> Dict[str, Dict[str, str]]:
 
     Handles both quoted (``"id"``) and unquoted (bare integer hash) node IDs.
     """
+    _DOT_KEYWORDS = {"graph", "node", "edge", "subgraph", "digraph", "strict"}
     node_data: Dict[str, Dict[str, str]] = {}
     for line in dot.body:
         if "->" in line:
@@ -133,6 +134,8 @@ def _parse_dot_node_data(dot) -> Dict[str, Dict[str, str]]:
         if not id_match:
             continue
         nid = id_match.group(1).strip()
+        if nid.lower() in _DOT_KEYWORDS:
+            continue
         if nid not in node_data:
             node_data[nid] = {}
         label_m = re.search(r'label="([^"]*)"', line)
