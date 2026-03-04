@@ -66,11 +66,17 @@ flowchart TB
         E["F2 ≤ val2"]
         FF["F2 > val2"]
         G["Class"]
+        EoutLL["..."]
+        EoutLR["..."]
+        FoutRL["..."]
+        FoutRR["..."]
 
         E -- "w4" --> Eout
         FF -- "w5" --> Fout
-
-
+        Eout -- "≤" --> EoutLL
+        Eout -- ">" --> EoutLR
+        Fout -- "≤" --> FoutRL
+        Fout -- ">" --> FoutRR
 
         A["F1 ≤ val1"]
         B["F1 > val3"]
@@ -100,7 +106,13 @@ flowchart TB
     style T1LR fill:transparent,stroke:transparent,color:#666
     style T2RL fill:transparent,stroke:transparent,color:#666
     style T2RR fill:transparent,stroke:transparent,color:#666
-    style Eout fill:transparent,stroke:transparent,color:transparent
+    style EoutLL fill:transparent,stroke:transparent,color:#666
+    style EoutLR fill:transparent,stroke:transparent,color:#666
+    style FoutRL fill:transparent,stroke:transparent,color:#666
+    style FoutRR fill:transparent,stroke:transparent,color:#666    style EoutLL fill:transparent,stroke:transparent,color:#666
+    style EoutLR fill:transparent,stroke:transparent,color:#666
+    style FoutRL fill:transparent,stroke:transparent,color:#666
+    style FoutRR fill:transparent,stroke:transparent,color:#666    style Eout fill:transparent,stroke:transparent,color:transparent
     style Fout fill:transparent,stroke:transparent,color:transparent
 ```
 
