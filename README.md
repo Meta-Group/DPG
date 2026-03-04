@@ -35,8 +35,8 @@ flowchart TB
             T2R(("F1, val3"))
             T2C["Class"]
             T2L(("F2, val2"))
-            T2RL["·"]
-            T2RR["·"]
+            T2RL["..."]
+            T2RR["..."]
             T2R -- "≤" --> T2C
             T2R -- ">" --> T2L
             T2L -- "≤" --> T2RL
@@ -47,8 +47,8 @@ flowchart TB
             T1R(("F1, val1"))
             T1L(("F2, val2"))
             T1C["Class"]
-            T1LL["·"]
-            T1LR["·"]
+            T1LL["..."]
+            T1LR["..."]
             T1R -- "≤" --> T1L
             T1R -- ">" --> T1C
             T1L -- "≤" --> T1LL
@@ -94,10 +94,10 @@ flowchart TB
     style D fill:#d4e4f7,color:#000,stroke:#89a
     style E fill:#d4e4f7,color:#000,stroke:#89a
     style FF fill:#d4e4f7,color:#000,stroke:#89a
-    style T1LL fill:#eee,color:#eee,stroke:#eee
-    style T1LR fill:#eee,color:#eee,stroke:#eee
-    style T2RL fill:#eee,color:#eee,stroke:#eee
-    style T2RR fill:#eee,color:#eee,stroke:#eee
+    style T1LL fill:transparent,stroke:transparent,color:#666
+    style T1LR fill:transparent,stroke:transparent,color:#666
+    style T2RL fill:transparent,stroke:transparent,color:#666
+    style T2RR fill:transparent,stroke:transparent,color:#666
     style Eout fill:transparent,stroke:transparent,color:transparent
     style Fout fill:transparent,stroke:transparent,color:transparent
 ```
