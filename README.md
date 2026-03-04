@@ -16,7 +16,10 @@ DPG is a graph structure that captures the tree-based ensemble model and learned
 DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
 DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights.
 <p align="center">
-  ![DPG Example](examples/results/custom_RandomForestClassifier_l2_pv0.001_t2_160898.svg?sanitize=true)
+  <a href="https://meta-group.github.io/DPG/dpg_image_examples/iris_RandomForestClassifier_l5_pv1e-09_t6_None.html">
+    <img src="dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="600" alt="Interactive DPG — click to explore" />
+    <br><em>Click to open the interactive graph (pan, zoom, drag)</em>
+  </a>
 </p>
 
 ---
