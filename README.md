@@ -72,10 +72,13 @@ flowchart TB
         E -- "w4" --> EoutLL
         FF -- "w5" --> EoutLR
 
-        A["F1 ≤ val1"]
-        B["F1 > val3"]
-        C["F1 > val1"]
-        D["F1 ≤ val3"]
+        subgraph f1line [" "]
+            direction LR
+            A["F1 ≤ val1"]
+            B["F1 > val3"]
+            C["F1 > val1"]
+            D["F1 ≤ val3"]
+        end
 
         A -- "w1" --> E
         A -- "w2" --> FF
@@ -85,6 +88,7 @@ flowchart TB
         D -- "w8" --> G
     end
 
+    style f1line fill:transparent,stroke:transparent,color:transparent
     style T1C fill:#4a86c8,color:#fff,stroke:#336
     style T2C fill:#4a86c8,color:#fff,stroke:#336
     style G fill:#4a86c8,color:#fff,stroke:#336
