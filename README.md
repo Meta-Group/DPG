@@ -76,8 +76,6 @@ flowchart TB
         B["F1 > val3"]
         C["F1 > val1"]
         D["F1 ≤ val3"]
-        Eout((" "))
-        Fout((" "))
 
         A -- "w1" --> E
         A -- "w2" --> FF
@@ -102,12 +100,7 @@ flowchart TB
     style T2RR fill:transparent,stroke:transparent,color:#666
     style EoutLL fill:transparent,stroke:transparent,color:#666
     style EoutLR fill:transparent,stroke:transparent,color:#666
-    style FoutRL fill:transparent,stroke:transparent,color:#666
-    style FoutRR fill:transparent,stroke:transparent,color:#666    style EoutLL fill:transparent,stroke:transparent,color:#666
     style EoutLR fill:transparent,stroke:transparent,color:#666
-    style FoutRL fill:transparent,stroke:transparent,color:#666
-    style FoutRR fill:transparent,stroke:transparent,color:#666    style Eout fill:transparent,stroke:transparent,color:transparent
-    style Fout fill:transparent,stroke:transparent,color:transparent
 ```
 
 ## Metrics
