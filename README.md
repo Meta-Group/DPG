@@ -89,8 +89,12 @@ flowchart TB
     end
 
     style f1line fill:transparent,stroke:transparent,color:transparent
-    style T1C fill:#4a86c8,color:#fff,stroke:#336
-    style T2C fill:#4a86c8,color:#fff,stroke:#336
+    style T1C fill:#a7d294,color:#000,stroke:#5a8a4a
+    style T2C fill:#a7d294,color:#000,stroke:#5a8a4a
+    style T1R fill:#e1f0db,color:#000,stroke:#89a
+    style T1L fill:#e1f0db,color:#000,stroke:#89a
+    style T2R fill:#e1f0db,color:#000,stroke:#89a
+    style T2L fill:#e1f0db,color:#000,stroke:#89a
     style G fill:#4a86c8,color:#fff,stroke:#336
     style A fill:#d4e4f7,color:#000,stroke:#89a
     style B fill:#d4e4f7,color:#000,stroke:#89a
