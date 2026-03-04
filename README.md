@@ -27,7 +27,7 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
 ```mermaid
-%%{init: {"flowchart": {"nodeSpacing": 75, "rankSpacing": 30}}}%%
+%%{init: {"flowchart": {"nodeSpacing": 70, "rankSpacing": 15}}}%%
 
 flowchart TB
     subgraph trees ["Tree Base Learners"]
@@ -81,8 +81,8 @@ flowchart TB
         end
 
         A -- "w1" --> E
-        A -- "w2" --> FF
-        B -- "w6" --> E
+        A -- "w6" --> FF
+        B -- "w2" --> E
         B -- "w7" --> FF
         C -- "w3" --> G
         D -- "w8" --> G
@@ -109,6 +109,9 @@ flowchart TB
     style EoutLL fill:transparent,stroke:transparent
     style EoutLR fill:transparent,stroke:transparent
     style EoutLR fill:transparent,stroke:transparent
+    style tree2 fill:transparent,stroke:transparent
+    style tree1 fill:transparent,stroke:transparent
+
 ```
 
 ## Metrics
