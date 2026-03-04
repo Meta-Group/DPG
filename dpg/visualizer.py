@@ -104,6 +104,20 @@ def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
         except Exception:
             raise first_exc
 
+
+def _pipe_graph_svg_with_fallback(dot_source: str, sanitizer) -> bytes:
+    try:
+        return Source(dot_source).pipe(format="svg")
+    except ExecutableNotFound as exc:
+        raise _graphviz_not_found_error() from exc
+    except Exception as first_exc:
+        try:
+            return Source(sanitizer(dot_source)).pipe(format="svg")
+        except ExecutableNotFound as exc:
+            raise _graphviz_not_found_error() from exc
+        except Exception:
+            raise first_exc
+
 def plot_dpg(
     plot_name,
     dot,
@@ -310,6 +324,9 @@ def plot_dpg(
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
     fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+    with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+        f.write(svg_bytes)
     if export_pdf:
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
@@ -487,6 +504,9 @@ def plot_dpg_communities(
         bbox_inches="tight",
         pad_inches=0.02,
     )
+    svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+    with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+        f.write(svg_bytes)
     if export_pdf:
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
