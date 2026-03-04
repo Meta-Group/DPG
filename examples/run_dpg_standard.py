@@ -25,6 +25,8 @@ if __name__ == "__main__":
     parser.set_defaults(plot=True)
     parser.add_argument("--html", dest='export_html', action='store_true', help="Also export interactive pan/zoom HTML files (requires pyvis)")
     parser.set_defaults(export_html=False)
+    parser.add_argument("--mermaid", dest='export_mermaid', action='store_true', help="Also export Mermaid flowchart markdown files")
+    parser.set_defaults(export_mermaid=False)
     parser.add_argument("--save_plot_dir", type=str, default=os.path.join(SCRIPT_DIR, "results"), help="Directory to save the plot image")
     parser.add_argument("--attribute", type=str, default=None, help="A specific node attribute to visualize")
     parser.add_argument("--communities", action='store_true', help="Boolean indicating whether to visualize communities, add the argument to use it as True")
@@ -71,7 +73,8 @@ if __name__ == "__main__":
                                         threshold_clusters = args.threshold_clusters,
                                         class_flag = args.class_flag,
                                         seed = args.seed,
-                                        export_html = args.export_html)
+                                        export_html = args.export_html,
+                                        export_mermaid = args.export_mermaid)
         
     df.sort_values(['Degree'])
 

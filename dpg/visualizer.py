@@ -258,6 +258,54 @@ def export_dpg_html(
     print(f"Interactive HTML exported → {output_path}")
 
 
+def export_dpg_mermaid(
+    dot,
+    df_edges: pd.DataFrame,
+    output_path: str,
+) -> None:
+    """Export the DPG as a Mermaid flowchart markdown file.
+
+    Args:
+        dot: Fully-styled Graphviz Digraph.
+        df_edges: DataFrame with edge metrics; must include ``'Source_id'``,
+            ``'Target_id'``, and ``'Weight'`` columns.
+        output_path: Destination ``.md`` file path.
+    """
+    node_data = _parse_dot_node_data(dot)
+
+    def _sanitize_mermaid_id(raw: str) -> str:
+        return re.sub(r'[^A-Za-z0-9_]', '_', raw)
+
+    def _escape_mermaid_label(label: str) -> str:
+        return label.replace('"', '#quot;').replace('<', '&lt;').replace('>', '&gt;')
+
+    lines: list[str] = ["```mermaid", "flowchart LR"]
+
+    for nid, attrs in node_data.items():
+        safe_id = _sanitize_mermaid_id(nid)
+        label = _escape_mermaid_label(attrs.get("label", nid))
+        fill = attrs.get("fillcolor", "")
+        lines.append(f'    {safe_id}["{label}"]')
+        if fill:
+            lines.append(f'    style {safe_id} fill:{fill}')
+
+    if df_edges is not None and not df_edges.empty:
+        for _, row in df_edges.iterrows():
+            src = _sanitize_mermaid_id(str(row["Source_id"]))
+            tgt = _sanitize_mermaid_id(str(row["Target_id"]))
+            weight = row["Weight"]
+            lines.append(f'    {src} -->|"{weight:.4f}"| {tgt}')
+
+    lines.append("```")
+
+    out_dir = os.path.dirname(output_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Mermaid markdown exported → {output_path}")
+
+
 def plot_dpg(
     plot_name,
     dot,
@@ -278,6 +326,7 @@ def plot_dpg(
     show=True,
     export_pdf=False,
     export_html=False,
+    export_mermaid=False,
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -310,6 +359,7 @@ def plot_dpg(
         export_pdf: If ``True``, also writes a PDF next to the PNG.
         export_html: If ``True``, also writes an interactive pan/zoom HTML file
             (requires ``pyvis``).
+        export_mermaid: If ``True``, also writes a Mermaid flowchart markdown file.
 
     Returns:
         None
@@ -482,6 +532,8 @@ def plot_dpg(
     # No PDF output by default
     if export_html:
         export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
+    if export_mermaid:
+        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
     # Clean up temporary files
     # delete_folder_contents("temp")
     if not show:
@@ -505,6 +557,7 @@ def plot_dpg_communities(
     show=True,
     export_pdf=False,
     export_html=False,
+    export_mermaid=False,
 ):
     """
     Plot a DPG colored by community assignment.
@@ -536,6 +589,7 @@ def plot_dpg_communities(
         export_pdf: If ``True``, also writes a PDF next to the PNG.
         export_html: If ``True``, also writes an interactive pan/zoom HTML file
             (requires ``pyvis``).
+        export_mermaid: If ``True``, also writes a Mermaid flowchart markdown file.
 
     Returns:
         None
@@ -666,6 +720,8 @@ def plot_dpg_communities(
         plt.close(fig)
     if export_html:
         export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
+    if export_mermaid:
+        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
     # No PDF output by default
 
     # Clean up temporary files
