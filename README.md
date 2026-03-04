@@ -68,15 +68,9 @@ flowchart TB
         G["Class"]
         EoutLL["..."]
         EoutLR["..."]
-        FoutRL["..."]
-        FoutRR["..."]
 
-        E -- "w4" --> Eout
-        FF -- "w5" --> Fout
-        Eout -- "≤" --> EoutLL
-        Eout -- ">" --> EoutLR
-        Fout -- "≤" --> FoutRL
-        Fout -- ">" --> FoutRR
+        E -- "w4" --> EoutLL
+        FF -- "w5" --> EoutLR
 
         A["F1 ≤ val1"]
         B["F1 > val3"]
