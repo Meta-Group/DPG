@@ -89,8 +89,7 @@ def test_dpg(datasets: str,
              threshold_clusters: Optional[float] = None,
              class_flag: bool = False,
              seed:int = 160898,
-             export_html: bool = False,
-             export_mermaid: bool = False) -> Optional[Tuple[Any, Any]]:
+             export_format: str = "svg") -> Optional[Tuple[Any, Any]]:
     
     """
     Unified function to train models and extract DPG for both standard and custom datasets.
@@ -204,8 +203,7 @@ def test_dpg(datasets: str,
             df_edges,
             save_dir=save_plot_dir,
             class_flag=class_flag,
-            export_html=export_html,
-            export_mermaid=export_mermaid,
+            export_format=export_format,
         )
 
         # 2. One plot per node-metric attribute
@@ -226,8 +224,7 @@ def test_dpg(datasets: str,
                     save_dir=save_plot_dir,
                     attribute=attr,
                     class_flag=class_flag,
-                    export_html=export_html,
-                    export_mermaid=export_mermaid,
+                    export_format=export_format,
                 )
 
         # 3. Communities plot
@@ -240,8 +237,7 @@ def test_dpg(datasets: str,
                 save_dir=save_plot_dir,
                 class_flag=class_flag,
                 df_edges=df_edges,
-                export_html=export_html,
-                export_mermaid=export_mermaid,
+                export_format=export_format,
             )
 
         # 4. Clusters plot
@@ -255,8 +251,7 @@ def test_dpg(datasets: str,
                 clusters=clusters,
                 threshold_clusters=threshold_clusters,
                 class_flag=class_flag,
-                export_html=export_html,
-                export_mermaid=export_mermaid,
+                export_format=export_format,
             )
     
     return df, df_edges, df_dpg, clusters, node_prob, confidence

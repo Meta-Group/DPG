@@ -309,6 +309,9 @@ def export_dpg_mermaid(
     print(f"Mermaid markdown exported → {output_path}")
 
 
+_VALID_EXPORT_FORMATS = {"png", "svg", "pdf", "html", "mermaid"}
+
+
 def plot_dpg(
     plot_name,
     dot,
@@ -327,9 +330,7 @@ def plot_dpg(
     dpi=300,
     pdf_dpi=600,
     show=True,
-    export_pdf=False,
-    export_html=False,
-    export_mermaid=False,
+    export_format="svg",
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -357,16 +358,17 @@ def plot_dpg(
             values.
         fig_size: Matplotlib figure size as ``(width, height)``.
         dpi: PNG export/display resolution.
-        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        pdf_dpi: PDF export resolution when ``export_format`` is ``"pdf"``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
-        export_pdf: If ``True``, also writes a PDF next to the PNG.
-        export_html: If ``True``, also writes an interactive pan/zoom HTML file
-            (requires ``pyvis``).
-        export_mermaid: If ``True``, also writes a Mermaid flowchart markdown file.
+        export_format: Image format to export. One of
+            ``{'svg', 'png', 'pdf', 'html', 'mermaid'}``. Default is ``"svg"``.
 
     Returns:
         None
     """
+    if export_format not in _VALID_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported export_format '{export_format}'. "
+                         f"Choose from {sorted(_VALID_EXPORT_FORMATS)}.")
     print("Plotting DPG...")
     _apply_layout_template(
         dot,
@@ -519,11 +521,13 @@ def plot_dpg(
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
-    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
-    svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
-    with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
-        f.write(svg_bytes)
-    if export_pdf:
+    if export_format == "png":
+        fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    elif export_format == "svg":
+        svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+        with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+            f.write(svg_bytes)
+    elif export_format == "pdf":
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
@@ -531,14 +535,10 @@ def plot_dpg(
             bbox_inches="tight",
             pad_inches=0.02,
         )
-    #plt.show()
-    # No PDF output by default
-    if export_html:
+    elif export_format == "html":
         export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
-    if export_mermaid:
+    elif export_format == "mermaid":
         export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
-    # Clean up temporary files
-    # delete_folder_contents("temp")
     if not show:
         plt.close(fig)
 
@@ -558,9 +558,7 @@ def plot_dpg_communities(
     dpi=300,
     pdf_dpi=600,
     show=True,
-    export_pdf=False,
-    export_html=False,
-    export_mermaid=False,
+    export_format="svg",
 ):
     """
     Plot a DPG colored by community assignment.
@@ -587,16 +585,17 @@ def plot_dpg_communities(
             values.
         fig_size: Matplotlib figure size as ``(width, height)``.
         dpi: PNG export/display resolution.
-        pdf_dpi: PDF export resolution when ``export_pdf=True``.
+        pdf_dpi: PDF export resolution when ``export_format`` is ``"pdf"``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
-        export_pdf: If ``True``, also writes a PDF next to the PNG.
-        export_html: If ``True``, also writes an interactive pan/zoom HTML file
-            (requires ``pyvis``).
-        export_mermaid: If ``True``, also writes a Mermaid flowchart markdown file.
+        export_format: Image format to export. One of
+            ``{'svg', 'png', 'pdf', 'html', 'mermaid'}``. Default is ``"svg"``.
 
     Returns:
         None
     """
+    if export_format not in _VALID_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported export_format '{export_format}'. "
+                         f"Choose from {sorted(_VALID_EXPORT_FORMATS)}.")
     print("Plotting DPG (communities)...")
     _apply_layout_template(
         dot,
@@ -702,16 +701,18 @@ def plot_dpg_communities(
 
     # Save the plot to the specified directory with tight borders
     os.makedirs(save_dir, exist_ok=True)
-    fig.savefig(
-        os.path.join(save_dir, plot_name + ".png"),
-        dpi=dpi,
-        bbox_inches="tight",
-        pad_inches=0.02,
-    )
-    svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
-    with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
-        f.write(svg_bytes)
-    if export_pdf:
+    if export_format == "png":
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".png"),
+            dpi=dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    elif export_format == "svg":
+        svg_bytes = _pipe_graph_svg_with_fallback(dot.source, _sanitize_dot_source)
+        with open(os.path.join(save_dir, plot_name + ".svg"), "wb") as f:
+            f.write(svg_bytes)
+    elif export_format == "pdf":
         fig.savefig(
             os.path.join(save_dir, plot_name + ".pdf"),
             format="pdf",
@@ -719,16 +720,12 @@ def plot_dpg_communities(
             bbox_inches="tight",
             pad_inches=0.02,
         )
+    elif export_format == "html":
+        export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
+    elif export_format == "mermaid":
+        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
     if not show:
         plt.close(fig)
-    if export_html:
-        export_dpg_html(dot, df_edges, os.path.join(save_dir, plot_name + ".html"))
-    if export_mermaid:
-        export_dpg_mermaid(dot, df_edges, os.path.join(save_dir, plot_name + ".md"))
-    # No PDF output by default
-
-    # Clean up temporary files
-    # delete_folder_contents("temp")
 
 def change_node_color(dot, node_id: str, fillcolor: str) -> None:
     """Update a node's fill color and set an appropriate contrasting font color.
