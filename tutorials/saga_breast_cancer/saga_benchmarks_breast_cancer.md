@@ -1,18 +1,19 @@
 # DPGExplainer Saga Benchmarks — Episode 3: Breast Cancer
 
-Episode 1 (Iris) established the baseline explanation workflow, and Episode 2 (Wine) stress-tested it under richer multiclass overlap.
+Episode 1 (Iris) introduced the workflow. Episode 2 (Wine) stress-tested it on richer multiclass overlap.
 
-Episode 3 applies the same protocol to Breast Cancer Wisconsin: a binary benchmark with higher dimensionality than Iris and Wine, where threshold interactions are dense and medically meaningful.
+This episode applies the same protocol to Breast Cancer Wisconsin, a binary dataset with 30 features and dense threshold interactions.
 
-Pipeline:
-1. Train baseline Random Forest.
-2. Extract DPG.
-3. Analyze LRC, BC, communities, overlap, and class complexity.
-4. Validate DPG-induced ranges against empirical data ranges.
+What we do:
+1. Train a baseline Random Forest.
+2. Extract a Decision Predicate Graph (DPG).
+3. Compare classical feature importance vs structural graph signals.
+4. Add TreeSHAP for attribution-level comparison.
+5. Read bottlenecks, communities, and class-wise ranges.
 
 ---
 
-## 1. Baseline model sanity check
+## 1. Baseline model check
 
 ![RF confusion matrix](images/rf_confusion_matrix.png)
 
@@ -28,62 +29,47 @@ Classification report:
 ```text
               precision    recall  f1-score   support
 
-malignant         0.91      0.93      0.92        42
-benign            0.96      0.94      0.95        72
+malignant       0.9070    0.9286    0.9176        42
+benign          0.9577    0.9444    0.9510        72
 
-accuracy                               0.94       114
-macro avg         0.93      0.94      0.93       114
-weighted avg      0.94      0.94      0.94       114
+accuracy                             0.9386       114
+macro avg       0.9324    0.9365    0.9343       114
+weighted avg    0.9390    0.9386    0.9387       114
 ```
 
-Model quality is strong enough for structural interpretation, with minor malignant/benign confusion still present.
+Takeaway: predictive quality is strong enough to support global and local interpretability analysis.
 
 ---
 
-## 2. Data geometry (feature-level intuition)
+## 2. Data geometry at a glance
 
-Because Breast Cancer has 30 features, we use a representative subset for pairwise visualization.
+Breast Cancer has 30 features, so we visualize a representative subset.
 
 ![Breast Cancer pairplot](images/pairplot.png)
 
 Compared with Iris and Wine:
 - the feature space is larger,
-- class separation exists but requires more interacting thresholds,
-- local overlap motivates graph-level interpretation beyond single-feature ranking.
+- separation is good but not trivial,
+- multiple interacting thresholds are needed,
+- this is exactly where graph-level explanations become useful.
 
 ---
 
 ## 3. Why DPG on top of Random Forest
 
-As in earlier episodes, RF importance alone does not explain global decision flow.
+Random Forest importance is useful, but it is still a feature ranking. It does not directly show routing logic across the ensemble.
 
 DPG adds:
-- predicate-level nodes (`<=` / `>`),
-- transition edges across tree paths,
-- graph metrics to expose routing, bottlenecks, and modular class logic.
+- predicate-level nodes (`feature <= threshold`, `feature > threshold`),
+- transitions between predicates along tree paths,
+- graph metrics (LRC, BC, communities) to expose decision structure.
 
-This is especially relevant in Breast Cancer, where multiple related shape/texture features co-determine class boundaries.
-
-Implementation detail used in this run:
-- `decimal_threshold=2` (from DPG config), so predicate thresholds are rounded to two decimals.
-- This makes rules easier to read in tables/plots and improves communication without changing the modeling pipeline.
-
-Example:
-
-```python
-explainer = DPGExplainer(
-    model=model,
-    feature_names=X.columns,
-    target_names=bc.target_names.tolist(),
-    dpg_config={
-        "dpg": {"default": {"perc_var": 1e-9, "decimal_threshold": 2, "n_jobs": 1}}
-    },
-)
-```
+Run configuration detail used here:
+- `decimal_threshold=2` in DPG config, which keeps predicate thresholds readable.
 
 ---
 
-## 4. LRC vs RF importance (complementary views)
+## 4. LRC vs Random Forest importance
 
 ![LRC vs RF importance](images/lrc_vs_rf_importance.png)
 
@@ -117,22 +103,65 @@ Top RF features:
 | `worst symmetry` | 0.025696 |
 | `mean texture` | 0.016796 |
 
-Interpretation:
-- strong overlap between top RF features and high-LRC predicates indicates coherent statistical and structural relevance,
-- threshold-level details reveal the decision logic granularity hidden by feature-level summaries.
-
-Improved RF vs LRC comparison:
-- **8 of the top-10 RF features** also appear in the top-10 LRC predicates:
-  `mean concave points`, `worst perimeter`, `worst concave points`, `worst area`,
-  `mean concavity`, `worst radius`, `worst compactness`, `worst symmetry`.
-- RF tells us *which features matter most globally*; LRC tells us *which exact thresholds route decisions*.
-- LRC also exposes directional behavior not visible in RF ranking alone (for example, `worst perimeter` appears with both `<=` and `>` rules), indicating a central bifurcation boundary.
+Discussion:
+- RF tells us which features reduce impurity most across trees.
+- LRC tells us which exact predicates are structurally central in routing.
+- The model exposes a strong bifurcation around `worst perimeter` with both `<= 104.95` and `> 104.95` as high-LRC predicates.
+- 8 of the top-10 RF features also appear in top-LRC predicates (feature-level match), indicating good agreement between statistical relevance and structural influence.
 
 ![Top LRC predicate splits](images/top_lrc_predicate_splits.png)
 
 ---
 
-## 5. BC as bottleneck decision logic
+## 5. LRC predicates vs TreeSHAP (same RF model)
+
+This section keeps the same fitted Random Forest and compares:
+- LRC at full predicate level,
+- TreeSHAP at feature attribution level.
+
+![LRC vs TreeSHAP importance](images/lrc_vs_treeshap_importance.png)
+
+Top TreeSHAP features (mean absolute contribution):
+
+| Feature | TreeSHAP mean \|value\| |
+|---|---:|
+| `mean concave points` | 0.086209 |
+| `worst perimeter` | 0.069712 |
+| `worst concave points` | 0.067940 |
+| `worst area` | 0.055501 |
+| `worst radius` | 0.048390 |
+| `mean concavity` | 0.023725 |
+| `worst concavity` | 0.019222 |
+| `worst compactness` | 0.018096 |
+| `worst texture` | 0.017986 |
+| `perimeter error` | 0.016226 |
+
+Observed agreement:
+- Feature-level overlap between top LRC predicates (mapped to base features) and top TreeSHAP features is **8/10**:
+  `mean concave points`, `mean concavity`, `perimeter error`, `worst area`,
+  `worst compactness`, `worst concave points`, `worst perimeter`, `worst radius`.
+
+Where TreeSHAP is stronger:
+- local attribution for an individual sample,
+- signed contribution analysis,
+- additive decomposition of model output.
+
+Where LRC is stronger:
+- explicit threshold semantics (`<=` / `>`),
+- global routing centrality,
+- direct connection to bottlenecks and communities in the graph.
+
+Local example from this run (`sample index 256`, predicted `malignant`):
+- Top TreeSHAP pushes: `mean concave points`, `worst concave points`, `worst perimeter`, `worst radius`, `worst area`.
+- Top active high-LRC predicates: `worst symmetry <= 0.36`, `worst perimeter > 104.95`, `worst compactness <= 0.72`, `mean compactness > 0.1`, `mean concave points > 0.05`.
+
+Practical reading:
+- TreeSHAP explains how much each feature moved this prediction.
+- LRC explains which threshold rules carry the strongest structural traffic in the model.
+
+---
+
+## 6. BC as bottleneck logic
 
 ![BC bottleneck PCA cloud](images/bc_bottleneck_pca_cloud.png)
 
@@ -143,38 +172,40 @@ Top BC predicates:
 - `mean concavity <= 0.05` (0.005225)
 - `worst concave points <= 0.11` (0.005073)
 
-BC highlights transition predicates that bridge dense model-routing zones where class assignment is less straightforward.
+Discussion:
+- BC highlights bridge predicates between dense decision zones.
+- These are often transition rules where routing ambiguity is higher.
 
 ---
 
-## 6. Global DPG and communities
+## 7. Global DPG and communities
 
 ![DPG graph](images/breast_cancer_dpg.png)
 
 ![DPG communities](images/breast_cancer_dpg_communities.png)
 
-Community view condenses many tree paths into interpretable decision modules and exposes how class-specific and shared predicate patterns interact.
+Communities summarize recurring decision themes across many tree paths, turning path-level complexity into interpretable modules.
 
 ---
 
-## 7. Communities, overlap, and class complexity
+## 8. Communities and class complexity
 
 ![Community class-feature heatmap](images/communities_class_feature_complexity_heatmap.png)
 
 ![Community class complexity bars](images/communities_class_feature_complexity_bars.png)
 
-Complexity summary (from notebook):
+Class complexity summary:
 - `benign`: `159` predicates across `30` features.
 - `malignant`: `122` predicates across `26` features.
 
-What this adds:
-- both classes use broad feature coverage,
-- `benign` receives a larger rule budget in this model,
-- overlap can be inspected through shared high-count features with class-specific density patterns.
+Discussion:
+- both classes involve broad feature coverage,
+- `benign` receives a larger rule budget in this RF+DPG configuration,
+- overlap and asymmetry are visible in feature-level predicate concentration.
 
 ---
 
-## 8. DPG ranges vs dataset ranges
+## 9. DPG ranges vs empirical data ranges
 
 ![DPG vs dataset feature ranges](images/dpg_vs_dataset_feature_ranges.png)
 
@@ -183,43 +214,51 @@ Boundary summary:
 - `malignant`: 26 modeled features, 22 finite lower bounds, 21 finite upper bounds.
 
 Interpretation:
-- Breast Cancer decision ranges are often asymmetric,
-- one-sided constraints appear in several features,
-- DPG boundaries provide a direct validation layer against empirical class ranges.
+- boundaries are often asymmetric,
+- several constraints are one-sided,
+- DPG gives a direct consistency layer between model logic and observed class ranges.
 
 ---
 
-## 9. Main DPG contributions in this benchmark
+## 10. Takeaway messages
 
-1. Global rule topology (from isolated feature ranking to connected decision flow).
-2. Predicate-level influence via LRC.
-3. Bottleneck routing via BC.
-4. Community-level class semantics.
-5. Overlap diagnostics.
-6. Class complexity profiling.
-7. Boundary validation against dataset statistics.
+- Random Forest importance is a strong first signal, but not the full story.
+- DPG adds rule topology: central thresholds, bottlenecks, and communities.
+- TreeSHAP adds local and additive attribution clarity.
+- On this benchmark, LRC and TreeSHAP strongly agree on major drivers (8/10 overlap), while still answering different questions.
 
-Episode link:
-- Iris showed the method on cleaner geometry.
-- Wine extended it to richer multiclass overlap.
-- Breast Cancer shows the same method handling binary logic with higher feature dimensionality than the previous benchmarks and dense threshold interactions.
+One-line conclusion:
+**Use TreeSHAP for local contribution narratives and DPG/LRC for global rule-structure narratives. Together, they provide a fuller explanation than either alone.**
 
 ---
 
-## 10. References and related work
+## 11. References
 
-### Original DPG proposal
-- Arrighi, L., Pennella, L., Marques Tavares, G., Barbon Junior, S.
-  **Decision Predicate Graphs: Enhancing Interpretability in Tree Ensembles**.
-  *World Conference on Explainable Artificial Intelligence*, 311-332.
+### DPG
+- Arrighi, L., Pennella, L., Marques Tavares, G., Barbon Junior, S.  
+  **Decision Predicate Graphs: Enhancing Interpretability in Tree Ensembles**.  
+  *World Conference on Explainable Artificial Intelligence*, 311-332.  
   https://link.springer.com/chapter/10.1007/978-3-031-63797-1_16
 
-### Extended DPG (Isolation Forest)
-- Ceschin, M., Arrighi, L., Longo, L., Barbon Junior, S.
-  **Extending Decision Predicate Graphs for Comprehensive Explanation of Isolation Forest**.
-  *World Conference on Explainable Artificial Intelligence*, 271-293.
+- Ceschin, M., Arrighi, L., Longo, L., Barbon Junior, S.  
+  **Extending Decision Predicate Graphs for Comprehensive Explanation of Isolation Forest**.  
+  *World Conference on Explainable Artificial Intelligence*, 271-293.  
   https://link.springer.com/chapter/10.1007/978-3-032-08324-1_12
 
+### SHAP / TreeSHAP
+- Lundberg, S. M., Lee, S.-I.  
+  **A Unified Approach to Interpreting Model Predictions**.  
+  *NeurIPS 2017*.  
+  https://proceedings.neurips.cc/paper_files/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html
+
+- Lundberg, S. M., Erion, G. G., Chen, H., et al.  
+  **From Local Explanations to Global Understanding with Explainable AI for Trees**.  
+  *Nature Machine Intelligence* 2, 56-67 (2020).  
+  https://www.nature.com/articles/s42256-019-0138-9
+
+- SHAP documentation (TreeExplainer):  
+  https://shap.readthedocs.io/en/latest/generated/shap.TreeExplainer.html
+
 ### Saga context
-- Episode 1 (Iris):
+- Episode 1 (Iris):  
   https://medium.com/@sbarbonjr/dpgexplainer-saga-benchmarks-episode-1-iris-c8816db2857d
