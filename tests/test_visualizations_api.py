@@ -12,7 +12,9 @@ from dpg.visualizer import (
     class_lookup_from_target_names,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
     plot_lrc_vs_rf_importance,
+    plot_sample_using_bc_weights,
     plot_top_lrc_predicate_splits,
+    sample_bc_weights,
 )
 
 
@@ -45,6 +47,14 @@ def test_additional_visualization_apis(tmp_path):
     heat = class_feature_predicate_counts(explanation)
     assert not heat.empty
 
+    bc_weights = sample_bc_weights(
+        explanation=explanation,
+        X_df=X,
+        top_k=8,
+    )
+    assert len(bc_weights) == len(X)
+    assert np.all(np.asarray(bc_weights) >= 0)
+
     fig_lrc = plot_lrc_vs_rf_importance(
         explanation=explanation,
         model=explainer.builder.model,
@@ -69,6 +79,19 @@ def test_additional_visualization_apis(tmp_path):
     )
     assert fig_split is not None
     assert (tmp_path / "top_lrc_splits.png").exists()
+
+    fig_bc = plot_sample_using_bc_weights(
+        explanation=explanation,
+        X_df=X,
+        y=y,
+        top_k=8,
+        dataset_name="Custom",
+        class_names=explainer.builder.target_names,
+        save_path=str(tmp_path / "sample_bc_weights.png"),
+        show=False,
+    )
+    assert fig_bc is not None
+    assert (tmp_path / "sample_bc_weights.png").exists()
 
     lookup = class_lookup_from_target_names(explainer.builder.target_names)
     fig_bounds = plot_dpg_class_bounds_vs_dataset_feature_ranges(

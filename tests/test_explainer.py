@@ -225,3 +225,33 @@ class TestExplainerLifecycle:
         from dpg.core import DecisionPredicateGraph
 
         assert isinstance(explainer.builder, DecisionPredicateGraph)
+
+
+class TestAdditionalExplainerApis:
+    def test_sample_bc_weights(self, explainer, explanation, iris_model):
+        _, X, _, _ = iris_model
+        X_df = pd.DataFrame(X, columns=explainer.builder.feature_names)
+        weights = explainer.sample_bc_weights(
+            X_df=X_df,
+            explanation=explanation,
+            top_k=5,
+        )
+        assert len(weights) == len(X_df)
+        assert np.all(np.asarray(weights) >= 0)
+
+    def test_plot_sample_using_bc_weights(self, explainer, explanation, iris_model, tmp_path):
+        _, X, _, target_names = iris_model
+        X_df = pd.DataFrame(X, columns=explainer.builder.feature_names)
+        y = explainer.builder.model.predict(X_df)
+        fig = explainer.plot_sample_using_bc_weights(
+            X_df=X_df,
+            y=y,
+            explanation=explanation,
+            top_k=5,
+            dataset_name="Iris",
+            class_names=target_names,
+            save_path=str(tmp_path / "iris_bc_weights.png"),
+            show=False,
+        )
+        assert fig is not None
+        assert (tmp_path / "iris_bc_weights.png").exists()

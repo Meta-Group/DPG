@@ -5,11 +5,13 @@ from .core import DecisionPredicateGraph
 from .visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
+    plot_sample_using_bc_weights,
     plot_dpg,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
     plot_dpg_communities,
     plot_lrc_vs_rf_importance,
     plot_top_lrc_predicate_splits,
+    sample_bc_weights,
 )
 from metrics.graph import GraphMetrics
 from metrics.nodes import NodeMetrics
@@ -266,6 +268,46 @@ class DPGExplainer:
         if explanation is None or explanation.communities is None:
             explanation = self.explain_global(communities=True, community_threshold=community_threshold)
         return class_feature_predicate_counts(explanation)
+
+    def sample_bc_weights(
+        self,
+        X_df: Any,
+        explanation: Optional[DPGExplanation] = None,
+        top_k: int = 10,
+    ) -> Any:
+        """Return the per-sample BC-derived bottleneck exposure weights."""
+        if explanation is None:
+            explanation = self.explain_global()
+        return sample_bc_weights(
+            explanation=explanation,
+            X_df=X_df,
+            top_k=top_k,
+        )
+
+    def plot_sample_using_bc_weights(
+        self,
+        X_df: Any,
+        y,
+        explanation: Optional[DPGExplanation] = None,
+        top_k: int = 10,
+        dataset_name: str = "Dataset",
+        class_names: Optional[Any] = None,
+        save_path: Optional[str] = None,
+        show: bool = True,
+    ) -> Any:
+        """Plot samples in PCA space with marker size set by BC-derived weights."""
+        if explanation is None:
+            explanation = self.explain_global()
+        return plot_sample_using_bc_weights(
+            explanation=explanation,
+            X_df=X_df,
+            y=y,
+            top_k=top_k,
+            dataset_name=dataset_name,
+            class_names=class_names,
+            save_path=save_path,
+            show=show,
+        )
 
     def plot_class_bounds_vs_dataset_ranges(
         self,

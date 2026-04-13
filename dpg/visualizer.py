@@ -1188,6 +1188,177 @@ def plot_top_lrc_predicate_splits(
     return fig
 
 
+def sample_bc_weights(
+    explanation,
+    X_df: Any,
+    top_k: int = 10,
+) -> Any:
+    """
+    Compute a per-sample bottleneck exposure score from top-BC predicates.
+
+    This is not a graph-theoretic BC computed on samples themselves. Instead,
+    each sample receives the sum of the betweenness-centrality scores of the
+    top-k predicate nodes it satisfies:
+
+        weight(sample_i) = sum_p 1[sample_i satisfies predicate_p] * BC(predicate_p)
+
+    Args:
+        explanation: Global DPG explanation containing ``node_metrics``.
+        X_df: Feature matrix as a pandas DataFrame.
+        top_k: Number of highest-BC predicate nodes to include.
+
+    Returns:
+        pandas Series indexed like ``X_df`` with one BC-derived weight per sample.
+    """
+    if not hasattr(X_df, "columns"):
+        raise ValueError("X_df must be a pandas DataFrame with named columns.")
+
+    nm = explanation.node_metrics.copy()
+    mask = (
+        nm["Label"].astype(str).str.contains("<=", regex=False, na=False)
+        | nm["Label"].astype(str).str.contains(">", regex=False, na=False)
+    )
+    top_bc = nm[mask].sort_values("Betweenness centrality", ascending=False).head(top_k)
+
+    weights = np.zeros(len(X_df), dtype=float)
+    for _, row in top_bc.iterrows():
+        parsed = parse_predicate_parts(row["Label"])
+        if not parsed:
+            continue
+        feature, operator, threshold = parsed
+        if feature not in X_df.columns:
+            continue
+        if operator == "<=":
+            active = X_df[feature].to_numpy() <= threshold
+        else:
+            active = X_df[feature].to_numpy() > threshold
+        weights += active.astype(float) * float(row["Betweenness centrality"])
+
+    return pd.Series(weights, index=X_df.index, name="bc_weight")
+
+
+def plot_sample_using_bc_weights(
+    explanation,
+    X_df: Any,
+    y,
+    top_k: int = 10,
+    dataset_name: str = "Dataset",
+    class_names: Optional[Any] = None,
+    save_path: Optional[str] = None,
+    show: bool = True,
+) -> Any:
+    """
+    Plot samples in PCA space with marker size driven by BC-derived weights.
+
+    Marker size reflects the sum of BC scores from the top-k predicate nodes
+    satisfied by each sample. Large points therefore indicate samples that
+    activate more bottleneck predicates in the DPG.
+    """
+    from sklearn.decomposition import PCA
+
+    if not hasattr(X_df, "columns"):
+        raise ValueError("X_df must be a pandas DataFrame with named columns.")
+
+    bc_w = sample_bc_weights(explanation=explanation, X_df=X_df, top_k=top_k)
+    bc_w_norm = (bc_w - bc_w.min()) / (bc_w.max() - bc_w.min() + 1e-12)
+
+    pca = PCA(n_components=2, random_state=42)
+    X_pca = pca.fit_transform(X_df)
+
+    y_series = pd.Series(np.asarray(y), index=X_df.index if len(X_df) == len(y) else None)
+    y_numeric = pd.to_numeric(y_series, errors="coerce")
+    class_codes = None
+    class_labels: List[str] = []
+
+    if y_numeric.notna().all():
+        unique_classes = sorted(y_numeric.unique().tolist())
+        class_to_code = {cls: idx for idx, cls in enumerate(unique_classes)}
+        class_codes = y_numeric.map(class_to_code).to_numpy(dtype=int)
+
+        for cls in unique_classes:
+            cls_idx = int(cls) if float(cls).is_integer() else cls
+            if class_names is None:
+                class_labels.append(str(cls_idx))
+            elif isinstance(class_names, dict):
+                class_labels.append(str(class_names.get(cls_idx, cls_idx)))
+            else:
+                if isinstance(cls_idx, int) and 0 <= cls_idx < len(class_names):
+                    class_labels.append(str(class_names[cls_idx]))
+                else:
+                    class_labels.append(str(cls_idx))
+    else:
+        class_codes, unique_labels = pd.factorize(y_series.astype(str), sort=True)
+        class_labels = [str(label) for label in unique_labels]
+
+    if not class_labels:
+        class_labels = ["unknown"]
+        class_codes = np.zeros(len(y_series), dtype=int)
+
+    n_classes = len(class_labels)
+    class_cmap = cm.get_cmap("viridis", n_classes)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(
+        X_pca[:, 0],
+        X_pca[:, 1],
+        c=class_codes,
+        cmap=class_cmap,
+        s=30 + 120 * bc_w_norm.to_numpy(),
+        alpha=0.72,
+        edgecolor="white",
+        linewidth=0.5,
+    )
+
+    legend_handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="w",
+            markerfacecolor=class_cmap(i),
+            markersize=8,
+            label=label,
+        )
+        for i, label in enumerate(class_labels)
+    ]
+    legend_handles.append(
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="w",
+            markerfacecolor="gray",
+            markersize=12,
+            label="large = high BC-derived weight",
+        )
+    )
+    ax.legend(handles=legend_handles, loc="best", fontsize=9, frameon=True)
+    ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0] * 100:.1f}%)")
+    ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1] * 100:.1f}%)")
+    ax.set_title(f"PCA - BC bottleneck weight per sample\n{dataset_name}")
+
+    formula = "weight(i) = sum 1[predicate active on i] * BC(predicate)"
+    ax.text(
+        0.01,
+        0.01,
+        formula,
+        transform=ax.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=9,
+        bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "lightgray"},
+    )
+
+    fig.tight_layout()
+    if save_path is not None:
+        fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+    return fig
+
+
 def _resolve_graph_node(graph: nx.DiGraph, candidate):
     if candidate in graph:
         return candidate

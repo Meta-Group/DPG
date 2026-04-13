@@ -11,7 +11,9 @@ from .visualizer import (
     plot_dpg_reg,
     plot_lec_vs_rf_importance,
     plot_lrc_vs_rf_importance,
+    plot_sample_using_bc_weights,
     plot_top_lrc_predicate_splits,
+    sample_bc_weights,
 )
 
 __all__ = [
@@ -24,6 +26,8 @@ __all__ = [
     "plot_lrc_vs_rf_importance",
     "plot_lec_vs_rf_importance",
     "plot_top_lrc_predicate_splits",
+    "sample_bc_weights",
+    "plot_sample_using_bc_weights",
     "class_feature_predicate_counts",
     "classwise_feature_bounds_from_communities",
     "plot_dpg_class_bounds_vs_dataset_feature_ranges",
