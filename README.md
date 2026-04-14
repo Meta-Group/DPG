@@ -121,6 +121,9 @@ For full documentation, visit [https://dpg.readthedocs.io/](https://dpg.readthed
 
 To build and serve documentation locally, see [docs/README.md](docs/README.md).
 
+Practitioner-focused benchmark material for `perc_var` and `decimal_threshold` is available in
+[tutorials/parameter_sensitivity_benchmark/README.md](tutorials/parameter_sensitivity_benchmark/README.md).
+
 ---
 
 ## Example usage (Python)
