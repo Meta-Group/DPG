@@ -19,6 +19,12 @@ Install DPG and run your first explanation in minutes.
 
 Full API documentation for dpg, metrics, and counterfactual.
 :::
+:::{grid-item-card} Visualization
+:link: visualization
+:link-type: doc
+
+Browse all graph and chart outputs available in DPG.
+:::
 :::{grid-item-card} Counterfactual
 :link: api/counterfactual/index
 :link-type: doc
@@ -59,6 +65,13 @@ explainer.plot(explanation)
 :caption: User Guide
 
 quickstart
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Visualization
+
+visualization
 ```
 
 ```{toctree}

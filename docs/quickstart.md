@@ -75,6 +75,9 @@ explainer = DPGExplainer(
 
 ## Visualisation options
 
+For a complete gallery of available graph and chart outputs, see
+[Visualization](visualization.md).
+
 ```python
 from dpg import plot_dpg, plot_lrc_vs_rf_importance, plot_top_lrc_predicate_splits
 
@@ -93,6 +96,29 @@ plot_lrc_vs_rf_importance(explanation, model, X, dataset_name="Iris")
 
 # Visualise top predicate split lines in feature space
 plot_top_lrc_predicate_splits(explanation, X, y, dataset_name="Iris")
+```
+
+Example outputs:
+
+```{figure} _static/quickstart/iris_dpg.png
+:alt: Example Decision Predicate Graph visualization for the Iris dataset
+:width: 100%
+
+Decision Predicate Graph colored by Local Reaching Centrality.
+```
+
+```{figure} _static/quickstart/lrc_vs_rf_importance.png
+:alt: Comparison plot between DPG Local Reaching Centrality and Random Forest feature importance
+:width: 100%
+
+DPG-based feature importance compared with Random Forest feature importance.
+```
+
+```{figure} _static/quickstart/top_lrc_predicate_splits.png
+:alt: Scatter plots highlighting the most important predicate split lines discovered by DPG
+:width: 100%
+
+Top predicate split lines in feature space ranked by Local Reaching Centrality.
 ```
 
 ## scikit-learn compatible pipeline
