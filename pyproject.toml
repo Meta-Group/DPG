@@ -43,6 +43,7 @@ threadpoolctl = "3.5.0"
 tqdm = "4.67.1"
 tzdata = "2024.1"
 pyyaml = "^6.0.2"
+pyvis = ">=0.3.2"
 
 # -- optional docs dependencies (pip install ".[docs]") --
 sphinx = {version = ">=7.3", optional = true}

@@ -146,6 +146,7 @@ class DPGExplainer:
         pdf_dpi: int = 600,
         show: bool = True,
         export_pdf: bool = False,
+        export_html: bool = False,
     ) -> None:
         """Render a standard DPG plot."""
         if explanation is None:
@@ -167,6 +168,7 @@ class DPGExplainer:
             pdf_dpi=pdf_dpi,
             show=show,
             export_pdf=export_pdf,
+            export_html=export_html,
         )
 
     def plot_communities(
@@ -184,6 +186,7 @@ class DPGExplainer:
         pdf_dpi: int = 600,
         show: bool = True,
         export_pdf: bool = False,
+        export_html: bool = False,
         community_threshold: float = 0.2,
     ) -> None:
         """Render a community-colored DPG plot."""
@@ -208,6 +211,7 @@ class DPGExplainer:
             pdf_dpi=pdf_dpi,
             show=show,
             export_pdf=export_pdf,
+            export_html=export_html,
         )
 
     def plot_lrc_importance(
