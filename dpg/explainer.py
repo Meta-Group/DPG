@@ -146,6 +146,8 @@ class DPGExplainer:
         pdf_dpi: int = 600,
         show: bool = True,
         export_pdf: bool = False,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> None:
         """Render a standard DPG plot."""
         if explanation is None:
@@ -167,6 +169,8 @@ class DPGExplainer:
             pdf_dpi=pdf_dpi,
             show=show,
             export_pdf=export_pdf,
+            theme=theme,
+            palette=palette,
         )
 
     def plot_communities(
@@ -185,6 +189,8 @@ class DPGExplainer:
         show: bool = True,
         export_pdf: bool = False,
         community_threshold: float = 0.2,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> None:
         """Render a community-colored DPG plot."""
         if explanation is None or explanation.communities is None:
@@ -208,6 +214,8 @@ class DPGExplainer:
             pdf_dpi=pdf_dpi,
             show=show,
             export_pdf=export_pdf,
+            theme=theme,
+            palette=palette,
         )
 
     def plot_lrc_importance(
@@ -218,6 +226,8 @@ class DPGExplainer:
         dataset_name: str = "Dataset",
         save_path: Optional[str] = None,
         show: bool = True,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> Any:
         """Plot top LRC predicates vs RF feature importances."""
         if explanation is None:
@@ -230,6 +240,8 @@ class DPGExplainer:
             dataset_name=dataset_name,
             save_path=save_path,
             show=show,
+            theme=theme,
+            palette=palette,
         )
 
     def plot_top_lrc_splits(
@@ -243,6 +255,8 @@ class DPGExplainer:
         class_names: Optional[Any] = None,
         save_path: Optional[str] = None,
         show: bool = True,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> Optional[Any]:
         """Plot top-LRC split lines over the top-2 LRC feature space."""
         if explanation is None:
@@ -257,6 +271,8 @@ class DPGExplainer:
             class_names=class_names,
             save_path=save_path,
             show=show,
+            theme=theme,
+            palette=palette,
         )
 
     def class_feature_predicate_counts(
@@ -294,6 +310,8 @@ class DPGExplainer:
         class_names: Optional[Any] = None,
         save_path: Optional[str] = None,
         show: bool = True,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> Any:
         """Plot samples in PCA space with marker size set by BC-derived weights."""
         if explanation is None:
@@ -307,6 +325,8 @@ class DPGExplainer:
             class_names=class_names,
             save_path=save_path,
             show=show,
+            theme=theme,
+            palette=palette,
         )
 
     def plot_class_bounds_vs_dataset_ranges(
@@ -325,6 +345,8 @@ class DPGExplainer:
         save_path: Optional[str] = None,
         show: bool = True,
         community_threshold: float = 0.2,
+        theme: str = "dpg",
+        palette: str = "default",
     ) -> Optional[Any]:
         """Plot DPG class bounds against empirical dataset feature ranges."""
         if explanation is None or explanation.communities is None:
@@ -345,4 +367,6 @@ class DPGExplainer:
             dataset_range_lw=dataset_range_lw,
             save_path=save_path,
             show=show,
+            theme=theme,
+            palette=palette,
         )

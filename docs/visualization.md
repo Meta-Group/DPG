@@ -3,8 +3,8 @@
 DPG includes graph renderers, feature-importance comparisons, predicate-space plots,
 and class-boundary views.
 
-This page collects the available visualization entry points in one place so the
-Read the Docs site has a dedicated reference for plotting.
+This page collects the plotting entry points, theme options, and example outputs
+used throughout the Read the Docs site.
 
 ## Overview
 
@@ -26,6 +26,49 @@ explainer = DPGExplainer(
 explanation = explainer.explain_global(X.values, communities=True)
 ```
 
+## Themes and palettes
+
+DPG plotting supports a first-class theme API.
+
+Most plotting entry points accept:
+
+- `theme="dpg"`: the branded DPG visual style
+- `theme="legacy"`: a more neutral, backwards-leaning visual style
+- `palette="default"`: the default DPG class palette
+- `palette="olive"`: an expanded palette with more green and olive tonalities
+
+The figures on this page were regenerated with the DPG themed palette.
+
+Example:
+
+```python
+explainer.plot_lrc_importance(
+    X,
+    explanation=explanation,
+    dataset_name="Iris",
+    theme="dpg",
+    palette="olive",
+)
+
+explainer.plot_top_lrc_splits(
+    X,
+    y,
+    explanation=explanation,
+    dataset_name="Iris",
+    class_names=["setosa", "versicolor", "virginica"],
+    theme="legacy",
+)
+```
+
+You can also inspect the resolved theme programmatically:
+
+```python
+from dpg import resolve_theme_context
+
+ctx = resolve_theme_context(theme="dpg", palette="olive")
+print(ctx["class_palette"])
+```
+
 ## Main chart types
 
 ### 1. Standard DPG graph
@@ -38,6 +81,8 @@ explainer.plot(
     explanation,
     save_dir="results/",
     attribute="Local reaching centrality",
+    theme="dpg",
+    palette="default",
 )
 ```
 
@@ -65,6 +110,8 @@ explainer.plot_communities(
     explanation,
     save_dir="results/",
     class_flag=True,
+    theme="dpg",
+    palette="olive",
 )
 ```
 
@@ -77,6 +124,9 @@ DPG rendering with community-based coloring.
 
 This plot requires an explanation built with `communities=True`.
 
+::::{grid} 2
+:::{grid-item}
+
 ### 3. LRC vs Random Forest importance
 
 Use `explainer.plot_lrc_importance(...)` or `dpg.plot_lrc_vs_rf_importance(...)` to
@@ -88,6 +138,8 @@ explainer.plot_lrc_importance(
     explanation=explanation,
     dataset_name="Iris",
     top_k=10,
+    theme="dpg",
+    palette="olive",
 )
 ```
 
@@ -97,6 +149,8 @@ explainer.plot_lrc_importance(
 
 Top DPG predicates compared with Random Forest feature importance.
 ```
+:::
+:::{grid-item}
 
 ### 4. Top predicate split lines in feature space
 
@@ -110,6 +164,8 @@ explainer.plot_top_lrc_splits(
     explanation=explanation,
     dataset_name="Iris",
     top_predicates=5,
+    theme="dpg",
+    palette="olive",
 )
 ```
 
@@ -119,6 +175,11 @@ explainer.plot_top_lrc_splits(
 
 Top LRC predicate thresholds drawn over the selected feature space.
 ```
+:::
+::::
+
+::::{grid} 2
+:::{grid-item}
 
 ### 5. Bottleneck-centrality sample cloud
 
@@ -133,15 +194,19 @@ explainer.plot_sample_using_bc_weights(
     explanation=explanation,
     dataset_name="Iris",
     top_k=10,
+    theme="dpg",
+    palette="olive",
 )
 ```
 
 ```{figure} _static/visualization/bc_bottleneck_pca_cloud.png
 :alt: PCA scatter plot where point size reflects bottleneck centrality derived weight
-:width: 75%
+:width: 100%
 
 Samples in PCA space sized by BC-derived bottleneck weight.
 ```
+:::
+:::{grid-item}
 
 ### 6. DPG class bounds vs dataset feature ranges
 
@@ -156,6 +221,8 @@ explainer.plot_class_bounds_vs_dataset_ranges(
     explanation=explanation,
     dataset_name="Iris",
     top_features=4,
+    theme="dpg",
+    palette="olive",
 )
 ```
 
@@ -165,6 +232,8 @@ explainer.plot_class_bounds_vs_dataset_ranges(
 
 DPG class bounds compared with empirical dataset ranges.
 ```
+:::
+::::
 
 This view is especially useful when you want to inspect which feature ranges are
 well separated by the graph structure.
@@ -186,19 +255,24 @@ print(heat_df.head())
 
 This is commonly turned into a heatmap or a per-class bar chart:
 
+::::{grid} 2
+:::{grid-item}
 ```{figure} _static/visualization/communities_class_feature_complexity_heatmap.png
 :alt: Heatmap showing class-wise feature predicate complexity derived from DPG communities
 :width: 100%
 
 Class-feature predicate count heatmap built from community summaries.
 ```
-
+:::
+:::{grid-item}
 ```{figure} _static/visualization/communities_class_feature_complexity_bars.png
 :alt: Bar chart showing class-wise feature predicate complexity derived from DPG communities
 :width: 100%
 
 Alternative bar-chart view of the same class-feature complexity summary.
 ```
+:::
+::::
 
 ### Bounds and predicate helpers
 
@@ -231,6 +305,306 @@ fig = plot_dpg_constraints_overview(
     feature_names=feature_names,
     class_colors_list=["#4c78a8", "#f58518", "#54a24b"],
     title="DPG Constraints Overview",
+)
+```
+
+## Example snippets for all current plot methods
+
+This section gives a minimal usage example for each plotting method currently
+exposed by DPG.
+
+### Shared setup
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+from dpg import DPGExplainer
+
+X, y = load_iris(return_X_y=True, as_frame=True)
+model = RandomForestClassifier(n_estimators=50, random_state=42).fit(X, y)
+
+explainer = DPGExplainer(
+    model,
+    feature_names=X.columns.tolist(),
+    target_names=["setosa", "versicolor", "virginica"],
+)
+
+explanation = explainer.explain_global(X.values, communities=True)
+```
+
+### `DPGExplainer.plot`
+
+```python
+explainer.plot(
+    "iris_dpg",
+    explanation=explanation,
+    save_dir="results/",
+    attribute="Local reaching centrality",
+    class_flag=True,
+    theme="dpg",
+    palette="default",
+)
+```
+
+### `DPGExplainer.plot_communities`
+
+```python
+explainer.plot_communities(
+    "iris_dpg",
+    explanation=explanation,
+    save_dir="results/",
+    class_flag=True,
+    community_threshold=0.2,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `DPGExplainer.plot_lrc_importance`
+
+```python
+explainer.plot_lrc_importance(
+    X,
+    explanation=explanation,
+    top_k=10,
+    dataset_name="Iris",
+    save_path="results/lrc_vs_rf_importance.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `DPGExplainer.plot_top_lrc_splits`
+
+```python
+explainer.plot_top_lrc_splits(
+    X,
+    y,
+    explanation=explanation,
+    top_predicates=5,
+    top_features=2,
+    dataset_name="Iris",
+    class_names=["setosa", "versicolor", "virginica"],
+    save_path="results/top_lrc_predicate_splits.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `DPGExplainer.plot_sample_using_bc_weights`
+
+```python
+explainer.plot_sample_using_bc_weights(
+    X,
+    y,
+    explanation=explanation,
+    top_k=10,
+    dataset_name="Iris",
+    class_names=["setosa", "versicolor", "virginica"],
+    save_path="results/bc_bottleneck_pca_cloud.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `DPGExplainer.plot_class_bounds_vs_dataset_ranges`
+
+```python
+explainer.plot_class_bounds_vs_dataset_ranges(
+    X,
+    y,
+    explanation=explanation,
+    dataset_name="Iris",
+    top_features=4,
+    feature_cols_per_row=2,
+    save_path="results/dpg_vs_dataset_feature_ranges.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_dpg`
+
+```python
+from dpg import plot_dpg
+
+plot_dpg(
+    "iris_dpg",
+    explanation.dot,
+    explanation.node_metrics,
+    explanation.edge_metrics,
+    save_dir="results/",
+    attribute="Local reaching centrality",
+    class_flag=True,
+    theme="dpg",
+    palette="default",
+)
+```
+
+### `dpg.plot_dpg_communities`
+
+```python
+from dpg.visualizer import plot_dpg_communities
+
+plot_dpg_communities(
+    "iris_dpg",
+    explanation.dot,
+    explanation.node_metrics,
+    explanation.communities,
+    save_dir="results/",
+    class_flag=True,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_lrc_vs_rf_importance`
+
+```python
+from dpg import plot_lrc_vs_rf_importance
+
+plot_lrc_vs_rf_importance(
+    explanation,
+    model,
+    X,
+    top_k=10,
+    dataset_name="Iris",
+    save_path="results/lrc_vs_rf_importance.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_lec_vs_rf_importance`
+
+```python
+from dpg import plot_lec_vs_rf_importance
+
+# Deprecated alias kept for backward compatibility.
+plot_lec_vs_rf_importance(
+    explanation,
+    model,
+    X,
+    top_k=10,
+    dataset_name="Iris",
+    save_path="results/lrc_vs_rf_importance_alias.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_top_lrc_predicate_splits`
+
+```python
+from dpg import plot_top_lrc_predicate_splits
+
+plot_top_lrc_predicate_splits(
+    explanation,
+    X,
+    y,
+    top_predicates=5,
+    top_features=2,
+    dataset_name="Iris",
+    class_names=["setosa", "versicolor", "virginica"],
+    save_path="results/top_lrc_predicate_splits.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_sample_using_bc_weights`
+
+```python
+from dpg import plot_sample_using_bc_weights
+
+plot_sample_using_bc_weights(
+    explanation,
+    X,
+    y,
+    top_k=10,
+    dataset_name="Iris",
+    class_names=["setosa", "versicolor", "virginica"],
+    save_path="results/bc_bottleneck_pca_cloud.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_dpg_class_bounds_vs_dataset_feature_ranges`
+
+```python
+from dpg import plot_dpg_class_bounds_vs_dataset_feature_ranges
+
+plot_dpg_class_bounds_vs_dataset_feature_ranges(
+    explanation,
+    X,
+    y,
+    dataset_name="Iris",
+    top_features=4,
+    feature_cols_per_row=2,
+    save_path="results/dpg_vs_dataset_feature_ranges.png",
+    show=False,
+    theme="dpg",
+    palette="olive",
+)
+```
+
+### `dpg.plot_dpg_reg`
+
+```python
+from dpg.visualizer import plot_dpg_reg
+
+plot_dpg_reg(
+    "iris_reg_view",
+    explanation.dot,
+    explanation.node_metrics,
+    explanation.communities,
+    save_dir="results/",
+    attribute="Local reaching centrality",
+    theme="dpg",
+    palette="default",
+)
+```
+
+`plot_dpg_reg` is a lower-level function intended for regression-oriented or
+custom workflows. In most classification cases, prefer `plot_dpg(...)`.
+
+### `dpg.plot_dpg_constraints_overview`
+
+```python
+from dpg import plot_dpg_constraints_overview
+
+normalized_constraints = {
+    "setosa": {
+        "petal length (cm)": {"min": 1.0, "max": 1.9},
+        "petal width (cm)": {"min": 0.1, "max": 0.6},
+    },
+    "versicolor": {
+        "petal length (cm)": {"min": 3.0, "max": 5.1},
+        "petal width (cm)": {"min": 1.0, "max": 1.8},
+    },
+    "virginica": {
+        "petal length (cm)": {"min": 4.5, "max": 6.9},
+        "petal width (cm)": {"min": 1.4, "max": 2.5},
+    },
+}
+
+fig = plot_dpg_constraints_overview(
+    normalized_constraints=normalized_constraints,
+    feature_names=["petal length (cm)", "petal width (cm)"],
+    class_colors_list=["#E3C800", "#F0A30A", "#FA6800"],
+    output_path="results/constraints_overview.png",
+    title="Iris constraints overview",
+    theme="dpg",
+    palette="olive",
 )
 ```
 

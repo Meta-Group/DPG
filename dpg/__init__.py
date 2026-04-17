@@ -1,6 +1,7 @@
 # dpg/__init__.py
 from .core import DecisionPredicateGraph
 from .explainer import DPGExplainer, DPGExplanation
+from .themes import DPG_CLASS_PALETTE, DPG_COLORS, DPG_OLIVE_CLASS_PALETTE, resolve_theme_context
 from .visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
@@ -20,6 +21,10 @@ __all__ = [
     "DecisionPredicateGraph",
     "DPGExplainer",
     "DPGExplanation",
+    "DPG_COLORS",
+    "DPG_CLASS_PALETTE",
+    "DPG_OLIVE_CLASS_PALETTE",
+    "resolve_theme_context",
     "plot_dpg",
     "plot_dpg_reg",
     "plot_dpg_constraints_overview",

@@ -30,7 +30,8 @@ explainer = DPGExplainer(
 )
 
 # 3. Fit (extract the graph from training paths)
-explanation = explainer.fit(X.values)
+explainer.fit(X.values)
+explanation = explainer.explain_global()
 
 # 4. Inspect metrics
 print(explanation.node_metrics.head())
@@ -42,7 +43,7 @@ explainer.plot(explanation, save_dir="results/")
 
 ## What `DPGExplainer` returns
 
-`explainer.fit()` returns a {class}`dpg.DPGExplanation` dataclass with:
+`explainer.explain_global()` returns a {class}`dpg.DPGExplanation` dataclass with:
 
 | Attribute | Type | Description |
 |---|---|---|
@@ -78,6 +79,8 @@ explainer = DPGExplainer(
 For a complete gallery of available graph and chart outputs, see
 [Visualization](visualization.md).
 
+The example outputs below use the themed DPG palette.
+
 ```python
 from dpg import plot_dpg, plot_lrc_vs_rf_importance, plot_top_lrc_predicate_splits
 
@@ -89,14 +92,33 @@ plot_dpg(
     explanation.edge_metrics,
     save_dir="results/",
     attribute="Local reaching centrality",  # color by LRC
+    theme="dpg",
+    palette="olive",
 )
 
 # Compare DPG importance vs Random Forest importance
-plot_lrc_vs_rf_importance(explanation, model, X, dataset_name="Iris")
+plot_lrc_vs_rf_importance(
+    explanation,
+    model,
+    X,
+    dataset_name="Iris",
+    theme="dpg",
+    palette="olive",
+)
 
 # Visualise top predicate split lines in feature space
-plot_top_lrc_predicate_splits(explanation, X, y, dataset_name="Iris")
+plot_top_lrc_predicate_splits(
+    explanation,
+    X,
+    y,
+    dataset_name="Iris",
+    theme="dpg",
+    palette="olive",
+)
 ```
+
+The theming API also supports `theme="legacy"` and `palette="default"` if you
+want a more neutral look.
 
 Example outputs:
 

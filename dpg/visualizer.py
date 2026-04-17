@@ -14,7 +14,11 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 from PIL import Image
-from .utils import highlight_class_node, change_node_color, delete_folder_contents
+from .utils import delete_folder_contents
+from .themes import (
+    DPG_COLORS,
+    resolve_theme_context,
+)
 
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
@@ -54,8 +58,100 @@ _LAYOUT_TEMPLATES = {
 }
 
 
-def _apply_layout_template(dot, layout_template=None, graph_style=None, node_style=None, edge_style=None):
+def _apply_matplotlib_theme(theme_context: Dict[str, Any]) -> None:
+    plt.rcParams.update(theme_context["mpl_style"])
+
+
+def _style_axes(ax, theme_context: Dict[str, Any], grid_axis: str = "y") -> None:
+    colors = theme_context["colors"]
+    ax.set_facecolor(colors["paper"])
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(colors["grid"])
+        ax.spines[side].set_linewidth(1.0)
+    if grid_axis in {"x", "y", "both"}:
+        ax.grid(axis=grid_axis, linestyle="--", alpha=0.55, zorder=0)
+
+
+def _style_legend(legend, theme_context: Dict[str, Any]) -> None:
+    if legend is None:
+        return
+    colors = theme_context["colors"]
+    frame = legend.get_frame()
+    frame.set_facecolor("#FFFDF7" if theme_context["theme"] == "dpg" else colors["paper"])
+    frame.set_edgecolor(colors["light_gray"])
+    frame.set_alpha(0.98)
+
+
+def _style_figure(fig, theme_context: Dict[str, Any], title: Optional[str] = None, subtitle: Optional[str] = None) -> None:
+    colors = theme_context["colors"]
+    fig.patch.set_facecolor(colors["paper"])
+    if title:
+        fig.suptitle(title, color=colors["ink"], fontsize=14, fontweight="semibold")
+    if subtitle:
+        fig.text(0.5, 0.015, subtitle, ha="center", color=colors["mid_gray"], fontsize=9, style="italic")
+
+
+def _class_fill_color(theme_context: Dict[str, Any]) -> str:
+    return theme_context["colors"].get("class_fill", theme_context["colors"]["success"])
+
+
+def _default_node_color(theme_context: Dict[str, Any]) -> str:
+    return theme_context["colors"]["node_fill"]
+
+
+def _default_pred_node_color(theme_context: Dict[str, Any]) -> str:
+    return theme_context["colors"]["node_muted"]
+
+
+def _apply_dpg_graphviz_skin(dot, theme_context: Dict[str, Any]) -> None:
+    colors = theme_context["colors"]
+    dot.attr(
+        "graph",
+        bgcolor=colors["paper"],
+        pad="0.18",
+        nodesep="0.38",
+        ranksep="0.55",
+    )
+    dot.attr(
+        "node",
+        shape="box",
+        style="rounded,filled",
+        color=colors["light_gray"],
+        fillcolor=_default_node_color(theme_context),
+        fontname="DejaVu Sans",
+        fontsize="11",
+        margin="0.06,0.04",
+        penwidth="1.1",
+    )
+    dot.attr(
+        "edge",
+        color=colors["edge"],
+        fontname="DejaVu Sans",
+        fontsize="10",
+        arrowsize="0.7",
+        penwidth="1.1",
+    )
+
+
+def _style_class_nodes(dot, df: Any, theme_context: Dict[str, Any]) -> None:
+    colors = theme_context["colors"]
+    class_rows = df[df["Label"].astype(str).str.contains("Class", regex=False, na=False)]
+    for _, row in class_rows.iterrows():
+        dot.node(
+            str(row["Node"]),
+            style="rounded,filled",
+            fillcolor=_class_fill_color(theme_context),
+            color=colors["danger"],
+            fontcolor="black",
+            penwidth="1.4",
+        )
+
+
+def _apply_layout_template(dot, theme_context: Dict[str, Any], layout_template=None, graph_style=None, node_style=None, edge_style=None):
     """Apply optional graph layout/style settings to Graphviz Digraph."""
+    _apply_dpg_graphviz_skin(dot, theme_context)
     template_name = (layout_template or "default").lower()
     template = _LAYOUT_TEMPLATES.get(template_name, _LAYOUT_TEMPLATES["default"])
 
@@ -123,6 +219,8 @@ def plot_dpg(
     pdf_dpi=600,
     show=True,
     export_pdf=False,
+    theme: str = "dpg",
+    palette: str = "default",
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -158,8 +256,13 @@ def plot_dpg(
         None
     """
     print("Plotting DPG...")
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
+    original_df = df.copy()
     _apply_layout_template(
         dot,
+        theme_context=theme_context,
         layout_template=layout_template,
         graph_style=graph_style,
         node_style=node_style,
@@ -169,43 +272,43 @@ def plot_dpg(
     if attribute is None and clusters is None:
         for index, row in df.iterrows():
             if 'Class' in row['Label']:
-                change_node_color(dot, row['Node'], "#{:02x}{:02x}{:02x}".format(157, 195, 230))  # Light blue for class nodes
+                change_node_color(dot, row['Node'], _class_fill_color(theme_context))
             else:
-                change_node_color(dot, row['Node'], "#{:02x}{:02x}{:02x}".format(222, 235, 247))  # Light grey for other nodes
+                change_node_color(dot, row['Node'], _default_node_color(theme_context))
 
 
     # Color nodes based on a specific attribute
     elif attribute is not None and clusters is None:
-        colormap = cm.Blues  # Choose a colormap
+        colormap = theme_context["sequential_cmap"]
         norm = None
 
         # Highlight class nodes if class_flag is True
         if class_flag:
             for index, row in df.iterrows():
                 if 'Class' in row['Label']:
-                    change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+                    change_node_color(dot, row['Node'], _class_fill_color(theme_context))
             df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
         
         # Normalize the attribute values if norm_flag is True
         max_score = df[attribute].max()
         norm = mcolors.Normalize(0, max_score)
-        colors = colormap(norm(df[attribute]))  # Assign colors based on normalized scores
+        node_rgba = colormap(norm(df[attribute]))  # Assign colors based on normalized scores
         
         for index, row in df.iterrows():
-            color = "#{:02x}{:02x}{:02x}".format(int(colors[index][0]*255), int(colors[index][1]*255), int(colors[index][2]*255))
+            color = "#{:02x}{:02x}{:02x}".format(int(node_rgba[index][0]*255), int(node_rgba[index][1]*255), int(node_rgba[index][2]*255))
             change_node_color(dot, row['Node'], color)
         
         plot_name = plot_name + f"_{attribute}".replace(" ","")
     
 
     elif attribute is None and clusters is not None:
-        colormap = cm.get_cmap('tab20')  # Choose a colormap
+        palette_hex = theme_context["class_palette"][: max(1, len(clusters) + 1)]
         
         # Highlight class nodes if class_flag is True
         if class_flag:
             for index, row in df.iterrows():
                 if 'Class' in row['Label']:
-                    change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+                    change_node_color(dot, row['Node'], _class_fill_color(theme_context))
             df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
         
         node_to_cluster = {}
@@ -221,13 +324,11 @@ def plot_dpg(
         ambiguous_idx = len(unique_clusters)
         cluster_to_idx['ambiguous'] = ambiguous_idx
 
-        n_colors = max(1, len(cluster_to_idx))
-        palette_rgba = [colormap(i / max(1, n_colors - 1)) for i in range(n_colors)]
-        palette_hex = ["#{:02x}{:02x}{:02x}".format(int(r*255), int(g*255), int(b*255))
-                    for (r, g, b, _) in palette_rgba]
-
         if 'ambiguous' in cluster_to_idx:
-            palette_hex[cluster_to_idx['ambiguous']] = '#bdbdbd'  # grigio chiaro
+            if cluster_to_idx['ambiguous'] >= len(palette_hex):
+                palette_hex.append(colors["light_gray"])
+            else:
+                palette_hex[cluster_to_idx['ambiguous']] = colors["light_gray"]
 
         for i, row in df.iterrows():
             idx = cluster_to_idx.get(row['Cluster'], cluster_to_idx['ambiguous'])
@@ -242,7 +343,7 @@ def plot_dpg(
 
 
     # Highlight edges
-    colormap_edge = cm.Greys  # Colormap edges
+    colormap_edge = theme_context["edge_cmap"]
     max_edge_value = df_edges['Weight'].max()
     min_edge_value = df_edges['Weight'].min()
     norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
@@ -267,8 +368,7 @@ def plot_dpg(
         #     dot.body[i] = re.sub(r'\s*label="[^"]*"', '', dot.body[i])
     
 
-    # Highlight class nodes
-    highlight_class_node(dot)
+    _style_class_nodes(dot, original_df, theme_context)
 
     # Render the graph to PNG bytes (avoid temp files)
     def _sanitize_dot_source(source: str) -> str:
@@ -288,8 +388,9 @@ def plot_dpg(
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
     fig, ax = plt.subplots(figsize=fig_size)
+    fig.patch.set_facecolor(colors["paper"])
     ax.set_axis_off()
-    ax.set_title(plot_name)
+    ax.set_title(plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
     ax.imshow(img)
     
     # Add a color bar if an attribute is specified
@@ -306,6 +407,9 @@ def plot_dpg(
             orientation='horizontal',
         )
         cbar.set_label(attribute)
+        cbar.outline.set_edgecolor(colors["light_gray"])
+        cbar.ax.xaxis.label.set_color(colors["charcoal"])
+        cbar.ax.tick_params(colors=colors["charcoal"])
 
     # Save the plot to the specified directory
     os.makedirs(save_dir, exist_ok=True)
@@ -343,6 +447,8 @@ def plot_dpg_communities(
     pdf_dpi=600,
     show=True,
     export_pdf=False,
+    theme: str = "dpg",
+    palette: str = "default",
 ):
     """
     Plot a DPG colored by community assignment.
@@ -377,8 +483,13 @@ def plot_dpg_communities(
         None
     """
     print("Plotting DPG (communities)...")
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
+    original_df = df.copy()
     _apply_layout_template(
         dot,
+        theme_context=theme_context,
         layout_template=layout_template,
         graph_style=graph_style,
         node_style=node_style,
@@ -388,13 +499,13 @@ def plot_dpg_communities(
     if dpg_metrics is None:
         raise AttributeError("dpg_metrics is required to plot communities.")
 
-    colormap = cm.YlOrRd  # Choose a colormap
+    colormap = theme_context["community_cmap"]
 
     # Highlight class nodes if class_flag is True
     if class_flag:
         for index, row in df.iterrows():
             if 'Class' in row['Label']:
-                change_node_color(dot, row['Node'], '#ffc000')  # Yellow for class nodes
+                change_node_color(dot, row['Node'], _class_fill_color(theme_context))
         df = df[~df.Label.str.contains('Class')].reset_index(drop=True)  # Exclude class nodes from further processing
 
     # Map labels to community indices
@@ -421,16 +532,16 @@ def plot_dpg_communities(
     else:
         norm = mcolors.Normalize(0, max_score)  # Normalize the community indices
 
-    colors = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
+    node_rgba = colormap(norm(df['Community']))  # Assign colors based on normalized community indices
 
     for index, row in df.iterrows():
         if pd.isna(row['Community']):
-            color = "#bdbdbd"
+            color = colors["light_gray"]
         else:
             color = "#{:02x}{:02x}{:02x}".format(
-                int(colors[index][0] * 255),
-                int(colors[index][1] * 255),
-                int(colors[index][2] * 255),
+                int(node_rgba[index][0] * 255),
+                int(node_rgba[index][1] * 255),
+                int(node_rgba[index][2] * 255),
             )
         change_node_color(dot, row['Node'], color)
 
@@ -438,7 +549,7 @@ def plot_dpg_communities(
 
     # Highlight edges (optional)
     if df_edges is not None:
-        colormap_edge = cm.Greys  # Colormap edges
+        colormap_edge = theme_context["edge_cmap"]
         max_edge_value = df_edges['Weight'].max()
         min_edge_value = df_edges['Weight'].min()
         norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
@@ -454,8 +565,7 @@ def plot_dpg_communities(
 
             change_edge_color(dot, row['Source_id'], row['Target_id'], new_color=color_hex, new_width=penwidth)
 
-    # Highlight class nodes
-    highlight_class_node(dot)
+    _style_class_nodes(dot, original_df, theme_context)
 
     # Render the graph to PNG bytes (avoid temp files)
     def _sanitize_dot_source(source: str) -> str:
@@ -475,8 +585,9 @@ def plot_dpg_communities(
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
     fig, ax = plt.subplots(figsize=fig_size)
+    fig.patch.set_facecolor(colors["paper"])
     ax.set_axis_off()
-    ax.set_title(plot_name)
+    ax.set_title(plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
     ax.imshow(img)
 
     # Save the plot to the specified directory with tight borders
@@ -541,6 +652,8 @@ def plot_dpg_reg(
     attribute: Optional[str] = None,
     communities: bool = False,
     leaf_flag: bool = False,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> None:
     """Plot a regression DPG with optional node coloring by attribute or community.
 
@@ -556,20 +669,25 @@ def plot_dpg_reg(
             attribute coloring.
     """
     print("Rendering plot...")
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     
     node_colors = {}
     if attribute or communities:
         if attribute:
             df = df[~df['Label'].str.contains('Pred')] if leaf_flag else df
-            node_colors = normalize_data(df, attribute, plt.cm.Blues)
+            node_colors = normalize_data(df, attribute, theme_context["sequential_cmap"])
             plot_name += f"_{attribute.replace(' ', '')}"
         elif communities:
             df['Community'] = df['Label'].map({label: idx for idx, s in enumerate(df_dpg['Communities']) for label in s})
-            node_colors = normalize_data(df, 'Community', plt.cm.YlOrRd)
+            node_colors = normalize_data(df, 'Community', theme_context["community_cmap"])
             plot_name += "_communities"
     else:
-        base_color = "#9ec3e6" if 'Pred' in df['Label'] else "#dee1f7"
-        node_colors = {row['Node']: base_color for index, row in df.iterrows()}
+        node_colors = {}
+        for _, row in df.iterrows():
+            fill = _class_fill_color(theme_context) if "Pred" in str(row["Label"]) else _default_pred_node_color(theme_context)
+            node_colors[row["Node"]] = fill
 
     # Apply node colors
     for node, color in node_colors.items():
@@ -584,23 +702,27 @@ def plot_dpg_reg(
     # Display and save the image
     img_path = f"{graph_path}.png"
     img = Image.open(img_path)
-    plt.figure(figsize=(16, 8))
-    plt.axis('off')
-    plt.title(plot_name)
-    plt.imshow(img)
+    fig, ax = plt.subplots(figsize=(16, 8))
+    fig.patch.set_facecolor(colors["paper"])
+    ax.axis('off')
+    ax.set_title(plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
+    ax.imshow(img)
 
     if attribute:
-        cax = plt.axes([0.11, 0.1, 0.8, 0.025])
+        cax = fig.add_axes([0.11, 0.1, 0.8, 0.025])
         norm = Normalize(vmin=df[attribute].min(), vmax=df[attribute].max())
-        cbar = plt.colorbar(ScalarMappable(norm=norm, cmap=plt.cm.Blues), cax=cax, orientation='horizontal')
+        cbar = fig.colorbar(ScalarMappable(norm=norm, cmap=theme_context["sequential_cmap"]), cax=cax, orientation='horizontal')
         cbar.set_label(attribute)
+        cbar.outline.set_edgecolor(colors["light_gray"])
+        cbar.ax.tick_params(colors=colors["charcoal"])
 
-    plt.savefig(os.path.join(save_dir, f"{plot_name}_REG.png"), dpi=300)
-    plt.close()  # Free up memory by closing the plot
+    fig.savefig(os.path.join(save_dir, f"{plot_name}_REG.png"), dpi=300, bbox_inches="tight", pad_inches=0.04)
+    plt.close(fig)  # Free up memory by closing the plot
 
 
     # Clean up temporary files
-    delete_folder_contents("temp")
+    if os.path.isdir("temp"):
+        delete_folder_contents("temp")
 
 
 def plot_dpg_constraints_overview(
@@ -611,7 +733,9 @@ def plot_dpg_constraints_overview(
     title: str = "DPG Constraints Overview",
     original_sample: Dict = None,
     original_class: int = None,
-    target_class: int = None
+    target_class: int = None,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> Any:
     """Create a horizontal bar chart showing DPG constraints for all features.
 
@@ -632,6 +756,9 @@ def plot_dpg_constraints_overview(
     Returns:
         matplotlib Figure object
     """
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     if not normalized_constraints:
         print("WARNING: No constraints available for visualization")
         return None
@@ -680,6 +807,8 @@ def plot_dpg_constraints_overview(
 
     # Create figure
     fig, ax = plt.subplots(figsize=(14, max(6, n_features * 0.5)))
+    fig.patch.set_facecolor(colors["paper"])
+    ax.set_facecolor(colors["paper"])
 
     # Y positions for features
     y_positions = np.arange(n_features)
@@ -727,7 +856,7 @@ def plot_dpg_constraints_overview(
         # Highlight non-overlapping features
         is_discriminative = feat in non_overlapping_features
         if is_discriminative:
-            ax.axhspan(y - 0.45, y + 0.45, alpha=0.1, color='gold', zorder=0)
+            ax.axhspan(y - 0.45, y + 0.45, alpha=0.12, color=colors.get("gold", colors["success"]), zorder=0)
 
         # Draw constraints for each class
         for class_idx, cname in enumerate(class_names):
@@ -759,11 +888,11 @@ def plot_dpg_constraints_overview(
                     # Add min/max value labels
                     ax.text(feat_min, y + y_offset, f'{feat_min:.2f}',
                            ha='right', va='center', fontsize=7, color=color, weight='bold',
-                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='#FFFDF7',
                                     edgecolor=color, alpha=0.8, linewidth=0.5))
                     ax.text(feat_max, y + y_offset, f'{feat_max:.2f}',
                            ha='left', va='center', fontsize=7, color=color, weight='bold',
-                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='#FFFDF7',
                                     edgecolor=color, alpha=0.8, linewidth=0.5))
 
                 elif feat_min is not None:
@@ -774,7 +903,7 @@ def plot_dpg_constraints_overview(
                               marker='|', zorder=3, linewidths=3)
                     ax.text(feat_min, y + y_offset + bar_height/2, f'min:{feat_min:.2f}',
                            ha='center', va='bottom', fontsize=7, color=color, weight='bold',
-                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='#FFFDF7',
                                     edgecolor=color, alpha=0.8, linewidth=0.5))
 
                 elif feat_max is not None:
@@ -785,21 +914,21 @@ def plot_dpg_constraints_overview(
                               marker='|', zorder=3, linewidths=3)
                     ax.text(feat_max, y + y_offset + bar_height/2, f'max:{feat_max:.2f}',
                            ha='center', va='bottom', fontsize=7, color=color, weight='bold',
-                           bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                           bbox=dict(boxstyle='round,pad=0.2', facecolor='#FFFDF7',
                                     edgecolor=color, alpha=0.8, linewidth=0.5))
 
         # Draw original sample value if provided
         if original_sample and feat in original_sample:
             sample_val = original_sample[feat]
             # Draw as a prominent marker
-            ax.scatter([sample_val], [y], color='black', s=150, marker='o',
-                      zorder=10, edgecolors='white', linewidths=2)
+            ax.scatter([sample_val], [y], color=colors["ink"], s=150, marker='o',
+                      zorder=10, edgecolors='#FFFDF7', linewidths=2)
             ax.plot([sample_val, sample_val], [y - 0.4, y + 0.4],
-                   color='black', linewidth=2, linestyle='-', zorder=9, alpha=0.7)
+                   color=colors["ink"], linewidth=2, linestyle='-', zorder=9, alpha=0.7)
             ax.text(sample_val, y + 0.42, f'{sample_val:.2f}',
-                   ha='center', va='bottom', fontsize=8, color='black', weight='bold',
-                   bbox=dict(boxstyle='round,pad=0.2', facecolor='yellow',
-                            edgecolor='black', alpha=0.9, linewidth=1))
+                   ha='center', va='bottom', fontsize=8, color=colors["ink"], weight='bold',
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor=colors.get("gold", colors["success"]),
+                            edgecolor=colors["charcoal"], alpha=0.92, linewidth=1))
 
     # Configure axes
     ax.set_yticks(y_positions)
@@ -816,13 +945,14 @@ def plot_dpg_constraints_overview(
     # Color discriminative feature labels
     for tick_label, feat in zip(ax.get_yticklabels(), features_with_constraints):
         if feat in non_overlapping_features:
-            tick_label.set_color('darkgreen')
+            tick_label.set_color(colors["success"])
             tick_label.set_weight('bold')
+    ax.tick_params(axis="y", length=0)
 
     ax.set_xlim(x_min, x_max)
-    ax.set_xlabel('Feature Value', fontsize=12, loc='left')
-    ax.axvline(x=0, color='gray', linestyle=':', alpha=0.5, zorder=1)
-    ax.grid(True, axis='x', linestyle='--', alpha=0.3)
+    ax.set_xlabel('Feature value', fontsize=12, loc='left')
+    ax.axvline(x=0, color=colors["mid_gray"], linestyle=':', alpha=0.5, zorder=1)
+    _style_axes(ax, theme_context, grid_axis="x")
 
     # Create legend
     legend_elements = []
@@ -841,22 +971,23 @@ def plot_dpg_constraints_overview(
 
     if non_overlapping_features:
         legend_elements.append(
-            mpatches.Patch(facecolor='gold', alpha=0.2,
+            mpatches.Patch(facecolor=colors.get("gold", colors["success"]), alpha=0.2,
                           label=f'★ Non-overlapping ({len(non_overlapping_features)} features)')
         )
 
-    ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+    legend = ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+    _style_legend(legend, theme_context)
 
     # Title with class info
     title_text = title
     if original_class is not None and target_class is not None:
         title_text += f'\nOriginal Class: {original_class} → Target Class: {target_class}'
-    ax.set_title(title_text, fontsize=14, weight='bold', pad=10)
+    ax.set_title(title_text, fontsize=14, weight='semibold', pad=10, color=colors["ink"])
 
     # Add statistics subtitle
     n_non_overlap = len(non_overlapping_features)
     subtitle = f"Features: {n_features} | Non-overlapping: {n_non_overlap} | Classes: {n_classes}"
-    fig.text(0.5, 0.01, subtitle, ha='center', fontsize=10, style='italic')
+    fig.text(0.5, 0.01, subtitle, ha='center', fontsize=10, style='italic', color=colors["mid_gray"])
 
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.08)
@@ -890,13 +1021,7 @@ def parse_feature_from_predicate(label: str) -> str:
 
 
 def _feature_color_map(features: List[str]) -> Dict[str, Any]:
-    unique = list(dict.fromkeys(features))
-    if not unique:
-        return {}
-    cmap = plt.cm.tab20
-    if len(unique) == 1:
-        return {unique[0]: cmap(0)}
-    return {feature: cmap(i / (len(unique) - 1)) for i, feature in enumerate(unique)}
+    return feature_color_map(features)
 
 
 def lrc_predicate_scores(explanation, top_k: int = 10) -> Any:
@@ -934,6 +1059,8 @@ def plot_lrc_vs_rf_importance(
     dataset_name: str = "Dataset",
     save_path: Optional[str] = None,
     show: bool = True,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> Any:
     """
     Compare top LRC predicates and top RF feature importances side-by-side.
@@ -941,6 +1068,9 @@ def plot_lrc_vs_rf_importance(
     Returns:
         Matplotlib figure.
     """
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     top_lrc = lrc_predicate_scores(explanation, top_k=top_k).copy()
     if top_lrc.empty:
         raise ValueError("No predicate labels available to compute LRC scores.")
@@ -962,31 +1092,34 @@ def plot_lrc_vs_rf_importance(
     top_lrc_plot = top_lrc.sort_values("lrc", ascending=True)
     top_rf_plot = top_rf.sort_values("rf_importance", ascending=True)
     all_features = top_lrc_plot["feature"].tolist() + top_rf_plot["feature"].tolist()
-    feature_to_color = _feature_color_map(all_features)
+    feature_to_color = theme_context["feature_color_map"](all_features)
 
     fig, axes = plt.subplots(1, 2, figsize=(16, max(5, top_k * 0.45)))
+    fig.patch.set_facecolor(colors["paper"])
 
     axes[0].barh(
         top_lrc_plot["predicate"],
         top_lrc_plot["lrc"],
         color=[feature_to_color[f] for f in top_lrc_plot["feature"]],
-        edgecolor="black",
-        linewidth=0.4,
+        edgecolor=colors["paper"],
+        linewidth=0.8,
     )
     axes[0].set_title(f"{dataset_name}: Top {top_k} LRC predicates")
-    axes[0].set_xlabel("Local Reaching Centrality")
+    axes[0].set_xlabel("Local reaching centrality")
     axes[0].set_ylabel("Predicate")
+    _style_axes(axes[0], theme_context, grid_axis="x")
 
     axes[1].barh(
         top_rf_plot["feature"],
         top_rf_plot["rf_importance"],
         color=[feature_to_color[f] for f in top_rf_plot["feature"]],
-        edgecolor="black",
-        linewidth=0.4,
+        edgecolor=colors["paper"],
+        linewidth=0.8,
     )
     axes[1].set_title(f"{dataset_name}: Top {top_k} RF feature importances")
     axes[1].set_xlabel("Random Forest feature importance")
     axes[1].set_ylabel("Feature")
+    _style_axes(axes[1], theme_context, grid_axis="x")
 
     legend_features = list(dict.fromkeys(all_features))
     legend_handles = [
@@ -997,18 +1130,19 @@ def plot_lrc_vs_rf_importance(
             color="w",
             label=feature,
             markerfacecolor=feature_to_color[feature],
-            markeredgecolor="black",
+            markeredgecolor=colors["charcoal"],
             markersize=8,
         )
         for feature in legend_features
     ]
-    fig.legend(
+    legend = fig.legend(
         handles=legend_handles,
         title="Feature colors",
         loc="lower center",
         ncol=min(4, max(1, len(legend_handles))),
         frameon=True,
     )
+    _style_legend(legend, theme_context)
 
     plt.tight_layout(rect=(0, 0.08, 1, 1))
     if save_path is not None:
@@ -1044,6 +1178,8 @@ def plot_top_lrc_predicate_splits(
     class_names: Optional[Any] = None,
     save_path: Optional[str] = None,
     show: bool = True,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> Optional[Any]:
     """
     Scatter the top-2 LRC features and overlay top-LRC predicate split lines.
@@ -1051,6 +1187,9 @@ def plot_top_lrc_predicate_splits(
     Returns:
         Matplotlib figure, or None when top features cannot be resolved.
     """
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     top_lrc = lrc_predicate_scores(explanation, top_k=max(top_predicates, 10)).copy()
     top_pred = top_lrc.sort_values("lrc", ascending=False).head(top_predicates).copy()
 
@@ -1102,20 +1241,24 @@ def plot_top_lrc_predicate_splits(
         class_labels = ["unknown"]
         class_codes = np.zeros(len(y_series), dtype=int)
     n_classes = len(class_labels)
-    class_cmap = cm.get_cmap("viridis", n_classes)
+    class_map = theme_context["class_cmap"](n_classes)
 
-    scatter = ax.scatter(
+    fig.patch.set_facecolor(colors["paper"])
+    ax.set_facecolor(colors["paper"])
+
+    ax.scatter(
         X_df[fx],
         X_df[fy],
         c=class_codes,
-        cmap=class_cmap,
-        s=36,
-        alpha=0.75,
-        edgecolor="white",
-        linewidth=0.5,
+        cmap=class_map,
+        s=42,
+        alpha=0.82,
+        edgecolor="#FFFDF7",
+        linewidth=0.7,
+        zorder=2,
     )
 
-    feature_to_color = _feature_color_map([fx, fy])
+    feature_to_color = theme_context["predicate_line_color_map"]([fx, fy])
     labels_seen = set()
     for _, row in split_rows.iterrows():
         feature = row["feature"]
@@ -1129,7 +1272,7 @@ def plot_top_lrc_predicate_splits(
                 threshold,
                 color=feature_to_color[feature],
                 linestyle=linestyle,
-                linewidth=2,
+                linewidth=2.4,
                 alpha=0.9,
                 label=label if label not in labels_seen else None,
             )
@@ -1139,7 +1282,7 @@ def plot_top_lrc_predicate_splits(
                 threshold,
                 color=feature_to_color[feature],
                 linestyle=linestyle,
-                linewidth=2,
+                linewidth=2.4,
                 alpha=0.9,
                 label=label if label not in labels_seen else None,
             )
@@ -1148,6 +1291,7 @@ def plot_top_lrc_predicate_splits(
     ax.set_title(f"{dataset_name}: Top-{top_predicates} LRC predicate splits")
     ax.set_xlabel(fx)
     ax.set_ylabel(fy)
+    _style_axes(ax, theme_context, grid_axis="both")
 
     class_handles = [
         Line2D(
@@ -1155,9 +1299,9 @@ def plot_top_lrc_predicate_splits(
             [0],
             marker="o",
             color="w",
-            markerfacecolor=class_cmap(i),
-            markeredgecolor="white",
-            markeredgewidth=0.5,
+            markerfacecolor=class_map(i),
+            markeredgecolor="#FFFDF7",
+            markeredgewidth=0.7,
             markersize=7,
             linestyle="None",
             alpha=0.85,
@@ -1172,11 +1316,13 @@ def plot_top_lrc_predicate_splits(
         fontsize=8,
         frameon=True,
     )
+    _style_legend(class_legend, theme_context)
     ax.add_artist(class_legend)
 
     handles, labels = ax.get_legend_handles_labels()
     if handles:
-        ax.legend(handles, labels, title="Top LRC predicate lines", loc="lower right", fontsize=8)
+        predicate_legend = ax.legend(handles, labels, title="Top LRC predicate lines", loc="lower right", fontsize=8)
+        _style_legend(predicate_legend, theme_context)
 
     plt.tight_layout()
     if save_path is not None:
@@ -1246,6 +1392,8 @@ def plot_sample_using_bc_weights(
     class_names: Optional[Any] = None,
     save_path: Optional[str] = None,
     show: bool = True,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> Any:
     """
     Plot samples in PCA space with marker size driven by BC-derived weights.
@@ -1254,6 +1402,9 @@ def plot_sample_using_bc_weights(
     satisfied by each sample. Large points therefore indicate samples that
     activate more bottleneck predicates in the DPG.
     """
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     from sklearn.decomposition import PCA
 
     if not hasattr(X_df, "columns"):
@@ -1295,18 +1446,20 @@ def plot_sample_using_bc_weights(
         class_codes = np.zeros(len(y_series), dtype=int)
 
     n_classes = len(class_labels)
-    class_cmap = cm.get_cmap("viridis", n_classes)
+    class_map = theme_context["class_cmap"](n_classes)
 
     fig, ax = plt.subplots(figsize=(8, 6))
+    fig.patch.set_facecolor(colors["paper"])
+    ax.set_facecolor(colors["paper"])
     ax.scatter(
         X_pca[:, 0],
         X_pca[:, 1],
         c=class_codes,
-        cmap=class_cmap,
-        s=30 + 120 * bc_w_norm.to_numpy(),
-        alpha=0.72,
-        edgecolor="white",
-        linewidth=0.5,
+        cmap=class_map,
+        s=36 + 132 * bc_w_norm.to_numpy(),
+        alpha=0.78,
+        edgecolor="#FFFDF7",
+        linewidth=0.7,
     )
 
     legend_handles = [
@@ -1315,7 +1468,7 @@ def plot_sample_using_bc_weights(
             [0],
             marker="o",
             color="w",
-            markerfacecolor=class_cmap(i),
+            markerfacecolor=class_map(i),
             markersize=8,
             label=label,
         )
@@ -1327,15 +1480,17 @@ def plot_sample_using_bc_weights(
             [0],
             marker="o",
             color="w",
-            markerfacecolor="gray",
+            markerfacecolor=colors["success"],
             markersize=12,
             label="large = high BC-derived weight",
         )
     )
-    ax.legend(handles=legend_handles, loc="best", fontsize=9, frameon=True)
+    legend = ax.legend(handles=legend_handles, loc="best", fontsize=9, frameon=True)
+    _style_legend(legend, theme_context)
     ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0] * 100:.1f}%)")
     ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1] * 100:.1f}%)")
     ax.set_title(f"PCA - BC bottleneck weight per sample\n{dataset_name}")
+    _style_axes(ax, theme_context, grid_axis="both")
 
     formula = "weight(i) = sum 1[predicate active on i] * BC(predicate)"
     ax.text(
@@ -1346,7 +1501,8 @@ def plot_sample_using_bc_weights(
         ha="left",
         va="bottom",
         fontsize=9,
-        bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "lightgray"},
+        color=colors["charcoal"],
+        bbox={"boxstyle": "round,pad=0.25", "facecolor": "#FFFDF7", "alpha": 0.92, "edgecolor": colors["light_gray"]},
     )
 
     fig.tight_layout()
@@ -1719,6 +1875,8 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     dataset_range_lw: float = 10,
     save_path: Optional[str] = None,
     show: bool = True,
+    theme: str = "dpg",
+    palette: str = "default",
 ) -> Optional[Any]:
     """
     Plot DPG class bounds against empirical dataset ranges per feature.
@@ -1736,6 +1894,9 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
     Returns:
         Matplotlib figure, or None when no plottable classes exist.
     """
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
     if class_bounds is None:
         class_bounds = classwise_feature_bounds_from_communities(explanation)
     if class_bounds.empty:
@@ -1801,6 +1962,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
         ),
         squeeze=False,
     )
+    fig.patch.set_facecolor(colors["paper"])
 
     feature_axis_limits: Dict[str, Tuple[float, float]] = {}
     for feat in selected_features:
@@ -1863,7 +2025,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                         y0,
                         ds_lo,
                         ds_hi,
-                        color="lightgray",
+                        color=colors["range_fill"],
                         linewidth=dataset_range_lw,
                         alpha=0.85,
                         label="dataset class range" if (row_idx == 0 and c == 0) else None,
@@ -1871,7 +2033,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                     ax.scatter(
                         [ds_lo, ds_hi],
                         [y0, y0],
-                        color="dimgray",
+                        color=colors["range_marker"],
                         s=28,
                         label="dataset min/max" if (row_idx == 0 and c == 0) else None,
                     )
@@ -1888,7 +2050,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                         y0,
                         draw_lo,
                         draw_hi,
-                        color="tab:blue",
+                        color=_class_fill_color(theme_context),
                         linewidth=3,
                         alpha=0.95,
                         label="DPG community range" if (row_idx == 0 and c == 0) else None,
@@ -1898,7 +2060,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                         ax.scatter(
                             [dpg_lo],
                             [y0],
-                            color="tab:green",
+                            color=colors["success"],
                             s=38,
                             label="DPG min bound" if (row_idx == 0 and c == 0) else None,
                         )
@@ -1906,7 +2068,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                         ax.scatter(
                             [dpg_hi],
                             [y0],
-                            color="tab:red",
+                            color=colors["danger"],
                             s=38,
                             label="DPG max bound" if (row_idx == 0 and c == 0) else None,
                         )
@@ -1915,7 +2077,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                             [left_lim],
                             [y0],
                             marker="<",
-                            color="tab:green",
+                            color=colors["success"],
                             s=70,
                             label="DPG min = -inf" if (row_idx == 0 and c == 0) else None,
                         )
@@ -1924,7 +2086,7 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                             [right_lim],
                             [y0],
                             marker=">",
-                            color="tab:red",
+                            color=colors["danger"],
                             s=70,
                             label="DPG max = +inf" if (row_idx == 0 and c == 0) else None,
                         )
@@ -1948,9 +2110,9 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                             np.full_like(xs, y0 + 0.10, dtype=float),
                             s=sizes,
                             marker="^",
-                            c="tab:green",
+                            c=colors["success"],
                             alpha=predicate_alpha,
-                            edgecolors="black",
+                            edgecolors=colors["paper"],
                             linewidths=0.35,
                             label="predicate density (>)" if not density_gt_labeled else None,
                             zorder=4,
@@ -1966,9 +2128,9 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                             np.full_like(xs, y0 - 0.10, dtype=float),
                             s=sizes,
                             marker="v",
-                            c="tab:red",
+                            c=colors["danger"],
                             alpha=predicate_alpha,
-                            edgecolors="black",
+                            edgecolors=colors["paper"],
                             linewidths=0.35,
                             label="predicate density (<=)" if not density_le_labeled else None,
                             zorder=4,
@@ -1978,18 +2140,18 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
                 ax.set_xlim(left_lim, right_lim)
                 ax.set_ylim(-0.35, 0.35)
                 ax.set_yticks([])
-                ax.grid(axis="x", linestyle="--", alpha=0.35)
+                _style_axes(ax, theme_context, grid_axis="x")
 
                 if r == 0:
-                    ax.set_title(str(feat))
+                    ax.set_title(str(feat), color=colors["ink"], fontsize=12, fontweight="semibold")
                 is_bottom_class_row = r == len(classes) - 1
                 ax.tick_params(axis="x", labelbottom=is_bottom_class_row)
                 if not is_bottom_class_row:
                     ax.set_xticklabels([])
                 if is_bottom_class_row:
-                    ax.set_xlabel("Feature value range")
+                    ax.set_xlabel("Feature value")
                 if c == 0:
-                    ax.set_ylabel(f"Class {cls}")
+                    ax.set_ylabel(f"Class {cls}", color=colors["charcoal"])
 
         # Hide separator row axes between feature blocks.
         if block_idx < n_feature_blocks - 1:
@@ -1999,12 +2161,13 @@ def plot_dpg_class_bounds_vs_dataset_feature_ranges(
 
     handles, labels = axes[0, 0].get_legend_handles_labels()
     if handles:
-        fig.legend(handles, labels, loc="lower center", ncol=3, frameon=True)
+        legend = fig.legend(handles, labels, loc="lower center", ncol=3, frameon=True)
+        _style_legend(legend, theme_context)
 
-    fig.suptitle(
+    _style_figure(fig, theme_context, title=(
         f"{dataset_name}: DPG vs dataset ranges "
         f"(rows=classes, features/row={n_cols})"
-    )
+    ))
     plt.tight_layout(rect=(0, 0.10, 1, 1))
     if save_path is not None:
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
