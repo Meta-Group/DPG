@@ -251,7 +251,8 @@ def _format_graph_label_for_readability(
         if normalized_mode == "short":
             return f"Class\\n{_shorten_feature_name(class_name)}"
         if normalized_mode == "wrapped":
-            return f"Class\\n{textwrap.fill(class_name, width=wrap_width).replace(chr(10), '\\n')}"
+            wrapped_class_name = textwrap.fill(class_name, width=wrap_width).replace("\n", "\\n")
+            return f"Class\\n{wrapped_class_name}"
         return text
 
     if normalized_mode == "short":
