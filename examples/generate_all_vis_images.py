@@ -118,24 +118,6 @@ def generate_all_visualizations():
         show=False,
     )
 
-    # 7. communities_class_feature_complexity_bars.png
-    print("  - communities_class_feature_complexity_bars.png")
-    explainer.plot_class_feature_complexity(
-        explanation=explanation,
-        plot_type="bar",
-        save_path=str(VISUALIZATION_DIR / "communities_class_feature_complexity_bars.png"),
-        show=False,
-    )
-
-    # 8. communities_class_feature_complexity_heatmap.png
-    print("  - communities_class_feature_complexity_heatmap.png")
-    explainer.plot_class_feature_complexity(
-        explanation=explanation,
-        plot_type="heatmap",
-        save_path=str(VISUALIZATION_DIR / "communities_class_feature_complexity_heatmap.png"),
-        show=False,
-    )
-
     print("\nAll visualization images generated successfully!")
 
 
