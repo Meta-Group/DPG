@@ -98,6 +98,8 @@ Useful options:
 - `attribute`: color nodes by a metric such as `Local reaching centrality`
 - `class_flag=True`: highlight class nodes
 - `layout_template`: choose from `default`, `compact`, `vertical`, or `wide`
+- `label_mode`: choose from `full`, `wrapped`, or `short`
+- `readability`: choose from `compact`, `normal`, or `presentation`
 - `export_pdf=True`: save a PDF next to the PNG
 
 ### 2. Community-colored DPG graph
@@ -112,6 +114,8 @@ explainer.plot_communities(
     class_flag=True,
     theme="dpg",
     palette="olive",
+    label_mode="wrapped",
+    readability="presentation",
 )
 ```
 
@@ -123,9 +127,8 @@ DPG rendering with community-based coloring.
 ```
 
 This plot requires an explanation built with `communities=True`.
-
-::::{grid} 2
-:::{grid-item}
+For dense graphs, `label_mode="wrapped"` and `readability="presentation"` make node
+labels much easier to read.
 
 ### 3. LRC vs Random Forest importance
 
@@ -149,8 +152,6 @@ explainer.plot_lrc_importance(
 
 Top DPG predicates compared with Random Forest feature importance.
 ```
-:::
-:::{grid-item}
 
 ### 4. Top predicate split lines in feature space
 
@@ -175,11 +176,6 @@ explainer.plot_top_lrc_splits(
 
 Top LRC predicate thresholds drawn over the selected feature space.
 ```
-:::
-::::
-
-::::{grid} 2
-:::{grid-item}
 
 ### 5. Bottleneck-centrality sample cloud
 
@@ -205,8 +201,6 @@ explainer.plot_sample_using_bc_weights(
 
 Samples in PCA space sized by BC-derived bottleneck weight.
 ```
-:::
-:::{grid-item}
 
 ### 6. DPG class bounds vs dataset feature ranges
 
@@ -232,8 +226,6 @@ explainer.plot_class_bounds_vs_dataset_ranges(
 
 DPG class bounds compared with empirical dataset ranges.
 ```
-:::
-::::
 
 This view is especially useful when you want to inspect which feature ranges are
 well separated by the graph structure.

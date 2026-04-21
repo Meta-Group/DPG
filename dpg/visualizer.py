@@ -1,5 +1,6 @@
 import os
 import re
+import textwrap
 import warnings
 import numpy as np
 import pandas as pd
@@ -54,6 +55,24 @@ _LAYOUT_TEMPLATES = {
         "graph": {"rankdir": "LR", "nodesep": "0.5", "ranksep": "0.6"},
         "node": {},
         "edge": {},
+    },
+}
+
+_READABILITY_PRESETS = {
+    "compact": {
+        "graph": {"nodesep": "0.32", "ranksep": "0.42", "pad": "0.14"},
+        "node": {"fontsize": "10", "margin": "0.05,0.03"},
+        "wrap_width": 20,
+    },
+    "normal": {
+        "graph": {"nodesep": "0.40", "ranksep": "0.58", "pad": "0.18"},
+        "node": {"fontsize": "11", "margin": "0.06,0.04"},
+        "wrap_width": 18,
+    },
+    "presentation": {
+        "graph": {"nodesep": "0.52", "ranksep": "0.78", "pad": "0.22"},
+        "node": {"fontsize": "12", "margin": "0.10,0.07"},
+        "wrap_width": 16,
     },
 }
 
@@ -186,6 +205,89 @@ def _graphviz_not_found_error() -> RuntimeError:
     return RuntimeError(message)
 
 
+def _shorten_feature_name(feature: str) -> str:
+    shortened = str(feature)
+    replacements = {
+        "sepal": "sep.",
+        "petal": "pet.",
+        "length": "len.",
+        "width": "wid.",
+        "diameter": "diam.",
+        "feature": "feat.",
+    }
+    for old, new in replacements.items():
+        shortened = re.sub(rf"\b{old}\b", new, shortened, flags=re.IGNORECASE)
+    shortened = re.sub(r"\s*\([^)]*\)", "", shortened).strip()
+    return shortened
+
+
+def _format_graph_label_for_readability(
+    label: str,
+    wrap_width: int = 18,
+    label_mode: str = "full",
+) -> str:
+    text = str(label)
+    if not text:
+        return text
+
+    normalized_mode = str(label_mode or "full").lower()
+    if normalized_mode not in {"full", "wrapped", "short"}:
+        raise ValueError("label_mode must be one of: full, wrapped, short.")
+
+    parsed = _PREDICATE_PATTERN.fullmatch(text.strip())
+    if parsed:
+        feature, operator, threshold = parsed.groups()
+        feature_text = feature.strip()
+        if normalized_mode == "short":
+            feature_text = _shorten_feature_name(feature_text)
+            return f"{feature_text}\\n{operator} {threshold}"
+        if normalized_mode == "wrapped":
+            feature_block = textwrap.fill(feature_text, width=wrap_width)
+            return f"{feature_block}\\n{operator} {threshold}"
+        return text
+
+    if text.startswith("Class "):
+        class_name = text.replace("Class ", "", 1)
+        if normalized_mode == "short":
+            return f"Class\\n{_shorten_feature_name(class_name)}"
+        if normalized_mode == "wrapped":
+            return f"Class\\n{textwrap.fill(class_name, width=wrap_width).replace(chr(10), '\\n')}"
+        return text
+
+    if normalized_mode == "short":
+        return _shorten_feature_name(text)
+
+    if normalized_mode == "wrapped" and len(text) > wrap_width:
+        return textwrap.fill(text, width=wrap_width).replace("\n", "\\n")
+
+    return text
+
+
+def _sanitize_dot_source(
+    source: str,
+    wrap_labels: bool = False,
+    wrap_width: int = 18,
+    label_mode: str = "full",
+) -> str:
+    # Escape brackets and quotes in node labels to avoid DOT parse errors, and
+    # optionally reformat long labels for better readability.
+    def repl(m):
+        label = m.group(1)
+        if wrap_labels:
+            label = _format_graph_label_for_readability(
+                label,
+                wrap_width=wrap_width,
+                label_mode=label_mode,
+            )
+        label = label.replace("\\", "\\\\").replace('"', '\\"')
+        label = label.replace("[", "\\[").replace("]", "\\]")
+        return f'label="{label}"'
+
+    source = re.sub(r'label="([^"]*)"', repl, source)
+    source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
+    return source
+
+
 def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
     try:
         return Source(dot_source).pipe(format="png")
@@ -199,6 +301,17 @@ def _pipe_graph_png_with_fallback(dot_source: str, sanitizer) -> bytes:
             raise _graphviz_not_found_error() from exc
         except Exception:
             raise first_exc
+
+
+def _apply_graph_readability_preset(dot, readability: str = "normal") -> int:
+    preset_name = str(readability or "normal").lower()
+    if preset_name not in _READABILITY_PRESETS:
+        raise ValueError("readability must be one of: compact, normal, presentation.")
+
+    preset = _READABILITY_PRESETS[preset_name]
+    dot.attr("graph", **preset["graph"])
+    dot.attr("node", **preset["node"])
+    return int(preset["wrap_width"])
 
 def plot_dpg(
     plot_name,
@@ -221,6 +334,8 @@ def plot_dpg(
     export_pdf=False,
     theme: str = "dpg",
     palette: str = "default",
+    label_mode: str = "full",
+    readability: str = "normal",
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -251,6 +366,10 @@ def plot_dpg(
         pdf_dpi: PDF export resolution when ``export_pdf=True``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
         export_pdf: If ``True``, also writes a PDF next to the PNG.
+        label_mode: Label formatting strategy. One of
+            ``{'full', 'wrapped', 'short'}``.
+        readability: Graph spacing/readability preset. One of
+            ``{'compact', 'normal', 'presentation'}``.
 
     Returns:
         None
@@ -268,6 +387,7 @@ def plot_dpg(
         node_style=node_style,
         edge_style=edge_style,
     )
+    wrap_width = _apply_graph_readability_preset(dot, readability=readability)
     # Basic color scheme if no attribute or communities are specified
     if attribute is None and clusters is None:
         for index, row in df.iterrows():
@@ -371,19 +491,15 @@ def plot_dpg(
     _style_class_nodes(dot, original_df, theme_context)
 
     # Render the graph to PNG bytes (avoid temp files)
-    def _sanitize_dot_source(source: str) -> str:
-        # Escape brackets and quotes in node labels to avoid DOT parse errors.
-        def repl(m):
-            label = m.group(1)
-            label = label.replace("\\", "\\\\").replace('"', '\\"')
-            label = label.replace("[", "\\[").replace("]", "\\]")
-            return f'label="{label}"'
-
-        source = re.sub(r'label="([^"]*)"', repl, source)
-        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
-        return source
-
-    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
+    png_bytes = _pipe_graph_png_with_fallback(
+        dot.source,
+        lambda source: _sanitize_dot_source(
+            source,
+            wrap_labels=label_mode != "full",
+            wrap_width=wrap_width,
+            label_mode=label_mode,
+        ),
+    )
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))
@@ -449,6 +565,8 @@ def plot_dpg_communities(
     export_pdf=False,
     theme: str = "dpg",
     palette: str = "default",
+    label_mode: str = "wrapped",
+    readability: str = "presentation",
 ):
     """
     Plot a DPG colored by community assignment.
@@ -478,6 +596,10 @@ def plot_dpg_communities(
         pdf_dpi: PDF export resolution when ``export_pdf=True``.
         show: Whether to display the image via Matplotlib. Default is ``True``.
         export_pdf: If ``True``, also writes a PDF next to the PNG.
+        label_mode: Label formatting strategy. One of
+            ``{'full', 'wrapped', 'short'}``.
+        readability: Graph spacing/readability preset. One of
+            ``{'compact', 'normal', 'presentation'}``.
 
     Returns:
         None
@@ -495,6 +617,7 @@ def plot_dpg_communities(
         node_style=node_style,
         edge_style=edge_style,
     )
+    wrap_width = _apply_graph_readability_preset(dot, readability=readability)
 
     if dpg_metrics is None:
         raise AttributeError("dpg_metrics is required to plot communities.")
@@ -568,19 +691,15 @@ def plot_dpg_communities(
     _style_class_nodes(dot, original_df, theme_context)
 
     # Render the graph to PNG bytes (avoid temp files)
-    def _sanitize_dot_source(source: str) -> str:
-        # Escape brackets and quotes in node labels to avoid DOT parse errors.
-        def repl(m):
-            label = m.group(1)
-            label = label.replace("\\", "\\\\").replace('"', '\\"')
-            label = label.replace("[", "\\[").replace("]", "\\]")
-            return f'label="{label}"'
-
-        source = re.sub(r'label="([^"]*)"', repl, source)
-        source = re.sub(r'label=([^\\s\\]]+)', r'label="\\1"', source)
-        return source
-
-    png_bytes = _pipe_graph_png_with_fallback(dot.source, _sanitize_dot_source)
+    png_bytes = _pipe_graph_png_with_fallback(
+        dot.source,
+        lambda source: _sanitize_dot_source(
+            source,
+            wrap_labels=label_mode != "full",
+            wrap_width=wrap_width,
+            label_mode=label_mode,
+        ),
+    )
 
     # Open and display the rendered image
     img = Image.open(BytesIO(png_bytes))

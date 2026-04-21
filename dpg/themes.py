@@ -58,12 +58,14 @@ DPG_CLASS_PALETTE: List[str] = [
 
 
 DPG_PREDICATE_LINE_PALETTE: List[str] = [
-    DPG_COLORS["pine"],
-    DPG_COLORS["steel"],
-    DPG_COLORS["plum"],
+    DPG_COLORS["gold"],
+    DPG_COLORS["olive_light"],
+    DPG_COLORS["amber"],
+    DPG_COLORS["sage"],
+    DPG_COLORS["clay"],
     DPG_COLORS["olive"],
-    DPG_COLORS["moss"],
-    DPG_COLORS["fern"],
+    DPG_COLORS["orange"],
+    DPG_COLORS["pine"],
 ]
 
 DPG_OLIVE_CLASS_PALETTE: List[str] = [
@@ -210,6 +212,31 @@ def _palette_values(palette: str) -> List[str]:
     raise ValueError(f"Unknown palette '{palette}'. Expected one of: default, extended, olive.")
 
 
+def _spaced_palette(palette_values: List[str], n_colors: int) -> List[str]:
+    if n_colors <= 0:
+        return []
+    if not palette_values:
+        return []
+    if n_colors == 1:
+        return [palette_values[min(len(palette_values) // 2, len(palette_values) - 1)]]
+
+    if n_colors <= len(palette_values):
+        max_index = len(palette_values) - 1
+        raw_positions = [round(i * max_index / (n_colors - 1)) for i in range(n_colors)]
+        deduped_positions: List[int] = []
+        for pos in raw_positions:
+            candidate = int(pos)
+            while candidate in deduped_positions and candidate < max_index:
+                candidate += 1
+            while candidate in deduped_positions and candidate > 0:
+                candidate -= 1
+            deduped_positions.append(candidate)
+        return [palette_values[idx] for idx in deduped_positions]
+
+    repeats = (n_colors // len(palette_values)) + 1
+    return (palette_values * repeats)[:n_colors]
+
+
 def resolve_theme_context(theme: str = "dpg", palette: str = "default") -> Dict[str, Any]:
     theme_name = str(theme or "dpg").lower()
     palette_name = str(palette or "default").lower()
@@ -242,12 +269,14 @@ def resolve_theme_context(theme: str = "dpg", palette: str = "default") -> Dict[
 
     class_palette = _palette_values(palette_name)
     predicate_palette = DPG_PREDICATE_LINE_PALETTE if palette_name != "olive" else [
-        DPG_COLORS["pine"],
+        DPG_COLORS["gold"],
+        DPG_COLORS["olive_light"],
+        DPG_COLORS["amber"],
+        DPG_COLORS["sage"],
+        DPG_COLORS["clay"],
         DPG_COLORS["olive"],
-        DPG_COLORS["fern"],
-        DPG_COLORS["moss"],
-        DPG_COLORS["steel"],
-        DPG_COLORS["plum"],
+        DPG_COLORS["sand"],
+        DPG_COLORS["pine"],
     ]
 
     return {
@@ -263,12 +292,12 @@ def resolve_theme_context(theme: str = "dpg", palette: str = "default") -> Dict[
         "sequential_cmap": brand_sequential_cmap(),
         "edge_cmap": edge_sequential_cmap(),
         "community_cmap": ListedColormap(class_palette, name=f"dpg_community_{palette_name}"),
-        "class_cmap": lambda n: ListedColormap((class_palette * (((n - 1) // len(class_palette)) + 1))[:n], name=f"dpg_classes_{palette_name}"),
+        "class_cmap": lambda n: ListedColormap(_spaced_palette(class_palette, n), name=f"dpg_classes_{palette_name}"),
         "feature_color_map": lambda features: {
             feature: mcolors.to_rgba(color)
             for feature, color in zip(
                 list(dict.fromkeys(features)),
-                (class_palette * (((len(list(dict.fromkeys(features))) - 1) // len(class_palette)) + 1))[: len(list(dict.fromkeys(features)))],
+                _spaced_palette(class_palette, len(list(dict.fromkeys(features)))),
             )
         },
         "predicate_line_color_map": lambda features: {
