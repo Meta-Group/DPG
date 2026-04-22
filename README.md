@@ -16,7 +16,7 @@ DPG is a graph structure that captures the tree-based ensemble model and learned
 DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
 DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights.
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/custom_l2.jpg?raw=true" width="600" />
+  <img src="https://github.com/Meta-Group/DPG/blob/main/image.png" width="600" />
 </p>
 
 ---
