@@ -10,6 +10,7 @@ from dpg import DPGExplainer
 from dpg.visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
+    plot_class_feature_complexity,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
     plot_lrc_vs_rf_importance,
     plot_sample_using_bc_weights,
@@ -92,6 +93,19 @@ def test_additional_visualization_apis(tmp_path):
     )
     assert fig_bc is not None
     assert (tmp_path / "sample_bc_weights.png").exists()
+
+    fig_heat, fig_bars = plot_class_feature_complexity(
+        heat_df=heat,
+        dataset_name="Custom",
+        class_names=explainer.builder.target_names,
+        top_n_features=3,
+        save_prefix=str(tmp_path / "community_complexity"),
+        show=False,
+    )
+    assert fig_heat is not None
+    assert fig_bars is not None
+    assert (tmp_path / "community_complexity_heatmap.png").exists()
+    assert (tmp_path / "community_complexity_bars.png").exists()
 
     lookup = class_lookup_from_target_names(explainer.builder.target_names)
     fig_bounds = plot_dpg_class_bounds_vs_dataset_feature_ranges(

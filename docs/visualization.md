@@ -16,12 +16,21 @@ from sklearn.datasets import load_iris
 from dpg import DPGExplainer
 
 X, y = load_iris(return_X_y=True, as_frame=True)
-model = RandomForestClassifier(n_estimators=50, random_state=42).fit(X, y)
+model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
 
 explainer = DPGExplainer(
     model,
     feature_names=X.columns.tolist(),
     target_names=["setosa", "versicolor", "virginica"],
+    dpg_config={
+        "dpg": {
+            "default": {
+                "perc_var": 1e-9,
+                "decimal_threshold": 2,
+                "n_jobs": -1,
+            }
+        }
+    },
 )
 explanation = explainer.explain_global(X.values, communities=True)
 ```
@@ -83,6 +92,11 @@ explainer.plot(
     attribute="Local reaching centrality",
     theme="dpg",
     palette="default",
+    layout_template="vertical",
+    label_mode="wrapped",
+    readability="presentation",
+    fig_size=(14, 14),
+    title="Iris Decision Predicate Graph by Local Reaching Centrality",
 )
 ```
 
@@ -114,8 +128,11 @@ explainer.plot_communities(
     class_flag=True,
     theme="dpg",
     palette="olive",
+    layout_template="vertical",
     label_mode="wrapped",
     readability="presentation",
+    fig_size=(14, 14),
+    title="Iris Decision Predicate Graph by Community Assignment",
 )
 ```
 

@@ -5,6 +5,7 @@ from .core import DecisionPredicateGraph
 from .visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
+    plot_class_feature_complexity,
     plot_sample_using_bc_weights,
     plot_dpg,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
@@ -148,6 +149,9 @@ class DPGExplainer:
         export_pdf: bool = False,
         theme: str = "dpg",
         palette: str = "default",
+        label_mode: str = "full",
+        readability: str = "normal",
+        title: Optional[str] = None,
     ) -> None:
         """Render a standard DPG plot."""
         if explanation is None:
@@ -171,6 +175,9 @@ class DPGExplainer:
             export_pdf=export_pdf,
             theme=theme,
             palette=palette,
+            label_mode=label_mode,
+            readability=readability,
+            title=title,
         )
 
     def plot_communities(
@@ -191,6 +198,9 @@ class DPGExplainer:
         community_threshold: float = 0.2,
         theme: str = "dpg",
         palette: str = "default",
+        label_mode: str = "wrapped",
+        readability: str = "presentation",
+        title: Optional[str] = None,
     ) -> None:
         """Render a community-colored DPG plot."""
         if explanation is None or explanation.communities is None:
@@ -216,6 +226,9 @@ class DPGExplainer:
             export_pdf=export_pdf,
             theme=theme,
             palette=palette,
+            label_mode=label_mode,
+            readability=readability,
+            title=title,
         )
 
     def plot_lrc_importance(
@@ -284,6 +297,32 @@ class DPGExplainer:
         if explanation is None or explanation.communities is None:
             explanation = self.explain_global(communities=True, community_threshold=community_threshold)
         return class_feature_predicate_counts(explanation)
+
+    def plot_class_feature_complexity(
+        self,
+        explanation: Optional[DPGExplanation] = None,
+        dataset_name: str = "Dataset",
+        top_n_features: int = 10,
+        save_prefix: Optional[str] = None,
+        show: bool = True,
+        community_threshold: float = 0.2,
+        theme: str = "dpg",
+        palette: str = "default",
+    ) -> Tuple[Any, Any]:
+        """Plot community class-feature complexity using PCA-consistent class colors."""
+        if explanation is None or explanation.communities is None:
+            explanation = self.explain_global(communities=True, community_threshold=community_threshold)
+        heat_df = class_feature_predicate_counts(explanation)
+        return plot_class_feature_complexity(
+            heat_df=heat_df,
+            dataset_name=dataset_name,
+            class_names=self._builder.target_names,
+            top_n_features=top_n_features,
+            save_prefix=save_prefix,
+            show=show,
+            theme=theme,
+            palette=palette,
+        )
 
     def sample_bc_weights(
         self,

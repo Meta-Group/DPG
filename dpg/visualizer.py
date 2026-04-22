@@ -337,6 +337,7 @@ def plot_dpg(
     palette: str = "default",
     label_mode: str = "full",
     readability: str = "normal",
+    title: Optional[str] = None,
 ):
     """
     Plot a Decision Predicate Graph (DPG) with optional node/edge styling.
@@ -507,7 +508,7 @@ def plot_dpg(
     fig, ax = plt.subplots(figsize=fig_size)
     fig.patch.set_facecolor(colors["paper"])
     ax.set_axis_off()
-    ax.set_title(plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
+    ax.set_title(title or plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
     ax.imshow(img)
     
     # Add a color bar if an attribute is specified
@@ -568,6 +569,7 @@ def plot_dpg_communities(
     palette: str = "default",
     label_mode: str = "wrapped",
     readability: str = "presentation",
+    title: Optional[str] = None,
 ):
     """
     Plot a DPG colored by community assignment.
@@ -707,7 +709,7 @@ def plot_dpg_communities(
     fig, ax = plt.subplots(figsize=fig_size)
     fig.patch.set_facecolor(colors["paper"])
     ax.set_axis_off()
-    ax.set_title(plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
+    ax.set_title(title or plot_name, color=colors["ink"], fontsize=13, fontweight="semibold")
     ax.imshow(img)
 
     # Save the plot to the specified directory with tight borders
@@ -1635,6 +1637,35 @@ def plot_sample_using_bc_weights(
     return fig
 
 
+def _resolve_named_class_palette(
+    observed_labels: List[str],
+    class_names: Optional[Any],
+    theme_context: Dict[str, Any],
+) -> Tuple[List[str], Dict[str, Any]]:
+    """Resolve class order and colors using the same palette logic as PCA plots."""
+    observed = [str(label) for label in observed_labels]
+    ordered_labels: List[str]
+
+    if class_names is None:
+        ordered_labels = list(dict.fromkeys(observed))
+    elif isinstance(class_names, dict):
+        ordered_labels = [
+            str(value)
+            for _, value in sorted(class_names.items(), key=lambda item: item[0])
+            if str(value) in observed
+        ]
+    else:
+        ordered_labels = [str(value) for value in class_names if str(value) in observed]
+
+    for label in observed:
+        if label not in ordered_labels:
+            ordered_labels.append(label)
+
+    class_map = theme_context["class_cmap"](max(1, len(ordered_labels)))
+    color_map = {label: class_map(i) for i, label in enumerate(ordered_labels)}
+    return ordered_labels, color_map
+
+
 def _resolve_graph_node(graph: nx.DiGraph, candidate):
     if candidate in graph:
         return candidate
@@ -1776,6 +1807,137 @@ def class_feature_predicate_counts(explanation) -> Any:
     heat = pd.DataFrame(series_map).T.fillna(0).astype(int)
     heat = heat.loc[:, heat.sum(axis=0).sort_values(ascending=False).index]
     return heat
+
+
+def plot_class_feature_complexity(
+    heat_df: Any,
+    dataset_name: str = "Dataset",
+    class_names: Optional[Any] = None,
+    top_n_features: int = 10,
+    save_prefix: Optional[str] = None,
+    show: bool = True,
+    theme: str = "dpg",
+    palette: str = "default",
+) -> Tuple[Any, Any]:
+    """
+    Plot class-feature predicate complexity with PCA-consistent class colors.
+
+    Produces:
+    - ``*_heatmap.png``: heatmap with class color strip and class-colored labels
+    - ``*_bars.png``: grouped bar chart with one color per class
+    """
+    if heat_df is None or getattr(heat_df, "empty", True):
+        raise ValueError("heat_df must be a non-empty class-feature count DataFrame.")
+
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
+
+    h = heat_df.copy()
+    h.index = h.index.map(str)
+    h.columns = h.columns.map(str)
+    h = h.loc[:, h.sum(axis=0).sort_values(ascending=False).index]
+    if top_n_features is not None and int(top_n_features) > 0:
+        h = h.iloc[:, : int(top_n_features)]
+
+    class_order, class_color_map = _resolve_named_class_palette(
+        observed_labels=h.index.tolist(),
+        class_names=class_names,
+        theme_context=theme_context,
+    )
+    ordered_rows = [label for label in class_order if label in h.index]
+    h = h.loc[ordered_rows]
+
+    fig_heat = plt.figure(figsize=(max(8.5, 1.2 * len(h.columns) + 3.8), max(4.5, 1.0 * len(h.index) + 1.8)))
+    fig_heat.patch.set_facecolor(colors["paper"])
+    gs = fig_heat.add_gridspec(1, 2, width_ratios=[0.18, 6.0], wspace=0.08)
+    ax_strip = fig_heat.add_subplot(gs[0, 0])
+    ax_heat = fig_heat.add_subplot(gs[0, 1])
+
+    strip_rgba = np.array([[mcolors.to_rgba(class_color_map[label])] for label in h.index], dtype=float)
+    ax_strip.imshow(strip_rgba, aspect="auto")
+    ax_strip.set_xticks([])
+    ax_strip.set_yticks([])
+    for spine in ax_strip.spines.values():
+        spine.set_visible(False)
+
+    im = ax_heat.imshow(h.to_numpy(dtype=float), aspect="auto", cmap=theme_context["sequential_cmap"])
+    ax_heat.set_xticks(np.arange(len(h.columns)))
+    ax_heat.set_xticklabels(h.columns, rotation=35, ha="right")
+    ax_heat.set_yticks(np.arange(len(h.index)))
+    ax_heat.set_yticklabels(h.index, rotation=90, va="center")
+    for tick in ax_heat.get_yticklabels():
+        tick.set_color(class_color_map[str(tick.get_text())])
+        tick.set_fontweight("semibold")
+    ax_heat.set_xlabel("Feature")
+    ax_heat.set_ylabel("Class")
+    ax_heat.set_title(f"{dataset_name}: Community class-feature complexity", color=colors["ink"], fontsize=13, fontweight="semibold")
+    ax_heat.set_facecolor(colors["paper"])
+    ax_heat.set_xticks(np.arange(-0.5, len(h.columns), 1), minor=True)
+    ax_heat.set_yticks(np.arange(-0.5, len(h.index), 1), minor=True)
+    ax_heat.grid(which="minor", color=colors["paper"], linestyle="-", linewidth=1.2)
+    ax_heat.tick_params(which="minor", bottom=False, left=False)
+    for row_idx in range(len(h.index)):
+        for col_idx in range(len(h.columns)):
+            value = int(h.iat[row_idx, col_idx])
+            text_color = colors["paper"] if im.norm(value) > 0.55 else colors["charcoal"]
+            ax_heat.text(col_idx, row_idx, str(value), ha="center", va="center", fontsize=9, color=text_color)
+    cbar = fig_heat.colorbar(im, ax=ax_heat, fraction=0.046, pad=0.04)
+    cbar.set_label("Predicate count")
+    cbar.outline.set_edgecolor(colors["light_gray"])
+    _style_figure(fig_heat, theme_context)
+    fig_heat.subplots_adjust(left=0.12, right=0.94, bottom=0.22, top=0.88, wspace=0.08)
+
+    n_classes = len(h.index)
+    x = np.arange(len(h.columns), dtype=float)
+    total_width = 0.82
+    bar_width = total_width / max(1, n_classes)
+    offsets = (np.arange(n_classes) - (n_classes - 1) / 2.0) * bar_width
+
+    fig_bar, ax_bar = plt.subplots(
+        figsize=(max(8.8, 1.2 * len(h.columns) + 3.6), max(4.8, 0.75 * n_classes + 3.2))
+    )
+    fig_bar.patch.set_facecolor(colors["paper"])
+    ax_bar.set_facecolor(colors["paper"])
+
+    for idx, class_label in enumerate(h.index):
+        class_color = class_color_map[str(class_label)]
+        ax_bar.bar(
+            x + offsets[idx],
+            h.loc[class_label].to_numpy(dtype=float),
+            width=bar_width * 0.92,
+            color=class_color,
+            edgecolor=colors["paper"],
+            linewidth=0.7,
+            label=str(class_label),
+            alpha=0.95,
+        )
+
+    ax_bar.set_xticks(x)
+    ax_bar.set_xticklabels(h.columns, rotation=35, ha="right")
+    ax_bar.set_ylabel("Predicate count")
+    ax_bar.set_xlabel("Feature")
+    ax_bar.set_title(f"{dataset_name}: Community class-feature complexity by class", color=colors["ink"], fontsize=13, fontweight="semibold")
+    _style_axes(ax_bar, theme_context, grid_axis="y")
+    legend = ax_bar.legend(loc="best", fontsize=9, frameon=True, title="Class")
+    _style_legend(legend, theme_context)
+    for text in legend.get_texts():
+        label = str(text.get_text())
+        if label in class_color_map:
+            text.set_color(class_color_map[label])
+    _style_figure(fig_bar, theme_context)
+    fig_bar.tight_layout()
+
+    if save_prefix is not None:
+        fig_heat.savefig(f"{save_prefix}_heatmap.png", dpi=200, bbox_inches="tight")
+        fig_bar.savefig(f"{save_prefix}_bars.png", dpi=200, bbox_inches="tight")
+
+    if show:
+        plt.show()
+    else:
+        plt.close(fig_heat)
+        plt.close(fig_bar)
+    return fig_heat, fig_bar
 
 
 def classwise_feature_bounds_from_communities(explanation) -> Any:

@@ -12,7 +12,7 @@ matplotlib.use("Agg")
 
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
-from dpg import DPGExplainer, plot_lrc_vs_rf_importance, plot_top_lrc_predicate_splits
+from dpg import DPGExplainer, plot_class_feature_complexity, plot_lrc_vs_rf_importance, plot_top_lrc_predicate_splits
 
 # Setup paths
 QUICKSTART_DIR = PROJECT_ROOT / "docs" / "_static" / "quickstart"
@@ -36,6 +36,15 @@ def generate_quickstart_images():
         model,
         feature_names=X.columns.tolist(),
         target_names=target_names,
+        dpg_config={
+            "dpg": {
+                "default": {
+                    "perc_var": 1e-9,
+                    "decimal_threshold": 2,
+                    "n_jobs": -1,
+                }
+            }
+        },
     )
     explanation = explainer.explain_global(X.values, communities=True)
 
@@ -83,7 +92,7 @@ def generate_visualization_images():
     X, y = load_iris(return_X_y=True, as_frame=True)
     target_names = ["setosa", "versicolor", "virginica"]
 
-    model = RandomForestClassifier(n_estimators=50, random_state=42)
+    model = RandomForestClassifier(n_estimators=5, random_state=42)
     model.fit(X, y)
 
     explainer = DPGExplainer(
@@ -100,16 +109,40 @@ def generate_visualization_images():
         explanation=explanation,
         save_dir=str(VISUALIZATION_DIR),
         class_flag=False,
+        layout_template="vertical",
+        label_mode="wrapped",
+        readability="presentation",
+        fig_size=(14, 14),
+        title="Iris Decision Predicate Graph by Local Reaching Centrality",
         show=False,
     )
 
     # Generate iris_dpg_communities
     print("  - iris_dpg_communities.png")
     explainer.plot_communities(
+        "iris_dpg",
+        explanation=explanation,
+        save_dir=str(VISUALIZATION_DIR),
+        class_flag=True,
+        layout_template="vertical",
+        label_mode="wrapped",
+        readability="presentation",
+        fig_size=(14, 14),
+        title="Iris Decision Predicate Graph by Community Assignment",
+        show=False,
+    )
+
+    print("  - iris_dpg_communities_communities.png")
+    explainer.plot_communities(
         "iris_dpg_communities",
         explanation=explanation,
         save_dir=str(VISUALIZATION_DIR),
         class_flag=True,
+        layout_template="vertical",
+        label_mode="wrapped",
+        readability="presentation",
+        fig_size=(14, 14),
+        title="Iris Decision Predicate Graph by Community Assignment",
         show=False,
     )
 
@@ -149,6 +182,18 @@ def generate_visualization_images():
         dataset_name="Iris",
         class_names=target_names,
         save_path=str(VISUALIZATION_DIR / "bc_bottleneck_pca_cloud.png"),
+        show=False,
+    )
+
+    print("  - communities_class_feature_complexity_heatmap.png")
+    print("  - communities_class_feature_complexity_bars.png")
+    heat_df = explainer.class_feature_predicate_counts(explanation=explanation)
+    plot_class_feature_complexity(
+        heat_df=heat_df,
+        dataset_name="Iris",
+        class_names=target_names,
+        top_n_features=4,
+        save_prefix=str(VISUALIZATION_DIR / "communities_class_feature_complexity"),
         show=False,
     )
 

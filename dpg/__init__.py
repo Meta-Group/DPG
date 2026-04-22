@@ -6,6 +6,7 @@ from .visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
     classwise_feature_bounds_from_communities,
+    plot_class_feature_complexity,
     plot_dpg,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
     plot_dpg_constraints_overview,
@@ -35,6 +36,7 @@ __all__ = [
     "plot_sample_using_bc_weights",
     "class_feature_predicate_counts",
     "classwise_feature_bounds_from_communities",
+    "plot_class_feature_complexity",
     "plot_dpg_class_bounds_vs_dataset_feature_ranges",
     "class_lookup_from_target_names",
 ]
