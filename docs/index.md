@@ -47,7 +47,7 @@ from sklearn.datasets import load_iris
 from dpg import DPGExplainer
 
 X, y = load_iris(return_X_y=True, as_frame=True)
-model = RandomForestClassifier(n_estimators=50, random_state=42).fit(X, y)
+model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
 
 explainer = DPGExplainer(
     model,

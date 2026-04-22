@@ -20,7 +20,7 @@ from dpg import DPGExplainer
 
 # 1. Train any tree-based ensemble
 X, y = load_iris(return_X_y=True, as_frame=True)
-model = RandomForestClassifier(n_estimators=50, random_state=42).fit(X, y)
+model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
 
 # 2. Create the explainer
 explainer = DPGExplainer(
@@ -94,6 +94,11 @@ plot_dpg(
     attribute="Local reaching centrality",  # color by LRC
     theme="dpg",
     palette="olive",
+    layout_template="vertical",
+    label_mode="wrapped",
+    readability="presentation",
+    fig_size=(14, 14),
+    title="Iris Decision Predicate Graph by Local Reaching Centrality",
 )
 
 # Compare DPG importance vs Random Forest importance

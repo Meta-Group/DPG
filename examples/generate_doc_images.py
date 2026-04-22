@@ -29,7 +29,7 @@ def generate_quickstart_images():
     X, y = load_iris(return_X_y=True, as_frame=True)
     target_names = ["setosa", "versicolor", "virginica"]
 
-    model = RandomForestClassifier(n_estimators=50, random_state=42)
+    model = RandomForestClassifier(n_estimators=5, random_state=42)
     model.fit(X, y)
 
     explainer = DPGExplainer(
@@ -55,6 +55,11 @@ def generate_quickstart_images():
         explanation=explanation,
         save_dir=str(QUICKSTART_DIR),
         class_flag=False,
+        layout_template="vertical",
+        label_mode="wrapped",
+        readability="presentation",
+        fig_size=(14, 14),
+        title="Iris Decision Predicate Graph by Local Reaching Centrality",
         show=False,
     )
 

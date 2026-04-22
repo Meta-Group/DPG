@@ -83,7 +83,7 @@ def main():
     # Tutorial note: adjust these values to point at your dataset and control the run.
     config = {
         "dataset_name": "custom.csv",
-        "num_trees": 10,
+        "num_trees": 5,
         "run_tag": "CustomDPG",
         "random_state": 27,
         "config_path": os.path.join(PROJECT_ROOT, "config.yaml"),
