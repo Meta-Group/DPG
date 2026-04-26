@@ -11,7 +11,7 @@ keywords = ["decision graph", "ensemble learning", "explainable ai", "explainabi
 packages = [
     { include = "dpg" },
     { include = "metrics" },
-    { include = "counterfactual" }
+    # { include = "counterfactual" }
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
