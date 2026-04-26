@@ -17,7 +17,7 @@ Install DPG and run your first explanation in minutes.
 :link: api_reference
 :link-type: doc
 
-Full API documentation for dpg, metrics, and counterfactual.
+Full API documentation for dpg and metrics.
 :::
 :::{grid-item-card} Visualization
 :link: visualization
@@ -25,11 +25,11 @@ Full API documentation for dpg, metrics, and counterfactual.
 
 Browse all graph and chart outputs available in DPG.
 :::
-:::{grid-item-card} Counterfactual
-:link: api/counterfactual/index
-:link-type: doc
+# Counterfactual
+# :link: api/counterfactual/index
+# :link-type: doc
 
-Counterfactual generation and constraint explanation on DPG models.
+# Counterfactual generation and constraint explanation on DPG models.
 :::
 :::{grid-item-card} Development
 :link: development/index

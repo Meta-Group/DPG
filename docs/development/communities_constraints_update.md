@@ -3,8 +3,7 @@
 In February 2026 the way DPG computes **communities** (node groupings) and
 **class boundaries** (per-class feature constraints) was redesigned.
 This page documents the before/after outputs produced by the
-[`export_iris_communities.py`](https://github.com/Meta-Group/DPG/blob/main/counterfactual/scripts/export_iris_communities.py)
-script on the Iris dataset so the differences can be inspected side-by-side.
+# [`export_iris_communities.py`](https://github.com/Meta-Group/DPG/blob/main/counterfactual/scripts/export_iris_communities.py)
 
 ## What changed
 
@@ -25,7 +24,7 @@ Key commits:
 
 Both outputs below were generated with the same parameters
 (5 estimators, `random_state=42`, default config) using the script at
-[`counterfactual/scripts/export_iris_communities.py`](https://github.com/Meta-Group/DPG/blob/main/counterfactual/scripts/export_iris_communities.py).
+# [`counterfactual/scripts/export_iris_communities.py`](https://github.com/Meta-Group/DPG/blob/main/counterfactual/scripts/export_iris_communities.py)
 
 **Old output** — extracted at commit
 [`8bb3583`](https://github.com/Meta-Group/DPG/commit/8bb3583) (Jan 28 2026, last

@@ -55,7 +55,7 @@ suppress_warnings = ["autoapi"]
 # ---------------------------------------------------------------------------
 # sphinx-autoapi
 # ---------------------------------------------------------------------------
-autoapi_dirs = ["../dpg", "../metrics", "../counterfactual"]
+# autoapi_dirs = ["../dpg", "../metrics", "../counterfactual"]
 autoapi_type = "python"
 autoapi_options = [
     "members",
@@ -70,14 +70,14 @@ autoapi_options = [
 # not part of the public API that we want documented via autoapi.
 autoapi_ignore = [
     "*sklearn_dpg*",
-    # Counterfactual sub-packages that are internal (scripts, utilities, etc.)
-    "*/counterfactual/scripts/*",
-    "*/counterfactual/utils/*",
-    "*/counterfactual/notebooks/*",
-    "*/counterfactual/wandb/*",
-    "*/counterfactual/outputs/*",
-    # Virtual environment embedded inside counterfactual/
-    "*/counterfactual/.venv/*",
+    # # Counterfactual sub-packages that are internal (scripts, utilities, etc.)
+    # "*/counterfactual/scripts/*",
+    # "*/counterfactual/utils/*",
+    # "*/counterfactual/notebooks/*",
+    # "*/counterfactual/wandb/*",
+    # "*/counterfactual/outputs/*",
+    # # Virtual environment embedded inside counterfactual/
+    # "*/counterfactual/.venv/*",
 ]
 # Don't re-document members imported from other modules (avoids duplicates
 # when e.g. DecisionPredicateGraph is in both dpg.core and dpg.__init__).
