@@ -2,6 +2,7 @@ import os
 import re
 import textwrap
 import warnings
+import copy
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -734,6 +735,237 @@ def plot_dpg_communities(
 
     # Clean up temporary files
     # delete_folder_contents("temp")
+
+
+def plot_dpg_local_paths_aggregate(
+    plot_name,
+    dot,
+    df,
+    df_edges,
+    paths_node_ids,
+    path_confidences=None,
+    sample_id=None,
+    true_class_label=None,
+    obtained_class_label=None,
+    sample_metrics=None,
+    save_dir="results/",
+    class_flag=True,
+    layout_template="default",
+    graph_style=None,
+    node_style=None,
+    edge_style=None,
+    fig_size=(16, 8),
+    dpi=300,
+    pdf_dpi=600,
+    show=True,
+    export_pdf=False,
+    theme: str = "dpg",
+    palette: str = "default",
+    label_mode: str = "wrapped",
+    readability: str = "presentation",
+    title: Optional[str] = None,
+):
+    """
+    Plot a fitted DPG with one sample's local paths highlighted on top.
+
+    Args mirror the existing DPG plot API, with local path overlays passed as
+    ordered node-id paths and optional per-path confidence weights.
+
+    Returns:
+        matplotlib.figure.Figure
+    """
+    print("Plotting local DPG paths...")
+    theme_context = resolve_theme_context(theme=theme, palette=palette)
+    colors = theme_context["colors"]
+    _apply_matplotlib_theme(theme_context)
+
+    local_dot = copy.deepcopy(dot)
+    original_df = df.copy()
+    _apply_layout_template(
+        local_dot,
+        theme_context=theme_context,
+        layout_template=layout_template,
+        graph_style=graph_style,
+        node_style=node_style,
+        edge_style=edge_style,
+    )
+    wrap_width = _apply_graph_readability_preset(local_dot, readability=readability)
+
+    visited_node_weights: Dict[str, float] = {}
+    visited_edge_weights: Dict[Tuple[str, str], float] = {}
+    path_confidences = list(path_confidences or [])
+
+    for path_index, path in enumerate(paths_node_ids):
+        weight = 1.0
+        if path_index < len(path_confidences) and path_confidences[path_index] is not None:
+            weight = float(path_confidences[path_index])
+        for node_id in path:
+            if node_id is None:
+                continue
+            node_id = str(node_id)
+            visited_node_weights[node_id] = visited_node_weights.get(node_id, 0.0) + weight
+        for i in range(len(path) - 1):
+            src = path[i]
+            dst = path[i + 1]
+            if src is None or dst is None:
+                continue
+            edge_key = (str(src), str(dst))
+            visited_edge_weights[edge_key] = visited_edge_weights.get(edge_key, 0.0) + weight
+
+    visited_nodes = set(visited_node_weights)
+    visited_edges = set(visited_edge_weights)
+
+    subdued_pred_color = colors.get("node_muted", colors["light_gray"])
+    subdued_class_color = _class_fill_color(theme_context)
+    for _, row in df.iterrows():
+        node_id = str(row["Node"])
+        label = str(row["Label"])
+        if node_id in visited_nodes:
+            continue
+        if label.startswith("Class "):
+            change_node_color(local_dot, node_id, subdued_class_color)
+        else:
+            change_node_color(local_dot, node_id, subdued_pred_color)
+
+    highlight_node_color = colors.get(
+        "charcoal",
+        colors.get("edge", colors.get("danger", "#333333")),
+    )
+    true_class_fill = colors.get("success", highlight_node_color)
+    obtained_class_fill = colors.get("danger", highlight_node_color)
+    normalized_true_class_label = None
+    if true_class_label is not None:
+        normalized_true_class_label = str(true_class_label)
+        if not normalized_true_class_label.startswith("Class "):
+            normalized_true_class_label = f"Class {normalized_true_class_label}"
+    normalized_obtained_class_label = None
+    if obtained_class_label is not None:
+        normalized_obtained_class_label = str(obtained_class_label)
+        if not normalized_obtained_class_label.startswith("Class "):
+            normalized_obtained_class_label = f"Class {normalized_obtained_class_label}"
+
+    for _, row in df.iterrows():
+        node_id = str(row["Node"])
+        if node_id not in visited_nodes:
+            continue
+        label = str(row["Label"])
+        fillcolor = highlight_node_color
+        if label.startswith("Class "):
+            fillcolor = subdued_class_color
+            if normalized_true_class_label is not None and label == normalized_true_class_label:
+                fillcolor = true_class_fill
+            if normalized_obtained_class_label is not None and label == normalized_obtained_class_label:
+                fillcolor = obtained_class_fill
+            if (
+                normalized_true_class_label is not None
+                and normalized_obtained_class_label is not None
+                and normalized_true_class_label == normalized_obtained_class_label
+                and label == normalized_true_class_label
+            ):
+                fillcolor = true_class_fill
+        change_node_color(local_dot, node_id, fillcolor)
+
+    if not df_edges.empty:
+        colormap_edge = theme_context["edge_cmap"]
+        max_edge_value = df_edges["Weight"].max()
+        min_edge_value = df_edges["Weight"].min()
+        norm_edge = mcolors.Normalize(vmin=min_edge_value, vmax=max_edge_value)
+        for _, row in df_edges.iterrows():
+            source_id = str(row["Source_id"])
+            target_id = str(row["Target_id"])
+            edge_value = row["Weight"]
+            color = colormap_edge(norm_edge(edge_value))
+            color_hex = "#{:02x}{:02x}{:02x}".format(
+                int(color[0] * 255),
+                int(color[1] * 255),
+                int(color[2] * 255),
+            )
+            penwidth = 0.8 + 1.8 * norm_edge(edge_value)
+            if (source_id, target_id) in visited_edges:
+                strength = visited_edge_weights[(source_id, target_id)]
+                max_strength = max(visited_edge_weights.values()) if visited_edge_weights else 1.0
+                normalized_strength = strength / max_strength if max_strength > 0 else 1.0
+                color_hex = highlight_node_color
+                penwidth = 1.8 + 4.2 * normalized_strength
+            else:
+                color_hex = colors.get("light_gray", color_hex)
+                penwidth = 0.7
+            change_edge_color(local_dot, source_id, target_id, new_color=color_hex, new_width=penwidth)
+
+    if class_flag:
+        _style_class_nodes(local_dot, original_df, theme_context)
+        for _, row in df.iterrows():
+            node_id = str(row["Node"])
+            label = str(row["Label"])
+            if node_id not in visited_nodes or not label.startswith("Class "):
+                continue
+            fillcolor = subdued_class_color
+            if normalized_true_class_label is not None and label == normalized_true_class_label:
+                fillcolor = true_class_fill
+            if normalized_obtained_class_label is not None and label == normalized_obtained_class_label:
+                fillcolor = obtained_class_fill
+            if (
+                normalized_true_class_label is not None
+                and normalized_obtained_class_label is not None
+                and normalized_true_class_label == normalized_obtained_class_label
+                and label == normalized_true_class_label
+            ):
+                fillcolor = true_class_fill
+            change_node_color(local_dot, node_id, fillcolor)
+
+    title_lines = []
+    if title:
+        title_lines.append(title)
+    else:
+        title_lines.append(plot_name)
+    meta_parts = []
+    if sample_id is not None:
+        meta_parts.append(f"sample={sample_id}")
+    if obtained_class_label is not None:
+        meta_parts.append(f"pred={obtained_class_label}")
+    if true_class_label is not None:
+        meta_parts.append(f"true={true_class_label}")
+    if meta_parts:
+        title_lines.append(" | ".join(meta_parts))
+    if sample_metrics:
+        metric_parts = []
+        for key in ("vote_confidence", "evidence_score_pred", "trace_coverage_score"):
+            value = sample_metrics.get(key)
+            if value is not None:
+                metric_parts.append(f"{key}={float(value):.2f}")
+        if metric_parts:
+            title_lines.append(" | ".join(metric_parts))
+
+    png_bytes = _pipe_graph_png_with_fallback(
+        local_dot.source,
+        lambda source: _sanitize_dot_source(
+            source,
+            wrap_labels=label_mode != "full",
+            wrap_width=wrap_width,
+            label_mode=label_mode,
+        ),
+    )
+
+    img = Image.open(BytesIO(png_bytes))
+    fig, ax = plt.subplots(figsize=fig_size)
+    fig.patch.set_facecolor(colors["paper"])
+    ax.set_axis_off()
+    ax.set_title("\n".join(title_lines), color=colors["ink"], fontsize=13, fontweight="semibold")
+    ax.imshow(img)
+
+    os.makedirs(save_dir, exist_ok=True)
+    fig.savefig(os.path.join(save_dir, plot_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.02)
+    if export_pdf:
+        fig.savefig(
+            os.path.join(save_dir, plot_name + ".pdf"),
+            format="pdf",
+            dpi=pdf_dpi,
+            bbox_inches="tight",
+            pad_inches=0.02,
+        )
+    if not show:
+        plt.close(fig)
+    return fig
 
 def change_node_color(dot, node_id: str, fillcolor: str) -> None:
     """Update a node's fill color and set an appropriate contrasting font color.
