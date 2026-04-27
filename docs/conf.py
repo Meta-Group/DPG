@@ -55,7 +55,7 @@ suppress_warnings = ["autoapi"]
 # ---------------------------------------------------------------------------
 # sphinx-autoapi
 # ---------------------------------------------------------------------------
-# autoapi_dirs = ["../dpg", "../metrics", "../counterfactual"]
+autoapi_dirs = ["../dpg", "../metrics"]
 autoapi_type = "python"
 autoapi_options = [
     "members",
