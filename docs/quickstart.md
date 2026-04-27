@@ -6,8 +6,12 @@
 pip install dpg
 ```
 
-DPG requires Python 3.10+ and a working [Graphviz](https://graphviz.org/download/) installation
-(the `dot` executable must be on your `PATH`).
+DPG requires Python 3.10+.
+
+If you want graph rendering, install the system [Graphviz](https://graphviz.org/download/)
+package as well so the `dot` executable is available on your `PATH`.
+
+For local development installs and longer setup notes, see [docs/README.md](README.md).
 
 ## Minimal example
 

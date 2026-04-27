@@ -10,18 +10,40 @@
 </p>
 
 
-DPG is a model-agnostic tool to provide a global interpretation of tree-based ensemble models, addressing transparency and explainability challenges.
+DPG is a model-agnostic framework for global and local explanation of tree-based ensemble models.
+It turns ensemble decision logic into a graph so users can inspect predicates, transitions, predictions,
+and structural explanation diagnostics in a single representation.
 
-DPG is a graph structure that captures the tree-based ensemble model and learned dataset details, preserving the relations among features, logical decisions, and predictions towards emphasising insightful points.
-DPG enables graph-based evaluations and the identification of model decisions towards facilitating comparisons between features and their associated values while offering insights into the entire model.
-DPG provides descriptive metrics that enhance the understanding of the decisions inherent in the model, offering valuable insights.
+DPG is a graph structure that captures the tree-based ensemble model and learned dataset details,
+preserving the relations among features, logical decisions, and predictions towards emphasising
+insightful points. DPG enables graph-based evaluations and the identification of model decisions
+towards facilitating comparisons between features and their associated values while offering insights
+into the entire model. DPG provides descriptive metrics that enhance the understanding of the
+decisions inherent in the model, offering valuable insights.
 <p align="center">
   <img src="https://github.com/Meta-Group/DPG/blob/main/image.png" width="600" />
 </p>
 
 ---
 
-## The structure
+## At a glance
+
+- High-level API for global and local explanation with `DPGExplainer`
+- Graph-based metrics such as constraints, betweenness centrality, and local reaching centrality
+- Local path inspection, local-on-global visualization, and faithfulness diagnostics
+- Lightweight experiment runners and analysis utilities for sklearn datasets
+
+## Quick links
+
+- Installation: [Installation](#installation)
+- High-level usage: [High-level usage](#high-level-usage)
+- Local explanations: [Local explanations](#local-explanations)
+- Faithfulness evaluation: [Faithfulness evaluation](#faithfulness-evaluation)
+- Visualizations: [https://dpg.readthedocs.io/en/latest/visualization.html](https://dpg.readthedocs.io/en/latest/visualization.html)
+- CLI usage and gallery examples: [CLI scripts](#cli-scripts)
+- Full docs: [https://dpg.readthedocs.io/](https://dpg.readthedocs.io/)
+
+## How DPG works
 The concept behind DPG is to convert a generic tree-based ensemble model for classification into a graph, where:
 - Nodes represent predicates, i.e., the feature-value associations present in each node of every tree;
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
@@ -48,71 +70,23 @@ The graph-based nature of DPG provides significant enhancements in the direction
 ---
 ## Installation
 
-To install DPG locally, first clone the repository:
+Install the package from PyPI:
 
 ```bash
-git clone https://github.com/Meta-Group/DPG.git
-cd DPG
+pip install dpg
 ```
 
-Then, install the DPG library in development mode using `pip`:
-```bash
-pip install -e .  
-```
+DPG requires Python 3.10+.
 
-Alternatively, if using `pip directly`:
-```bash
-pip install git+https://github.com/Meta-Group/DPG.git
-```
-**Troubleshooting:** If you encounter dependency conflicts, we recommend using a virtual environment:
+If you want graph rendering, install the system Graphviz package as well so the
+`dot` executable is available on your `PATH`:
 
-1- For Windows Users:
-  ```bash
-  # Create a virtual environment
-  python -m venv .venv
+- macOS (Homebrew): `brew install graphviz`
+- Ubuntu/Debian: `sudo apt-get install graphviz`
+- Windows (winget): `winget install Graphviz.Graphviz`
 
-  # Activate the virtual environment
-  .venv\Scripts\activate
-
-  # If you get execution policy errors, run this first in PowerShell as Administrator:
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-  # Then install DPG
-  pip install -r ./requirements.txt
-  ```
-2- For Linux/Mac Users:
-  ```bash
-  # Create a virtual environment
-  python -m venv .venv
-
-  # Activate the virtual environment
-  source .venv/bin/activate
-
-  # Install DPG
-  pip install -r ./requirements.txt
-  ```
-3- Deactivating the Virtual Environment:
-  When you're done working with DPG, you can deactivate the virtual environment:
-  ```bash
-  deactivate
-  ```
-
-4- Graph rendering error (`dot` not found):
-  DPG plotting requires the Graphviz system executable (`dot`) in your PATH.  
-  Installing the Python package `graphviz` is not sufficient on its own.
-
-  - macOS (Homebrew):
-    ```bash
-    brew install graphviz
-    ```
-  - Ubuntu/Debian:
-    ```bash
-    sudo apt-get install graphviz
-    ```
-  - Windows (winget):
-    ```powershell
-    winget install Graphviz.Graphviz
-    ```
+For local development installs, editable mode, and documentation builds, see
+[docs/README.md](docs/README.md).
 ---
 
 ## Documentation
@@ -126,9 +100,9 @@ Practitioner-focused benchmark material for `perc_var` and `decimal_threshold` i
 
 ---
 
-## Example usage (Python)
+## High-level usage
 
-You can also try DPG directly inside a Jupyter Notebook. Here's a minimal working example using the high-level API:
+Here is a minimal high-level example:
 
 ```python
 import pandas as pd
@@ -158,53 +132,7 @@ explainer.plot("dpg_output", explanation, save_dir="datasets", export_pdf=True)
 explainer.plot_communities("dpg_output", explanation, save_dir="datasets", export_pdf=True)
 ```
 
-### Legacy API (low-level)
-
-```python
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from dpg.core import DecisionPredicateGraph
-from dpg.visualizer import plot_dpg
-from metrics.nodes import NodeMetrics
-from metrics.edges import EdgeMetrics
-
-df = pd.read_csv("datasets/custom.csv", index_col=0)
-X = df.iloc[:, :-1]
-y = df.iloc[:, -1]
-
-model = RandomForestClassifier(n_estimators=10, random_state=27)
-model.fit(X, y)
-
-feature_names = X.columns.tolist()
-class_names = np.unique(y).astype(str).tolist()
-dpg = DecisionPredicateGraph(
-    model=model,
-    feature_names=feature_names,
-    target_names=class_names
-)
-dot = dpg.fit(X.values)
-dpg_model, nodes_list = dpg.to_networkx(dot)
-
-df_edges = EdgeMetrics.extract_edge_metrics(dpg_model, nodes_list)
-df_nodes = NodeMetrics.extract_node_metrics(dpg_model, nodes_list)
-
-plot_dpg(
-    "dpg_output",
-    dot,
-    df_nodes,
-    df_edges,
-    save_dir="datasets",
-    class_flag=True,
-    export_pdf=True,
-)
-```
-#### Output:
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/dpg_output_communities.png?raw=true" width="600" />
-</p>
-
-### API overview (high-level)
+### Common workflows
 
 The high-level API is designed to return structured outputs so downstream tools can use them directly.
 
@@ -215,6 +143,7 @@ The high-level API is designed to return structured outputs so downstream tools 
 - `DPGExplainer.plot(...)`: renders the standard DPG
 - `DPGExplainer.plot_communities(...)`: renders a community-colored DPG
 - `DPGExplainer.plot_local_on_dpg(...)`: overlays one sample's local paths on the fitted DPG
+- `DPGExplainer.evaluate_faithfulness(...)`: summarizes local explanation fidelity and structural faithfulness over a dataset
 
 `DPGExplanation` includes `dot`, `graph`, `nodes`, `node_metrics`, `edge_metrics`, `class_boundaries`, and optional `communities`.
 
@@ -328,24 +257,30 @@ Important:
 - `local_accuracy` is only reported when `y_true` is provided
 - structural faithfulness here means recovering the executed decision traces used by the model
 
-#### CLI scripts
+### Runnable examples
+
+- [examples/quickstart_iris.py](examples/quickstart_iris.py)
+- [examples/local_explanation_iris.py](examples/local_explanation_iris.py)
+- [examples](examples)
+
+## CLI scripts
 The library contains two different scripts to apply DPG:
 - `run_dpg_standard.py`: with this script it is possible to test DPG on a standard classification dataset provided by `sklearn` such as `iris`, `digits`, `wine`, `breast cancer`, and `diabetes`.
 - `run_dpg_custom.py`: with this script it is possible to apply DPG to your classification dataset, specifying the target class.
 
-#### DPG implementation
+### Implementation notes
 The library also contains two other essential scripts:
 - `core.py` contains all the functions used to calculate and create the DPG and the metrics.
 - `visualizer.py` contains the functions used to manage the visualization of DPG.
 
-#### Output
+### Output
 The DPG output, through `run_dpg_standard.py` or `run_dpg_custom.py`, produces several files:
 - the visualization of DPG in a dedicated environment, which can be zoomed and saved;
 - a `.txt` file containing the DPG metrics;
 - a `.csv` file containing the information about all the nodes of the DPG and their associated metrics;
 - a `.txt` file containing the Random Forest statistics (accuracy, confusion matrix, classification report)
 
-## Easy usage
+### CLI parameter reference
 Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
 Where:
 - `dataset` is the name of the standard classification `sklearn` dataset to be analyzed;
@@ -369,7 +304,7 @@ The usage of `run_dpg_custom.py` is similar, but it requires another parameter:
 - `target_column`, which is the name of the column to be used as the target variable;
 - while `ds` is the path of the directory where the dataset is.
 
-#### Example `run_dpg_standard.py`
+### Example `run_dpg_standard.py`
 Some examples can be appreciated in the `examples` folder: https://github.com/Meta-Group/DPG/tree/main/examples
 
 In particular, the following DPG is obtained by transforming a Random Forest with 5 base learners, trained on Iris dataset.
