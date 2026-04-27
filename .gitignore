@@ -55,7 +55,6 @@ docs/_build/
 outputs/
 results/
 examples/results
-experiments/
 experiments/results/
 experiments/local_explanation/results/
 wandb/
