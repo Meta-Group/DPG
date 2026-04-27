@@ -74,6 +74,94 @@ explainer = DPGExplainer(
 )
 ```
 
+You can also configure how the graph is constructed:
+
+```python
+explainer = DPGExplainer(
+    model,
+    feature_names=X.columns.tolist(),
+    dpg_config={
+        "dpg": {
+            "default": {
+                "perc_var": 1e-9,
+                "decimal_threshold": 6,
+                "n_jobs": -1,
+            },
+            "graph_construction": {
+                "mode": "execution_trace",  # or "aggregated_transitions"
+            },
+        }
+    },
+)
+```
+
+- `aggregated_transitions`: default global DPG behavior.
+- `execution_trace`: trace-first construction, useful for local path inspection.
+
+## Local explanations
+
+After fitting the explainer, you can inspect one sample at a time:
+
+```python
+local = explainer.explain_local(sample=X.iloc[0].values, sample_id=0)
+
+print(local.majority_vote)
+print(local.class_votes)
+print(local.sample_confidence)
+
+local_df = explainer.local_path_dataframe(local)
+print(local_df.head())
+```
+
+Path labels remain in DPG format such as `Class 0`, while `local.class_votes`
+and `local.majority_vote` use normalized class names such as `0`.
+
+To render the local paths on top of the fitted DPG:
+
+```python
+explainer.plot_local_on_dpg(
+    "iris_local_sample0",
+    local_explanation=local,
+    true_class_label=str(y.iloc[0]),
+    save_dir="results/",
+    theme="dpg",
+    palette="olive",
+    show=False,
+)
+```
+
+See [examples/local_explanation_iris.py](../examples/local_explanation_iris.py)
+for a minimal runnable script.
+
+## Faithfulness evaluation
+
+DPG can evaluate local explanations against the fitted black-box model:
+
+```python
+details = explainer.evaluate_faithfulness(
+    X_test,
+    y_true=y_test,
+    return_details=True,
+)
+
+print(details["faithfulness_score"])
+print(details["output_fidelity"])
+print(details["mean_trace_coverage_score"])
+print(details["mean_recombination_rate"])
+```
+
+This API reports:
+- `output_fidelity`: agreement between the local explanation and the model
+- structural metrics such as trace coverage and recombination
+- semantic metrics such as evidence margin
+- a composite `faithfulness_score`
+
+Notes:
+- the composite score is a heuristic summary, not a calibrated probability
+- `output_fidelity` measures agreement with the black-box model
+- `local_accuracy` is only available when `y_true` is supplied
+- structural faithfulness here is about recovering executed decision traces
+
 ## Visualisation options
 
 For a complete gallery of available graph and chart outputs, see

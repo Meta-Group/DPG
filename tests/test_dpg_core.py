@@ -174,6 +174,181 @@ class TestDPGInitValidation:
         assert dpg.decimal_threshold == 3
         assert dpg.n_jobs == 1
 
+    def test_default_graph_construction_mode_is_aggregated_transitions(
+        self, iris_rf, iris_split
+    ):
+        X_train, _, _, _, feature_names, target_names = iris_split
+        dpg = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+        )
+        assert dpg.graph_construction_mode == "aggregated_transitions"
+
+        default_log = dpg._extract_trace_log(X_train)
+        default_edges = set(
+            dpg.discover_dfg(dpg.filter_log(default_log)).keys()
+        )
+
+        explicit_dpg = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": dpg.perc_var,
+                        "decimal_threshold": dpg.decimal_threshold,
+                        "n_jobs": 1,
+                    },
+                    "graph_construction": {
+                        "mode": "aggregated_transitions",
+                    },
+                }
+            },
+        )
+        explicit_log = explicit_dpg._extract_trace_log(X_train)
+        explicit_edges = set(
+            explicit_dpg.discover_dfg(explicit_dpg.filter_log(explicit_log)).keys()
+        )
+
+        assert default_edges == explicit_edges
+
+    def test_explicit_aggregated_transitions_works(self, iris_rf, iris_split):
+        X_train, _, _, _, feature_names, target_names = iris_split
+        dpg = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": 1e-9,
+                        "decimal_threshold": 6,
+                        "n_jobs": 1,
+                    },
+                    "graph_construction": {
+                        "mode": "aggregated_transitions",
+                    },
+                }
+            },
+        )
+
+        dot = dpg.fit(X_train)
+        graph, _ = dpg.to_networkx(dot)
+
+        assert dpg.graph_construction_mode == "aggregated_transitions"
+        assert graph.number_of_edges() > 0
+
+    def test_explicit_execution_trace_works(self, iris_rf, iris_split):
+        X_train, _, _, _, feature_names, target_names = iris_split
+        dpg = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": 1e-9,
+                        "decimal_threshold": 6,
+                        "n_jobs": 1,
+                    },
+                    "graph_construction": {
+                        "mode": "execution_trace",
+                    },
+                }
+            },
+        )
+
+        dot = dpg.fit(X_train)
+        graph, _ = dpg.to_networkx(dot)
+
+        assert dpg.graph_construction_mode == "execution_trace"
+        assert graph.number_of_edges() > 0
+
+    def test_invalid_graph_construction_mode_raises(self, iris_rf, iris_split):
+        _, _, _, _, feature_names, target_names = iris_split
+        with pytest.raises(DPGError, match="Unsupported graph construction mode"):
+            DecisionPredicateGraph(
+                model=iris_rf,
+                feature_names=feature_names,
+                target_names=target_names,
+                dpg_config={
+                    "dpg": {
+                        "default": {
+                            "perc_var": 1e-9,
+                            "decimal_threshold": 6,
+                            "n_jobs": 1,
+                        },
+                        "graph_construction": {
+                            "mode": "not_a_real_mode",
+                        },
+                    }
+                },
+            )
+
+    def test_graph_construction_modes_can_produce_different_edges(self):
+        iris = load_iris()
+        X_train, _, y_train, _ = train_test_split(
+            iris.data, iris.target, test_size=0.3, random_state=42
+        )
+        model = RandomForestClassifier(
+            n_estimators=3, max_depth=2, random_state=42, n_jobs=-1
+        )
+        model.fit(X_train, y_train)
+        feature_names = iris.feature_names
+        target_names = np.unique(iris.target).astype(str).tolist()
+
+        aggregated_dpg = DecisionPredicateGraph(
+            model=model,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": 0.1,
+                        "decimal_threshold": 6,
+                        "n_jobs": 1,
+                    },
+                    "graph_construction": {
+                        "mode": "aggregated_transitions",
+                    },
+                }
+            },
+        )
+        aggregated_log = aggregated_dpg._extract_trace_log(X_train)
+        aggregated_edges = set(
+            aggregated_dpg.discover_dfg(
+                aggregated_dpg.filter_log(aggregated_log)
+            ).keys()
+        )
+
+        execution_trace_dpg = DecisionPredicateGraph(
+            model=model,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": 0.1,
+                        "decimal_threshold": 6,
+                        "n_jobs": 1,
+                    },
+                    "graph_construction": {
+                        "mode": "execution_trace",
+                    },
+                }
+            },
+        )
+        execution_trace_log = execution_trace_dpg._extract_trace_log(X_train)
+        execution_trace_edges = set(
+            execution_trace_dpg.discover_dfg_execution_trace(
+                execution_trace_log
+            ).keys()
+        )
+
+        assert aggregated_edges != execution_trace_edges
+
 
 # ---------------------------------------------------------------------------
 # Different ensemble models

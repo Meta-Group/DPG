@@ -1,6 +1,11 @@
 # dpg/__init__.py
 from .core import DecisionPredicateGraph
-from .explainer import DPGExplainer, DPGExplanation
+from .explainer import (
+    DPGExplainer,
+    DPGExplanation,
+    DPGLocalExplanation,
+    DPGTreePathExplanation,
+)
 from .themes import DPG_CLASS_PALETTE, DPG_COLORS, DPG_OLIVE_CLASS_PALETTE, resolve_theme_context
 from .visualizer import (
     class_feature_predicate_counts,
@@ -10,6 +15,7 @@ from .visualizer import (
     plot_dpg,
     plot_dpg_class_bounds_vs_dataset_feature_ranges,
     plot_dpg_constraints_overview,
+    plot_dpg_local_paths_aggregate,
     plot_dpg_reg,
     plot_lec_vs_rf_importance,
     plot_lrc_vs_rf_importance,
@@ -22,11 +28,14 @@ __all__ = [
     "DecisionPredicateGraph",
     "DPGExplainer",
     "DPGExplanation",
+    "DPGLocalExplanation",
+    "DPGTreePathExplanation",
     "DPG_COLORS",
     "DPG_CLASS_PALETTE",
     "DPG_OLIVE_CLASS_PALETTE",
     "resolve_theme_context",
     "plot_dpg",
+    "plot_dpg_local_paths_aggregate",
     "plot_dpg_reg",
     "plot_dpg_constraints_overview",
     "plot_lrc_vs_rf_importance",

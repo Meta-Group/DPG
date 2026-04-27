@@ -51,6 +51,11 @@ htmlcov/
 # Documentation
 docs/_build/
 
+# Generated outputs and temporary files
 outputs/
+results/
 examples/results
+experiments/results/
+experiments/local_explanation/results/
 wandb/
+.codex/

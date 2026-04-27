@@ -210,10 +210,123 @@ The high-level API is designed to return structured outputs so downstream tools 
 
 - `DPGExplainer.fit(X)`: builds the DPG structure
 - `DPGExplainer.explain_global(X=None, communities=False, community_threshold=0.2)`: returns a `DPGExplanation`
+- `DPGExplainer.explain_local(sample, sample_id=0, X=None, validate_graph=True)`: returns a `DPGLocalExplanation`
+- `DPGExplainer.local_path_dataframe(local_explanation)`: flattens local paths into a tabular view
 - `DPGExplainer.plot(...)`: renders the standard DPG
 - `DPGExplainer.plot_communities(...)`: renders a community-colored DPG
+- `DPGExplainer.plot_local_on_dpg(...)`: overlays one sample's local paths on the fitted DPG
 
 `DPGExplanation` includes `dot`, `graph`, `nodes`, `node_metrics`, `edge_metrics`, `class_boundaries`, and optional `communities`.
+
+### Local explanations
+
+DPG also supports sample-level explanations on top of the fitted global graph.
+
+#### Graph construction modes
+
+You can control how the graph is built through `dpg.graph_construction.mode`:
+
+```python
+from dpg import DPGExplainer
+
+explainer = DPGExplainer(
+    model=model,
+    feature_names=X.columns.tolist(),
+    target_names=class_names,
+    dpg_config={
+        "dpg": {
+            "default": {
+                "perc_var": 1e-9,
+                "decimal_threshold": 6,
+                "n_jobs": -1,
+            },
+            "graph_construction": {
+                "mode": "execution_trace",  # or "aggregated_transitions"
+            },
+        }
+    },
+)
+```
+
+- `"aggregated_transitions"`: current default behavior; filters path variants first, then discovers the DPG.
+- `"execution_trace"`: builds directly from raw traces and filters edges instead of whole-path variants when `perc_var > 0`.
+
+#### Minimal local workflow
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+from dpg import DPGExplainer
+import numpy as np
+
+X, y = load_iris(return_X_y=True, as_frame=True)
+model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
+
+explainer = DPGExplainer(
+    model=model,
+    feature_names=X.columns.tolist(),
+    target_names=np.unique(y).astype(str).tolist(),
+)
+explainer.fit(X.values)
+
+local = explainer.explain_local(sample=X.iloc[0].values, sample_id=0)
+
+print(local.majority_vote)
+print(local.class_votes)
+print(local.sample_confidence)
+
+df_local = explainer.local_path_dataframe(local)
+print(df_local.head())
+```
+
+`local.tree_paths[*].labels` stay in DPG label format such as `"sepal width (cm) <= 3.0"` and `"Class 0"`.
+For easier aggregation, `local.class_votes` and `local.majority_vote` use normalized class names such as `"0"` instead of `"Class 0"`.
+
+#### Local plotting
+
+```python
+explainer.plot_local_on_dpg(
+    "iris_local_sample0",
+    local_explanation=local,
+    true_class_label=str(y.iloc[0]),
+    save_dir="results/",
+    theme="dpg",
+    palette="olive",
+    layout_template="vertical",
+    show=False,
+)
+```
+
+A runnable example is available at [examples/local_explanation_iris.py](examples/local_explanation_iris.py).
+
+#### Faithfulness evaluation
+
+You can also evaluate local explanations against the fitted black-box model:
+
+```python
+details = explainer.evaluate_faithfulness(
+    X_test,
+    y_true=y_test,
+    return_details=True,
+)
+
+print(details["faithfulness_score"])
+print(details["output_fidelity"])
+print(details["mean_trace_coverage_score"])
+print(details["mean_recombination_rate"])
+```
+
+This reports:
+- `output_fidelity`: agreement between the local explanation and the black-box model
+- structural metrics such as trace coverage and recombination
+- semantic metrics such as evidence margin
+- a composite `faithfulness_score`
+
+Important:
+- the composite score is a heuristic summary, not a calibrated probability
+- `output_fidelity` is model agreement, not ground-truth correctness
+- `local_accuracy` is only reported when `y_true` is provided
+- structural faithfulness here means recovering the executed decision traces used by the model
 
 #### CLI scripts
 The library contains two different scripts to apply DPG:
