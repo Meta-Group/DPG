@@ -18,15 +18,16 @@ For local development installs and longer setup notes, see [docs/README.md](READ
 The simplest way to use DPG is through `DPGExplainer`:
 
 ```python
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.datasets import load_iris
 from dpg import DPGExplainer
 
-# 1. Train any tree-based ensemble
+# 1. Train any tree-based ensemble (RandomForest, GradientBoosting, AdaBoost, etc.)
 X, y = load_iris(return_X_y=True, as_frame=True)
-model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
+# model = RandomForestClassifier(n_estimators=5, random_state=42).fit(X, y)
+model = GradientBoostingClassifier(n_estimators=5, random_state=42).fit(X, y)
 
-# 2. Create the explainer
+# 2. Create the explainer (automatic model adaptation happens here)
 explainer = DPGExplainer(
     model,
     feature_names=X.columns.tolist(),
@@ -101,6 +102,27 @@ explainer = DPGExplainer(
 
 - `aggregated_transitions`: default global DPG behavior.
 - `execution_trace`: trace-first construction, useful for local path inspection.
+
+## Supported Models
+
+DPGExplainer works with a wide range of scikit-learn tree-based ensemble models:
+
+**Classification:**
+- ✅ `RandomForestClassifier`
+- ✅ `GradientBoostingClassifier` (NEW!)
+- ✅ `ExtraTreesClassifier`
+- ✅ `AdaBoostClassifier`
+- ✅ `BaggingClassifier`
+
+**Regression:**
+- ✅ `RandomForestRegressor`
+- ✅ `GradientBoostingRegressor` (NEW!)
+- ✅ `ExtraTreesRegressor`
+- ✅ `AdaBoostRegressor`
+
+All models work automatically without any special configuration. DPGExplainer detects the model type and handles differences internally.
+
+For a complete list of models and detailed configuration options, see [Supported Models](supported_models.md).
 
 ## Local explanations
 

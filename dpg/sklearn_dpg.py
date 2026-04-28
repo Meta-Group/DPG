@@ -5,7 +5,16 @@ import os
 from typing import Any, Optional, Tuple, Union
 import yaml
 
-from sklearn.ensemble import (RandomForestClassifier, RandomForestRegressor,GradientBoostingClassifier, BaggingClassifier,ExtraTreesClassifier, AdaBoostClassifier, AdaBoostRegressor)
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    RandomForestRegressor,
+    GradientBoostingClassifier,
+    GradientBoostingRegressor,
+    BaggingClassifier,
+    ExtraTreesClassifier,
+    AdaBoostClassifier,
+    AdaBoostRegressor,
+)
 from sklearn.metrics import (accuracy_score, classification_report,
                             confusion_matrix, f1_score, mean_squared_error)
 from sklearn.model_selection import train_test_split
@@ -117,11 +126,15 @@ def test_dpg(datasets: str,
     # Initialize model
     model_classes = {
         'RandomForestClassifier': RandomForestClassifier,
+        'RandomForestRegressor': RandomForestRegressor,
+        'GradientBoostingClassifier': GradientBoostingClassifier,
+        'GradientBoostingRegressor': GradientBoostingRegressor,
         'ExtraTreesClassifier': ExtraTreesClassifier,
         'AdaBoostClassifier': AdaBoostClassifier,
-        'BaggingClassifier': BaggingClassifier
+        'AdaBoostRegressor': AdaBoostRegressor,
+        'BaggingClassifier': BaggingClassifier,
     }
-    
+
     if model_name not in model_classes:
         raise ValueError(f"Unsupported model: {model_name}. Available: {list(model_classes.keys())}")
     

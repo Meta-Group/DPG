@@ -22,7 +22,14 @@ try:
 except ImportError:
     HAS_OMEGACONF = False
 
-from sklearn.ensemble import (AdaBoostRegressor, RandomForestRegressor, ExtraTreesRegressor)
+from sklearn.ensemble import (
+    AdaBoostRegressor,
+    RandomForestRegressor,
+    ExtraTreesRegressor,
+    GradientBoostingClassifier,
+    GradientBoostingRegressor,
+)
+from dpg.sklearn_normalizer import SklearnEnsembleNormalizer
 
 DEFAULT_DPG_CONFIG = {
     "dpg": {
@@ -101,7 +108,10 @@ class DecisionPredicateGraph:
             raise DPGError("Model must be a tree-based ensemble")
         if len(feature_names) == 0:
             raise DPGError("Feature names cannot be empty")
-        
+
+        # Normalize sklearn ensemble models for consistent tree structure
+        model = SklearnEnsembleNormalizer.normalize(model)
+
         # Initialize attributes
         self.model = model
         self.feature_names = feature_names
@@ -209,7 +219,15 @@ class DecisionPredicateGraph:
         Yields:
             List[str]: Path segments as [prefix, decision/prediction]
         """
-        is_regressor = isinstance(self.model, (RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor))
+        is_regressor = isinstance(
+            self.model,
+            (
+                RandomForestRegressor,
+                ExtraTreesRegressor,
+                AdaBoostRegressor,
+                GradientBoostingRegressor,
+            ),
+        )
         sample = sample.reshape(-1)
         for i, tree in enumerate(self.model.estimators_):
             tree_ = tree.tree_
@@ -253,7 +271,15 @@ class DecisionPredicateGraph:
             List of ``[prefix, event]`` pairs representing the full decision path
             across all trees in the ensemble.
         """
-        is_regressor = isinstance(self.model, (RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor))
+        is_regressor = isinstance(
+            self.model,
+            (
+                RandomForestRegressor,
+                ExtraTreesRegressor,
+                AdaBoostRegressor,
+                GradientBoostingRegressor,
+            ),
+        )
         sample = sample.reshape(-1)
         result = []
         for i, tree in enumerate(self.model.estimators_):

@@ -13,17 +13,23 @@ DPG provides descriptive metrics that enhance the understanding of the decisions
 
 Install DPG and run your first explanation in minutes.
 :::
-:::{grid-item-card} API Reference
-:link: api_reference
+:::{grid-item-card} Supported Models
+:link: supported_models
 :link-type: doc
 
-Full API documentation for dpg and metrics.
+RandomForest, GradientBoosting, AdaBoost, and more.
 :::
 :::{grid-item-card} Visualization
 :link: visualization
 :link-type: doc
 
 Browse all graph and chart outputs available in DPG.
+:::
+:::{grid-item-card} API Reference
+:link: api_reference
+:link-type: doc
+
+Full API documentation for dpg and metrics.
 :::
 # Counterfactual
 # :link: api/counterfactual/index
@@ -65,6 +71,7 @@ explainer.plot(explanation)
 :caption: User Guide
 
 quickstart
+supported_models
 ```
 
 ```{toctree}

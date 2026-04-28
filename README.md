@@ -107,7 +107,7 @@ Here is a minimal high-level example:
 ```python
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from dpg import DPGExplainer
 
 # Load dataset (last column assumed to be target)
@@ -115,8 +115,9 @@ df = pd.read_csv("datasets/custom.csv", index_col=0)
 X = df.iloc[:, :-1]
 y = df.iloc[:, -1]
 
-# Train a simple Random Forest classifier
+# Train a classifier (supports RandomForest, GradientBoosting, AdaBoost, ExtraTree, and more)
 model = RandomForestClassifier(n_estimators=10, random_state=27)
+# or: model = GradientBoostingClassifier(n_estimators=10, random_state=27)
 model.fit(X, y)
 
 # Build the DPG and extract global explanations
@@ -284,10 +285,18 @@ The DPG output, through `run_dpg_standard.py` or `run_dpg_custom.py`, produces s
 Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
 Where:
 - `dataset` is the name of the standard classification `sklearn` dataset to be analyzed;
-- `n_learners` is the number of base learners for the Random Forest;
+- `n_learners` is the number of base learners for the ensemble model;
 - `pv` is the threshold value indicating the desire to retain only those paths that occur with a frequency exceeding a specified proportion across the trees;
 - `t` is the decimal precision of each feature;
-- `model_name` is the name of the `sklearn` model chosen to perform classification (`RandomForestClassifier`,`BaggingClassifier`,`ExtraTreesClassifier`,`AdaBoostClassifier` are currently available);
+- `model_name` is the name of the `sklearn` model chosen to perform classification. Supported models include:
+  - `RandomForestClassifier` (default)
+  - `GradientBoostingClassifier` (new!)
+  - `RandomForestRegressor`
+  - `GradientBoostingRegressor`
+  - `ExtraTreesClassifier`
+  - `AdaBoostClassifier`
+  - `AdaBoostRegressor`
+  - `BaggingClassifier`
 - `dir` is the path of the directory to save the files;
 - `plot` is a store_true variable which can be added to plot the DPG;
 - `save_plot_dir` is the path of the directory to save the plot image;
