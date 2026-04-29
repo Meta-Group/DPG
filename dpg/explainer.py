@@ -5,9 +5,15 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import AdaBoostRegressor, ExtraTreesRegressor, RandomForestRegressor
+from sklearn.ensemble import (
+    AdaBoostRegressor,
+    ExtraTreesRegressor,
+    GradientBoostingClassifier,
+    RandomForestRegressor,
+)
 
 from .core import DecisionPredicateGraph
+from .sklearn_normalizer import SklearnEnsembleNormalizer
 from .visualizer import (
     class_feature_predicate_counts,
     class_lookup_from_target_names,
@@ -640,10 +646,7 @@ class DPGExplainer:
                     pred = round(tree_.value[node_index][0][0], 2)
                     labels.append(f"Pred {pred}")
                 else:
-                    pred_class = tree_.value[node_index].argmax()
-                    if self._builder.target_names is not None:
-                        pred_class = self._builder.target_names[pred_class]
-                    labels.append(f"Class {pred_class}")
+                    labels.append(self._leaf_class_label(tree_index, tree_, node_index))
                 break
 
             feature_index = tree_.feature[node_index]
@@ -712,6 +715,26 @@ class DPGExplainer:
     @staticmethod
     def _label_to_node_id(label: str) -> str:
         return str(int(hashlib.sha1(label.encode()).hexdigest(), 16))
+
+    def _leaf_class_label(self, tree_index: int, tree_: Any, node_index: int) -> str:
+        """Return the class label for a classifier leaf node."""
+        gb_class_index = SklearnEnsembleNormalizer.get_tree_class_index(
+            self._builder.model,
+            tree_index,
+        )
+        if gb_class_index is not None:
+            pred_class = gb_class_index
+        elif isinstance(self._builder.model, GradientBoostingClassifier) and getattr(self._builder.model, "n_classes_", 0) == 2:
+            leaf_score = float(tree_.value[node_index][0][0])
+            pred_class = 1 if leaf_score > 0 else 0
+        else:
+            pred_class = int(tree_.value[node_index].argmax())
+
+        if self._builder.target_names is not None:
+            pred_class = self._builder.target_names[pred_class]
+        elif hasattr(self._builder.model, "classes_"):
+            pred_class = self._builder.model.classes_[pred_class]
+        return f"Class {pred_class}"
 
     @staticmethod
     def _normalize_class_vote_label(label: str) -> str:
@@ -871,8 +894,14 @@ class DPGExplainer:
 
     def _extract_execution_trace_labels(self, sample_arr: np.ndarray) -> List[List[str]]:
         traces = []
-        for tree in self._builder.model.estimators_:
-            traces.append(self._trace_execution_labels_for_tree(tree, sample_arr))
+        for tree_index, tree in enumerate(self._builder.model.estimators_):
+            traces.append(
+                self._trace_execution_labels_for_tree(
+                    tree,
+                    sample_arr,
+                    tree_index=tree_index,
+                )
+            )
         return traces
 
     def _trace_reference_sets(
@@ -956,6 +985,7 @@ class DPGExplainer:
         self,
         tree: Any,
         sample: np.ndarray,
+        tree_index: Optional[int] = None,
     ) -> List[str]:
         is_regressor = isinstance(
             self._builder.model,
@@ -973,10 +1003,15 @@ class DPGExplainer:
                     pred = round(tree_.value[node_index][0][0], 2)
                     labels.append(f"Pred {pred}")
                 else:
-                    pred_class = tree_.value[node_index].argmax()
-                    if self._builder.target_names is not None:
-                        pred_class = self._builder.target_names[pred_class]
-                    labels.append(f"Class {pred_class}")
+                    if tree_index is None:
+                        pred_class = int(tree_.value[node_index].argmax())
+                        if self._builder.target_names is not None:
+                            pred_class = self._builder.target_names[pred_class]
+                        elif hasattr(self._builder.model, "classes_"):
+                            pred_class = self._builder.model.classes_[pred_class]
+                        labels.append(f"Class {pred_class}")
+                    else:
+                        labels.append(self._leaf_class_label(tree_index, tree_, node_index))
                 break
 
             feature_index = tree_.feature[node_index]

@@ -208,6 +208,23 @@ class DecisionPredicateGraph:
         log = [item for sublist in log for item in sublist]
         return pd.DataFrame(log, columns=["case:concept:name", "concept:name"])
 
+    def _leaf_class_label(self, tree_index: int, tree_: Any, node_index: int) -> str:
+        """Return the class label for a classifier leaf node."""
+        gb_class_index = SklearnEnsembleNormalizer.get_tree_class_index(self.model, tree_index)
+        if gb_class_index is not None:
+            pred_class = gb_class_index
+        elif isinstance(self.model, GradientBoostingClassifier) and getattr(self.model, "n_classes_", 0) == 2:
+            leaf_score = float(tree_.value[node_index][0][0])
+            pred_class = 1 if leaf_score > 0 else 0
+        else:
+            pred_class = int(tree_.value[node_index].argmax())
+
+        if self.target_names is not None:
+            pred_class = self.target_names[pred_class]
+        elif hasattr(self.model, "classes_"):
+            pred_class = self.model.classes_[pred_class]
+        return f"Class {pred_class}"
+
     def tracing_ensemble(self, case_id: int, sample: Any) -> Generator[List[str], None, None]:
         """
         Extract decision path for a single sample (generator version).
@@ -241,11 +258,7 @@ class DecisionPredicateGraph:
                         pred = round(tree_.value[node_index][0][0], 2)
                         yield [prefix, f"Pred {pred}"]
                     else:
-                        pred_class = tree_.value[node_index].argmax()
-                        #Using the original class name
-                        if self.target_names is not None:
-                            pred_class = self.target_names[pred_class]
-                        yield [prefix, f"Class {pred_class}"]
+                        yield [prefix, self._leaf_class_label(i, tree_, node_index)]
                     break
                 feature_index = tree_.feature[node_index]
                 threshold = round(tree_.threshold[node_index], self.decimal_threshold)
@@ -294,10 +307,7 @@ class DecisionPredicateGraph:
                         pred = round(tree_.value[node_index][0][0], 2)
                         result.append([prefix, f"Pred {pred}"])
                     else:
-                        pred_class = tree_.value[node_index].argmax()
-                        if self.target_names is not None:
-                            pred_class = self.target_names[pred_class]
-                        result.append([prefix, f"Class {pred_class}"])
+                        result.append([prefix, self._leaf_class_label(i, tree_, node_index)])
                     break
                 feature_index = tree_.feature[node_index]
                 threshold = round(tree_.threshold[node_index], self.decimal_threshold)

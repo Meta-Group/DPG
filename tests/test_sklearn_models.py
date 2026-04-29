@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from sklearn.datasets import load_iris, load_wine, load_diabetes
+from sklearn.datasets import load_breast_cancer, load_iris, load_wine, load_diabetes
 from sklearn.ensemble import (
     RandomForestClassifier,
     RandomForestRegressor,
@@ -36,6 +36,12 @@ class TestGradientBoostingSupport:
         diabetes = load_diabetes()
         return diabetes.data, diabetes.target, diabetes.feature_names, None
 
+    @pytest.fixture
+    def breast_cancer_data(self):
+        """Load breast cancer dataset."""
+        cancer = load_breast_cancer()
+        return cancer.data, cancer.target, cancer.feature_names, cancer.target_names
+
     def test_gradient_boosting_classifier_binary(self, iris_data):
         """Test GradientBoostingClassifier on binary classification."""
         X, y, feature_names, target_names = iris_data
@@ -65,6 +71,13 @@ class TestGradientBoostingSupport:
         assert explanation is not None
         assert explanation.nodes is not None
         assert len(explanation.nodes) > 0
+        class_labels = sorted(
+            explanation.node_metrics.loc[
+                explanation.node_metrics["Label"].astype(str).str.startswith("Class "),
+                "Label",
+            ].unique().tolist()
+        )
+        assert class_labels == sorted([f"Class {name}" for name in target_names])
 
     def test_gradient_boosting_classifier_wine(self, wine_data):
         """Test GradientBoostingClassifier on wine dataset (3 classes)."""
@@ -79,6 +92,31 @@ class TestGradientBoostingSupport:
         assert explanation is not None
         assert explanation.nodes is not None
         assert len(explanation.nodes) > 0
+        class_labels = sorted(
+            explanation.node_metrics.loc[
+                explanation.node_metrics["Label"].astype(str).str.startswith("Class "),
+                "Label",
+            ].unique().tolist()
+        )
+        assert class_labels == sorted([f"Class {name}" for name in target_names])
+
+    def test_gradient_boosting_classifier_binary_breast_cancer(self, breast_cancer_data):
+        """Binary GradientBoostingClassifier should expose both class nodes."""
+        X, y, feature_names, target_names = breast_cancer_data
+
+        gb = GradientBoostingClassifier(n_estimators=5, max_depth=3, random_state=42)
+        gb.fit(X, y)
+
+        explainer = DPGExplainer(gb, feature_names, list(target_names))
+        explanation = explainer.explain_global(X)
+
+        class_labels = sorted(
+            explanation.node_metrics.loc[
+                explanation.node_metrics["Label"].astype(str).str.startswith("Class "),
+                "Label",
+            ].unique().tolist()
+        )
+        assert class_labels == sorted([f"Class {name}" for name in target_names])
 
     def test_gradient_boosting_regressor(self, diabetes_data):
         """Test GradientBoostingRegressor on regression task."""
@@ -109,6 +147,21 @@ class TestGradientBoostingSupport:
         # After DPGExplainer: should be normalized to list
         explainer = DPGExplainer(gb, feature_names, list(target_names))
         assert isinstance(explainer._builder.model.estimators_, list)
+        assert gb.estimators_.shape == original_shape
+
+    def test_gb_original_model_predict_still_works_after_explainer(self, iris_data):
+        """DPG normalization should not mutate the caller's sklearn model."""
+        X, y, feature_names, target_names = iris_data
+
+        gb = GradientBoostingClassifier(n_estimators=3, max_depth=2, random_state=42)
+        gb.fit(X, y)
+        baseline = gb.predict(X[:5])
+
+        explainer = DPGExplainer(gb, feature_names, list(target_names))
+        assert isinstance(explainer._builder.model.estimators_, list)
+
+        after = gb.predict(X[:5])
+        np.testing.assert_array_equal(after, baseline)
 
     def test_gb_vs_rf_same_structure(self, iris_data):
         """Test that GB and RF produce same output structure."""
