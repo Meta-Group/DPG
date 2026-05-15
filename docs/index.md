@@ -31,12 +31,6 @@ Browse all graph and chart outputs available in DPG.
 
 Full API documentation for dpg and metrics.
 :::
-# Counterfactual
-# :link: api/counterfactual/index
-# :link-type: doc
-
-# Counterfactual generation and constraint explanation on DPG models.
-:::
 :::{grid-item-card} Development
 :link: development/index
 :link-type: doc

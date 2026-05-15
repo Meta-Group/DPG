@@ -15,12 +15,6 @@ Core graph construction, explainer, and visualisation.
 
 Graph, node, and edge metrics for DPG analysis.
 :::
-# counterfactual
-# :link: api/counterfactual/index
-# :link-type: doc
-
-# Counterfactual generation, constraint extraction, and scoring.
-:::
 ::::
 
 ```{toctree}
@@ -28,5 +22,4 @@ Graph, node, and edge metrics for DPG analysis.
 
 api/dpg/index
 api/metrics/index
-api/counterfactual/index
 ```

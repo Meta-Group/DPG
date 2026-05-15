@@ -69,7 +69,6 @@ sphinx-autobuild docs/ docs/_build/html --open-browser
 The API documentation is auto-generated from docstrings using `sphinx-autoapi`. It scans:
 - `dpg/` - Main DPG package
 - `metrics/` - Metrics package
-- `# counterfactual/` - Counterfactual explanations
 
 No need to manually write API docs - just add proper docstrings to your Python code!
 
