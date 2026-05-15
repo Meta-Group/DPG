@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/dpg.svg)](https://pypi.org/project/dpg/)
 [![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
