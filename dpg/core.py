@@ -10,9 +10,11 @@ import graphviz
 import networkx as nx
 import hashlib
 import yaml
+from collections import defaultdict
+from dataclasses import dataclass, field
 from joblib import Parallel, delayed
 
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Set, Tuple, Union
 from sklearn.base import is_classifier, is_regressor
 
 # Handle OmegaConf DictConfig if available
@@ -48,6 +50,23 @@ DEFAULT_DPG_CONFIG = {
 class DPGError(Exception):
     """Base exception class for DPG-specific errors"""
     pass
+
+
+@dataclass(frozen=True)
+class TraceSignature:
+    """A single observed sample-tree execution trace.
+
+    Attributes:
+        signature: Canonical feature-occurrence signature of the trace
+            (repeated feature splits within one tree are preserved).
+        predicate_sequence: Ordered predicate/leaf labels as observed in the trace.
+        path_count: Number of sample-tree executions that produced this exact
+            predicate sequence.
+    """
+
+    signature: Tuple[str, ...]
+    predicate_sequence: Tuple[str, ...]
+    path_count: int
 
 
 class DecisionPredicateGraph:
@@ -154,6 +173,11 @@ class DecisionPredicateGraph:
         # Store visualization config for use by utils
         self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
 
+        # Trace artefacts (populated only in "execution_trace" mode; reset on every fit())
+        self._trace_consistent_lrc: Dict[str, float] = {}
+        self._trace_consistent_trc: Dict[str, Set[str]] = {}
+        self._trace_signatures: List[TraceSignature] = []
+
     def fit(self, X_train: Any) -> Any:
         """
         Main pipeline: Extract decision paths → Build graph → Generate visualization.
@@ -171,11 +195,17 @@ class DecisionPredicateGraph:
         print("Model Params: ", self.model.get_params())
         print("*****************************************************************")
 
+        # Reset trace artefacts on every fit so no state leaks across refits.
+        self._trace_consistent_lrc = {}
+        self._trace_consistent_trc = {}
+        self._trace_signatures = []
+
         log_df = self._extract_trace_log(X_train)
 
         print(f'Total of paths: {len(log_df["case:concept:name"].unique())}')
         print('Building DPG...')
         if self.graph_construction_mode == "execution_trace":
+            self._build_trace_artifacts(log_df)
             dfg = self.discover_dfg_execution_trace(log_df)
         else:
             if self.perc_var > 0:
@@ -397,6 +427,130 @@ class DecisionPredicateGraph:
             edge: count for edge, count in dfg.items()
             if count >= min_count
         }
+
+    _PREDICATE_LABEL_RE = re.compile(
+        r"^\s*(.+?)\s*(<=|>)\s*[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?\s*$"
+    )
+
+    @classmethod
+    def _is_predicate_label(cls, label: str) -> bool:
+        """Return True if a trace label is a decision predicate (not a leaf/class label)."""
+        return bool(cls._PREDICATE_LABEL_RE.match(label))
+
+    @classmethod
+    def _feature_signature_token(cls, label: str) -> str:
+        """Return the feature-signature token for a trace label (feature name for
+        predicates, the label itself for leaf/class labels)."""
+        match = cls._PREDICATE_LABEL_RE.match(label)
+        return match.group(1) if match else label
+
+    def _build_trace_artifacts(self, log_df: Any) -> None:
+        """
+        Build trace-consistent artefacts from the raw execution-trace log.
+
+        These artefacts are derived exclusively from single, observed
+        sample-tree executions: a downstream relation or path is only recorded
+        if it was witnessed within one same-trace sequence. This avoids the
+        cross-trace "phantom path" issue that can arise when reading multi-hop
+        paths off the pooled aggregated graph.
+
+        Populates ``self._trace_signatures``, ``self._trace_consistent_trc``
+        and ``self._trace_consistent_lrc``. Only raw sequences are consumed
+        here; no raw per-trace records are retained afterwards.
+
+        Note on ``perc_var``: this method always consumes the *unfiltered*
+        raw trace log passed in from ``fit()``. ``perc_var`` filtering in
+        ``execution_trace`` mode is applied afterwards, only to the pooled
+        graph's edges (see ``discover_dfg_execution_trace``) — it never
+        removes a trace artefact. A predicate can therefore appear in
+        ``get_trace_consistent_lrc()`` / ``get_trace_signatures()`` even if
+        every pooled edge it participates in was filtered out of the
+        visualised graph. This is intentional: trace artefacts are meant to
+        stay auditable evidence, independent of display-oriented filtering.
+        """
+        signature_counts: Dict[Tuple[str, ...], int] = defaultdict(int)
+        signature_sequence: Dict[Tuple[str, ...], Tuple[str, ...]] = {}
+        downstream: Dict[str, Set[str]] = defaultdict(set)
+        all_labels: Set[str] = set()
+
+        grouped = log_df.groupby("case:concept:name", sort=False)
+        for _, trace_df in grouped:
+            sequence = tuple(trace_df["concept:name"].values)
+            if not sequence:
+                continue
+            all_labels.update(sequence)
+
+            signature = tuple(self._feature_signature_token(label) for label in sequence)
+            signature_counts[signature] += 1
+            signature_sequence.setdefault(signature, sequence)
+
+            for i, label in enumerate(sequence):
+                if not self._is_predicate_label(label):
+                    continue
+                downstream[label].update(sequence[i + 1:])
+
+        self._trace_signatures = [
+            TraceSignature(
+                signature=sig,
+                predicate_sequence=signature_sequence[sig],
+                path_count=count,
+            )
+            for sig, count in signature_counts.items()
+        ]
+        self._trace_consistent_trc = dict(downstream)
+
+        denom = max(len(all_labels) - 1, 1)
+        self._trace_consistent_lrc = {
+            label: len(downs) / denom for label, downs in downstream.items()
+        }
+
+    def get_trace_consistent_lrc(self) -> Dict[str, float]:
+        """
+        Return trace-consistent local-reaching-centrality-like scores.
+
+        For each predicate label, the score is the fraction (over all distinct
+        labels observed across every trace) of labels found downstream of it
+        within at least one single observed sample-tree execution. Unlike the
+        pooled-graph NetworkX local reaching centrality, this never credits a
+        predicate with reach that only exists after pooling edges from
+        different traces.
+
+        Returns:
+            Dict[str, float]: Mapping of predicate label to trace-consistent
+            LRC score. Empty before ``fit()`` or outside
+            ``graph_construction_mode="execution_trace"``.
+        """
+        return dict(self._trace_consistent_lrc)
+
+    def get_trace_consistent_trc(self) -> Dict[str, Tuple[str, ...]]:
+        """
+        Return observed downstream predicate sets, keyed by predicate label.
+
+        Each value is the sorted tuple of labels that were observed
+        downstream of the key label within at least one single sample-tree
+        trace. A tuple (rather than a ``set``) is returned so the result is
+        directly JSON-serialisable and has a stable, deterministic order.
+
+        Returns:
+            Dict[str, Tuple[str, ...]]: Mapping of predicate label to its
+            observed downstream labels. Empty before ``fit()`` or outside
+            ``graph_construction_mode="execution_trace"``.
+        """
+        return {
+            label: tuple(sorted(downs))
+            for label, downs in self._trace_consistent_trc.items()
+        }
+
+    def get_trace_signatures(self) -> List[TraceSignature]:
+        """
+        Return the aggregated set of observed sample-tree trace signatures.
+
+        Returns:
+            List[TraceSignature]: One entry per distinct observed feature
+            signature, with its predicate sequence and observed count. Empty
+            before ``fit()`` or outside ``graph_construction_mode="execution_trace"``.
+        """
+        return list(self._trace_signatures)
 
     def generate_dot(self, dfg: Dict[Tuple[str, str], int]) -> Any:
         """

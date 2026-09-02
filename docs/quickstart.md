@@ -103,6 +103,60 @@ explainer = DPGExplainer(
 - `aggregated_transitions`: default global DPG behavior.
 - `execution_trace`: trace-first construction, useful for local path inspection.
 
+### Execution-trace artefacts (provenance-safe path evidence)
+
+The pooled DPG graph aggregates transitions across every sample and tree, so
+an edge `A -> B` and an edge `B -> C` can appear together even if no single
+tree execution ever produced the path `A -> B -> C`. In
+`execution_trace` mode, `DecisionPredicateGraph` additionally records
+artefacts derived only from single, observed sample-tree executions:
+
+```python
+from dpg.core import DecisionPredicateGraph
+
+dpg = DecisionPredicateGraph(
+    model,
+    feature_names=X.columns.tolist(),
+    dpg_config={
+        "dpg": {
+            "graph_construction": {"mode": "execution_trace"},
+        }
+    },
+)
+dpg.fit(X)
+
+dpg.get_trace_consistent_lrc()   # {predicate_label: trace-consistent LRC score}
+dpg.get_trace_consistent_trc()   # {predicate_label: set of labels observed downstream}
+dpg.get_trace_signatures()       # list[TraceSignature(signature, predicate_sequence, path_count)]
+```
+
+- `get_trace_consistent_lrc()` scores each predicate by how much of the label
+  space it was observed to reach *within a single trace*, unlike the
+  pooled-graph NetworkX local reaching centrality, which can credit reach
+  that only exists after aggregating unrelated traces.
+- `get_trace_consistent_trc()` returns each predicate's observed downstream
+  label sets — every member is guaranteed to have co-occurred later in at
+  least one real execution.
+- `get_trace_signatures()` returns the distinct predicate sequences observed
+  across all traces, with their aggregated occurrence count (`path_count`).
+
+These getters return empty containers until `fit()` is called, and are reset
+on every refit. Outside `execution_trace` mode they remain empty.
+
+**`perc_var` does not filter trace artefacts.** In `execution_trace` mode,
+`perc_var` only filters infrequent *edges* out of the pooled visualisation
+graph — it never removes a trace signature or downstream relation. A
+predicate can therefore appear in `get_trace_consistent_lrc()` /
+`get_trace_signatures()` even if every pooled edge it participates in was
+filtered out of the graph you see. This is intentional: the trace artefacts
+are meant to stay auditable raw evidence, independent of display-oriented
+filtering.
+
+When `graph_construction.mode == "execution_trace"`, `DPGExplainer`'s node
+metrics table (`Local reaching centrality` column) automatically uses the
+trace-consistent score for any label it covers, falling back to the legacy
+NetworkX computation otherwise.
+
 ## Supported Models
 
 DPGExplainer works with a wide range of scikit-learn tree-based ensemble models:

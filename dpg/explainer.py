@@ -742,7 +742,12 @@ class DPGExplainer:
 
     def _get_node_metrics(self) -> Any:
         if self._node_metrics is None:
-            self._node_metrics = NodeMetrics.extract_node_metrics(self._graph, self._nodes)
+            trace_lrc_by_label = None
+            if self._builder.graph_construction_mode == "execution_trace":
+                trace_lrc_by_label = self._builder.get_trace_consistent_lrc()
+            self._node_metrics = NodeMetrics.extract_node_metrics(
+                self._graph, self._nodes, trace_lrc_by_label=trace_lrc_by_label
+            )
         return self._node_metrics
 
     def _get_node_metrics_lookup(self) -> Dict[str, Dict[str, Any]]:

@@ -10,6 +10,7 @@ import re
 
 import networkx as nx
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.datasets import load_iris, load_wine
 from sklearn.ensemble import (
@@ -396,3 +397,313 @@ class TestDifferentDataset:
         assert graph.number_of_edges() == 126
         class_labels = sorted({n[1] for n in nodes if n[1].startswith("Class ")})
         assert class_labels == ["Class 0", "Class 1", "Class 2"]
+
+
+class TestTraceArtifacts:
+    """
+    Trace-consistent artefacts (LRC, downstream sets, signatures) built in
+    ``execution_trace`` mode. These must only report relations witnessed
+    within a single observed sample-tree execution, never relations that
+    only exist after pooling edges from different traces.
+    """
+
+    def _log(self, rows):
+        return pd.DataFrame(rows, columns=["case:concept:name", "concept:name"])
+
+    def _dpg(self, iris_rf, iris_split, mode="execution_trace"):
+        _, _, _, _, feature_names, target_names = iris_split
+        return DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+                    "graph_construction": {"mode": mode},
+                }
+            },
+        )
+
+    def test_getters_empty_before_fit(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        assert dpg.get_trace_consistent_lrc() == {}
+        assert dpg.get_trace_consistent_trc() == {}
+        assert dpg.get_trace_signatures() == []
+
+    def test_cross_trace_phantom_path_guard(self, iris_rf, iris_split):
+        """Pooled A->B and B->C must not be reported as a witnessed A->B->C."""
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "B <= 1.0"),
+            ("sample1_dt0", "B <= 1.0"),
+            ("sample1_dt0", "C <= 2.0"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        trc = dpg.get_trace_consistent_trc()
+        assert trc["A <= 0.5"] == ("B <= 1.0",)
+        assert "C <= 2.0" not in trc["A <= 0.5"]
+
+        signatures = dpg.get_trace_signatures()
+        for sig in signatures:
+            assert sig.predicate_sequence != ("A <= 0.5", "B <= 1.0", "C <= 2.0")
+
+    def test_single_trace_preservation(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "B <= 1.0"),
+            ("sample0_dt0", "Class 0"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        signatures = dpg.get_trace_signatures()
+        assert len(signatures) == 1
+        assert signatures[0].predicate_sequence == ("A <= 0.5", "B <= 1.0", "Class 0")
+        assert signatures[0].path_count == 1
+
+    def test_repeated_predicate_feature_not_deduplicated(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "A <= 2.0"),
+            ("sample0_dt0", "Class 0"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        signatures = dpg.get_trace_signatures()
+        assert signatures[0].signature == ("A", "A", "Class 0")
+        assert signatures[0].predicate_sequence == ("A <= 0.5", "A <= 2.0", "Class 0")
+
+    def test_trace_count_aggregation(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "Class 0"),
+            ("sample1_dt0", "A <= 0.5"),
+            ("sample1_dt0", "Class 0"),
+            ("sample2_dt0", "A <= 0.5"),
+            ("sample2_dt0", "Class 1"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        signatures = {sig.predicate_sequence: sig.path_count for sig in dpg.get_trace_signatures()}
+        assert signatures[("A <= 0.5", "Class 0")] == 2
+        assert signatures[("A <= 0.5", "Class 1")] == 1
+
+    def test_downstream_set_provenance(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "B <= 1.0"),
+            ("sample0_dt0", "C <= 2.0"),
+            ("sample0_dt0", "Class 0"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        sequences = [sig.predicate_sequence for sig in dpg.get_trace_signatures()]
+        for label, downs in dpg.get_trace_consistent_trc().items():
+            for down in downs:
+                assert any(
+                    label in seq and down in seq[seq.index(label) + 1:]
+                    for seq in sequences
+                )
+
+    def test_non_predicate_labels_excluded_from_trc_keys(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "Class 0"),
+            ("sample1_dt0", "Pred 1.23"),
+            ("sample1_dt0", "A <= 0.5"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        trc = dpg.get_trace_consistent_trc()
+        assert "Class 0" not in trc
+        assert "Pred 1.23" not in trc
+
+    def test_refit_isolation(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        dpg._build_trace_artifacts(self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "Class 0"),
+        ]))
+        assert "A <= 0.5" in dpg.get_trace_consistent_trc()
+
+        dpg._build_trace_artifacts(self._log([
+            ("sample0_dt0", "D <= 0.5"),
+            ("sample0_dt0", "Class 0"),
+        ]))
+        assert "A <= 0.5" not in dpg.get_trace_consistent_trc()
+        assert "D <= 0.5" in dpg.get_trace_consistent_trc()
+
+    def test_aggregated_mode_leaves_trace_artifacts_empty(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split, mode="aggregated_transitions")
+        X_train, _, _, _, _, _ = iris_split
+        dpg.fit(X_train)
+        assert dpg.get_trace_consistent_lrc() == {}
+        assert dpg.get_trace_consistent_trc() == {}
+        assert dpg.get_trace_signatures() == []
+
+    def test_execution_trace_mode_populates_artifacts_on_fit(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split, mode="execution_trace")
+        X_train, _, _, _, _, _ = iris_split
+        dpg.fit(X_train)
+        assert dpg.get_trace_consistent_lrc() != {}
+        assert dpg.get_trace_signatures() != []
+
+    def test_get_trace_consistent_trc_returns_sorted_tuples(self, iris_rf, iris_split):
+        dpg = self._dpg(iris_rf, iris_split)
+        log = self._log([
+            ("sample0_dt0", "A <= 0.5"),
+            ("sample0_dt0", "C <= 2.0"),
+            ("sample0_dt0", "B <= 1.0"),
+        ])
+        dpg._build_trace_artifacts(log)
+
+        trc = dpg.get_trace_consistent_trc()
+        assert trc["A <= 0.5"] == ("B <= 1.0", "C <= 2.0")
+        assert isinstance(trc["A <= 0.5"], tuple)
+
+    def test_trace_artifacts_ignore_perc_var_filtering(self, iris_rf, iris_split):
+        """
+        Trace artefacts are built from the raw, unfiltered execution log:
+        a rare predicate whose pooled edges get filtered out by perc_var
+        must still appear in the trace artefacts.
+        """
+        _, _, _, _, feature_names, target_names = iris_split
+        X_train, _, _, _, _, _ = iris_split
+
+        # A high perc_var filters almost every pooled edge out of the graph...
+        dpg_filtered = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {"perc_var": 0.5, "decimal_threshold": 6, "n_jobs": 1},
+                    "graph_construction": {"mode": "execution_trace"},
+                }
+            },
+        )
+        dot = dpg_filtered.fit(X_train)
+        filtered_graph, _ = dpg_filtered.to_networkx(dot)
+
+        # ...but the same fit's trace artefacts are unaffected by perc_var.
+        dpg_unfiltered = DecisionPredicateGraph(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+                    "graph_construction": {"mode": "execution_trace"},
+                }
+            },
+        )
+        dpg_unfiltered.fit(X_train)
+
+        assert filtered_graph.number_of_edges() < len(
+            dpg_unfiltered.discover_dfg(dpg_unfiltered._extract_trace_log(X_train))
+        )
+        assert dpg_filtered.get_trace_consistent_lrc() == dpg_unfiltered.get_trace_consistent_lrc()
+        assert dpg_filtered.get_trace_signatures() == dpg_unfiltered.get_trace_signatures()
+
+
+class TestTraceLRCNodeMetricsIntegration:
+    """DPGExplainer forwards trace LRC only for execution_trace mode."""
+
+    def test_explainer_uses_trace_lrc_in_execution_trace_mode(self, iris_rf, iris_split):
+        from dpg.explainer import DPGExplainer
+
+        X_train, _, _, _, feature_names, target_names = iris_split
+        explainer = DPGExplainer(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+            dpg_config={
+                "dpg": {
+                    "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+                    "graph_construction": {"mode": "execution_trace"},
+                }
+            },
+        )
+        explainer.fit(X_train)
+        node_metrics = explainer._get_node_metrics()
+        trace_lrc = explainer.builder.get_trace_consistent_lrc()
+
+        by_label = node_metrics.set_index("Label")["Local reaching centrality"].to_dict()
+        for label, score in trace_lrc.items():
+            assert by_label[label] == pytest.approx(score)
+
+    def test_explainer_uses_legacy_lrc_in_aggregated_mode(self, iris_rf, iris_split):
+        from dpg.explainer import DPGExplainer
+
+        X_train, _, _, _, feature_names, target_names = iris_split
+        explainer = DPGExplainer(
+            model=iris_rf,
+            feature_names=feature_names,
+            target_names=target_names,
+        )
+        explainer.fit(X_train)
+        node_metrics = explainer._get_node_metrics()
+        assert explainer.builder.get_trace_consistent_lrc() == {}
+        assert not node_metrics.empty
+
+
+class TestIrisLRCRankingComparison:
+    """
+    Fit Iris with both graph-construction implementations and compare the
+    resulting predicate LRC rankings: pooled-graph NetworkX local reaching
+    centrality (aggregated_transitions) vs. trace-consistent LRC
+    (execution_trace).
+    """
+
+    def test_top_20_lrc_ranking_both_implementations(self, iris_rf, iris_split, capsys):
+        from dpg.explainer import DPGExplainer
+
+        X_train, _, _, _, feature_names, target_names = iris_split
+
+        def fit_and_rank(mode):
+            explainer = DPGExplainer(
+                model=iris_rf,
+                feature_names=feature_names,
+                target_names=target_names,
+                dpg_config={
+                    "dpg": {
+                        "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+                        "graph_construction": {"mode": mode},
+                    }
+                },
+            )
+            explainer.fit(X_train)
+            node_metrics = explainer._get_node_metrics()
+            predicates = node_metrics[
+                node_metrics["Label"].apply(DecisionPredicateGraph._is_predicate_label)
+            ]
+            ranked = predicates.sort_values(
+                "Local reaching centrality", ascending=False
+            ).head(20)
+            return ranked[["Label", "Local reaching centrality"]].reset_index(drop=True)
+
+        aggregated_ranking = fit_and_rank("aggregated_transitions")
+        trace_ranking = fit_and_rank("execution_trace")
+
+        assert not aggregated_ranking.empty
+        assert not trace_ranking.empty
+        assert aggregated_ranking["Local reaching centrality"].is_monotonic_decreasing
+        assert trace_ranking["Local reaching centrality"].is_monotonic_decreasing
+
+        with capsys.disabled():
+            print("\n\nTop 20 predicates by LRC -- aggregated_transitions (pooled NetworkX LRC)")
+            print("-" * 70)
+            for rank, row in aggregated_ranking.iterrows():
+                print(f"{rank + 1:>2}. {row['Label']:<35} {row['Local reaching centrality']:.4f}")
+
+            print("\nTop 20 predicates by LRC -- execution_trace (trace-consistent LRC)")
+            print("-" * 70)
+            for rank, row in trace_ranking.iterrows():
+                print(f"{rank + 1:>2}. {row['Label']:<35} {row['Local reaching centrality']:.4f}")
+            print()
