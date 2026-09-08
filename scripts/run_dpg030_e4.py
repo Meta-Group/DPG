@@ -64,15 +64,26 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("experiments/dpg_0_3_0/results/e4_scale.csv"))
     parser.add_argument("--workers", type=int, default=int(os.environ.get("DPG_WORKERS", min(os.cpu_count() or 1, 18))))
     parser.add_argument("--notify-every", type=int, default=5)
+    parser.add_argument("--scenarios", default=",".join(SCENARIOS))
+    parser.add_argument("--models", default=",".join(MODELS))
+    parser.add_argument("--learners", default="10,25")
+    parser.add_argument("--seeds", default="0,1")
     args = parser.parse_args()
     try:
         import subprocess
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     except Exception:
         commit = "unknown"
+    scenarios = [x.strip() for x in args.scenarios.split(",") if x.strip()]
+    models = [x.strip() for x in args.models.split(",") if x.strip()]
+    learners_list = [int(x) for x in args.learners.split(",")]
+    seeds = [int(x) for x in args.seeds.split(",")]
+    unknown = (set(scenarios) - set(SCENARIOS)) | (set(models) - set(MODELS))
+    if unknown:
+        raise SystemExit(f"Unknown E4 values: {sorted(unknown)}")
     tasks = [(scenario, model, learners, seed, commit)
-             for scenario in SCENARIOS for model in MODELS
-             for learners in (10, 25) for seed in (0, 1)]
+             for scenario in scenarios for model in models
+             for learners in learners_list for seed in seeds]
     fields = ["scenario", "model", "n_samples", "n_features", "n_estimators", "seed", "status", "error",
               "k1_seconds", "kauto_seconds", "k1_nodes", "kauto_nodes", "node_ratio", "kauto",
               "kauto_violations", "git_commit"]
