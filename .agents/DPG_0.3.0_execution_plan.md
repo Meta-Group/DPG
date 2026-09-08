@@ -17,7 +17,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 
 | ID | Owner | Scope | Acceptance evidence | Status |
 |---|---|---|---|---|
-| A | Codex | Core routing fidelity, `context_order`, sink invariant, accessors | focused tests + `pytest -q` report | implemented; audit pending |
+| A | Codex | Core routing fidelity, `context_order`, sink invariant, accessors | focused tests + `pytest -q` report | implemented; E0/E1 audit clean |
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
 | C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
