@@ -65,6 +65,25 @@ E4 uses 16 resource-intensive cells on S5 (100k×50) and S6 (10k×500), with
 Random Forest and Extra Trees at 10/25 learners and seeds 0/1. It records k=1
 and auto-k construction time, graph size, node ratio, and violation history.
 
+E5 (`scripts/run_dpg030_e5_lrc.py`, `scripts/lrc_aggregation.py`) compares
+execution-trace k=1 against auto-k on iris/wine/breast_cancer x 5 ensemble
+families x {10, 25, 50} learners x 5 seeds (225 cells), evaluating predicate
+LRC against `feature_importances_` via Spearman correlation and top-k ranking
+overlap, alongside runtime, resolved k, and graph size. Three aggregations
+are compared from the same node-level LRC values: `sum` (the shipped
+production default in `DecisionPredicateGraph.get_predicate_lrc()`, per
+CHANGELOG 0.3.0), and `max`/`weighted_sum` (analysis-only, implemented only
+in `scripts/lrc_aggregation.py`, never added to the public API). This is a
+verification comparison, not an optimization: the aggregation choice must
+not be picked by which correlates best, or the comparison becomes circular.
+`BaggingClassifier` has no `feature_importances_`; its cells are recorded
+with `status=skipped_no_feature_importances` and graph-construction metrics
+still populated, never omitted. Status: runner implemented, unit- and
+cell-level tested, smoke-tested end to end on a 2-cell grid; the full
+225-cell grid is queued to run on a separate output path
+(`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) once E4 releases the
+machine, since both are CPU-bound benchmark runs.
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
