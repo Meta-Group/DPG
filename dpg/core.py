@@ -385,9 +385,14 @@ class DecisionPredicateGraph:
         Yields:
             List[str]: Path segments as [prefix, decision/prediction]
         """
+        label_extractor = (
+            self._trace_tree_labels_legacy
+            if self.graph_construction_mode == "aggregated_transitions"
+            else self._trace_tree_labels
+        )
         for i, tree in enumerate(self.model.estimators_):
             prefix = f"sample{case_id}_dt{i}"
-            for condition in self._trace_tree_labels(i, tree, sample):
+            for condition in label_extractor(i, tree, sample):
                 yield [prefix, condition]
 
     def tracing_ensemble_parallel(self, case_id: int, sample: Any) -> List[List[str]]:
@@ -402,12 +407,55 @@ class DecisionPredicateGraph:
             List of ``[prefix, event]`` pairs representing the full decision path
             across all trees in the ensemble.
         """
+        label_extractor = (
+            self._trace_tree_labels_legacy
+            if self.graph_construction_mode == "aggregated_transitions"
+            else self._trace_tree_labels
+        )
         result = []
         for i, tree in enumerate(self.model.estimators_):
             prefix = f"sample{case_id}_dt{i}"
-            for condition in self._trace_tree_labels(i, tree, sample):
+            for condition in label_extractor(i, tree, sample):
                 result.append([prefix, condition])
         return result
+
+    def _trace_tree_labels_legacy(
+        self, tree_index: int, tree: Any, sample: Any
+    ) -> List[str]:
+        """Return labels using the pre-0.3.0 rounded-threshold traversal.
+
+        The aggregated-transitions graph historically rounded each tree
+        threshold before selecting a child.  Keep that behavior for the
+        legacy path so its graph weights remain backward-compatible.  The
+        execution-trace path uses :meth:`_trace_tree_labels`, which follows
+        sklearn's native routing exactly.
+        """
+        sample_array = np.asarray(sample).reshape(-1)
+        tree_ = tree.tree_
+        node_index = 0
+        labels: List[str] = []
+        effective_decimal = self.get_decimal_threshold()
+
+        while True:
+            left = int(tree_.children_left[node_index])
+            right = int(tree_.children_right[node_index])
+            if left == right:
+                if is_regressor(self.model):
+                    pred = round(float(tree_.value[node_index][0][0]), 2)
+                    labels.append(f"Pred {pred}")
+                else:
+                    labels.append(self._leaf_class_label(tree_index, tree_, node_index))
+                return labels
+
+            feature_index = int(tree_.feature[node_index])
+            threshold = round(float(tree_.threshold[node_index]), effective_decimal)
+            feature_name = self.feature_names[feature_index]
+            if sample_array[feature_index] <= threshold:
+                labels.append(f"{feature_name} <= {threshold}")
+                node_index = left
+            else:
+                labels.append(f"{feature_name} > {threshold}")
+                node_index = right
 
     def _trace_tree_labels(self, tree_index: int, tree: Any, sample: Any) -> List[str]:
         """Return the executed labels using sklearn's native routing decisions.
