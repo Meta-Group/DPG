@@ -236,6 +236,19 @@ class GraphMetrics:
         node_to_label = df_node_metrics.set_index('Node')['Label'].to_dict()
 
         class_nodes = {i[0] : i[1] for i in nodes_list if 'Class' in i[1]}
+        if not class_nodes:
+            # The absorbing-chain clustering below requires at least one
+            # classifier sink ("Class ..." leaf) to anchor the Markov chain;
+            # a regression DPG has "Pred ..." leaves instead and none is a
+            # class sink, which makes every node transient and (I - Q)
+            # singular. Regression community/class-boundary extraction is
+            # out of scope for 0.3.0 (see CHANGELOG); raise a clear error
+            # instead of letting numpy fail with an opaque LinAlgError.
+            raise ValueError(
+                "extract_communities requires a classifier DPG with at least one "
+                "'Class ' sink node; regression DPGs ('Pred ' leaves) are not "
+                "supported by this community extraction in 0.3.0."
+            )
         clusters, node_prob, confidence = cls.clustering(dpg_model, class_nodes, threshold_clusters)
 
         clusters_labels = {k: [node_to_label.get(n, n) for n in v] for k, v in clusters.items()}

@@ -25,6 +25,16 @@
 - The routing correction can change graph weights and labels at floating-point
   boundaries. Residual off-grid behavior is reported by the auto-precision
   warning rather than hidden.
+- **Regression sink semantics are out of scope for 0.3.0.** `context_order`
+  mechanically builds a graph for regressors (regression leaves are treated
+  as terminal sinks, like class leaves), but there is no "one sink per
+  output" guarantee: a regression sink is only as unique as the 2-decimal
+  rounded leaf value, so two leaves collide into one sink by coincidence of
+  rounding, not by any modeled notion of "output". A principled regression
+  sink policy is deferred to a future release. `class_boundaries` and
+  `communities` remain classifier-only features; calling
+  `DPGExplainer.explain_global(communities=True)` on a regressor now raises a
+  clear `ValueError` instead of an internal `numpy.linalg.LinAlgError`.
 
 ## 0.2.0
 

@@ -194,6 +194,16 @@ these recombinations at the resolved context order while retaining one graph.
 The effective order and each node's context are available through
 `get_context_order()` and `get_node_context(node)`.
 
+**Regression scope (0.3.0):** `context_order` builds without raising for
+regressors (regression leaves, labeled `"Pred <value>"`, are treated as
+terminal sinks just like class leaves), but "one sink per output" is not a
+defined guarantee for regression the way it is for classification: two
+leaves collapse into the same sink only when their rounded values coincide,
+which is an artifact of label rounding, not a modeled invariant. A
+principled regression sink policy is deferred past 0.3.0. `class_boundaries`
+and `communities` remain classifier-only; calling `explain_global`
+with `communities=True` on a regressor raises a clear `ValueError`.
+
 #### Minimal local workflow
 
 ```python
