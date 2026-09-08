@@ -11,9 +11,6 @@ import sys
 from pathlib import Path
 
 TASKS = [
-    ("RandomForestClassifier", 10, 1),
-    ("RandomForestClassifier", 25, 0),
-    ("RandomForestClassifier", 25, 1),
     ("ExtraTreesClassifier", 10, 0),
     ("ExtraTreesClassifier", 10, 1),
     ("ExtraTreesClassifier", 25, 0),
