@@ -2,12 +2,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/dpg.svg)](https://pypi.org/project/dpg/)
 [![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" width="300" />
-</p>
+| ![DPG logo](https://github.com/Meta-Group/DPG/blob/main/DPG.png) |
+|:--:|
 
 
 DPG is a model-agnostic framework for global and local explanation of tree-based ensemble models.
@@ -20,9 +20,7 @@ insightful points. DPG enables graph-based evaluations and the identification of
 towards facilitating comparisons between features and their associated values while offering insights
 into the entire model. DPG provides descriptive metrics that enhance the understanding of the
 decisions inherent in the model, offering valuable insights.
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/image.png" width="600" />
-</p>
+![DPG overview](https://github.com/Meta-Group/DPG/blob/main/image.png)
 
 ---
 
@@ -48,9 +46,7 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Nodes represent predicates, i.e., the feature-value associations present in each node of every tree;
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true" width="600" />
-</p>
+![DPG example](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true)
 
 ## Metrics
 The graph-based nature of DPG provides significant enhancements in the direction of a complete mapping of the ensemble structure.
@@ -318,20 +314,14 @@ Some examples can be appreciated in the `examples` folder: https://github.com/Me
 
 In particular, the following DPG is obtained by transforming a Random Forest with 5 base learners, trained on Iris dataset.
 The used command is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples`.
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
-</p>
+![Iris DPG](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png)
 
 The following visualizations are obtained using the same parameters as the previous example, but they show two different metrics: _Community_ and _Betweenness centrality_.
 The used command for showing communities is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --communities`.
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
-</p>
+![Iris communities](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png)
 
 The used command for showing a specific property is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --attribute "Betweenness centrality" --class_flag`.
-<p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
-</p>
+![Iris betweenness centrality](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png)
 
 ***
 ## Citation
