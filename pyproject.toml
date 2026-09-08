@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dpg"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Python library for extracting Decision Predicate Graphs and global explanations from ensemble models."
 authors = ["Sylvio Barbon Junior <sylvio.barbonjunior@units.it>", "Leonardo Arrighi <leonardo.arrighi@phd.units.it>"]
 license = "MIT"

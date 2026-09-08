@@ -172,6 +172,7 @@ explainer = DPGExplainer(
             },
             "graph_construction": {
                 "mode": "execution_trace",  # or "aggregated_transitions"
+                "context_order": 1,           # 1, an integer > 1, or "auto"
             },
         }
     },
@@ -180,6 +181,18 @@ explainer = DPGExplainer(
 
 - `"aggregated_transitions"`: current default behavior; filters path variants first, then discovers the DPG.
 - `"execution_trace"`: builds directly from raw traces and filters edges instead of whole-path variants when `perc_var > 0`.
+
+`context_order` controls predicate identity in `execution_trace` mode. `1`
+preserves the legacy graph exactly; an order greater than one uses the last k
+executed predicates as context and keeps one sink per class. `"auto"` resolves
+the smallest order with no local recombination. Orders greater than one require
+`mode: "execution_trace"`.
+
+A phantom path is a multi-hop path assembled by pooling edges from different
+tree executions even though no single execution produced it. DPG-k removes
+these recombinations at the resolved context order while retaining one graph.
+The effective order and each node's context are available through
+`get_context_order()` and `get_node_context(node)`.
 
 #### Minimal local workflow
 

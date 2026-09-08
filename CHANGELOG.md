@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.0
+
+### Added
+
+- Added context-aware DPG construction through `context_order` in execution
+  trace mode. `context_order=1` preserves legacy predicate identity; integer
+  orders and `"auto"` split nodes by recent execution history.
+- Class outcomes are shared terminal sinks at every context order, and node
+  metadata exposes `predicate`, `context`, and `context_order`.
+- Added enumeration-free local context-order resolution and a reproducible
+  multi-process benchmark launcher under `scripts/`.
+- Added exact sklearn `decision_path` routing. Threshold rounding now formats
+  predicate labels without changing the branch selected by the model.
+- Added `decimal_threshold="auto"`, which derives precision from the data and
+  warns when a tree threshold is off the derived grid.
+
+### Compatibility and limitations
+
+- The default remains `context_order=1`; DPG-k is opt-in so existing consumers
+  keep their graph shape. `context_order > 1` requires `execution_trace` mode.
+- `get_trace_consistent_lrc()` remains available for k=1 and is deprecated for
+  contextual graphs; k>1 aggregates ordinary unweighted node LRC by predicate.
+- The routing correction can change graph weights and labels at floating-point
+  boundaries. Residual off-grid behavior is reported by the auto-precision
+  warning rather than hidden.
+
 ## 0.2.0
 
 ### Added
