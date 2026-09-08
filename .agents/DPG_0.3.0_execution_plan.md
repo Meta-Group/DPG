@@ -19,7 +19,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 |---|---|---|---|---|
 | A | Codex | Core routing fidelity, `context_order`, sink invariant, accessors | focused tests + `pytest -q` report | implemented; audit pending |
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
-| C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | running |
+| C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
 | E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | queued |
 
@@ -47,6 +47,11 @@ The launcher supports the procedure's comparable variants:
 The default grid is 3 sklearn datasets × 5 ensemble families × 5 learner
 counts × 5 seeds × 3 variants. Every row records commit, timing, graph size,
 edge mass, resolved k, violation history, precision, warnings, and errors.
+
+E0/E1 validation uses 675 cells: the same three datasets, five classifier
+families, learner counts 5/10/25, seeds 0/1/2, and decimal thresholds
+1/2/4/6/auto. It writes `e0_e1_validation.csv` and reports identity, sink,
+edge-mass, misroute, and local-context checks.
 
 ## Long-running command
 
