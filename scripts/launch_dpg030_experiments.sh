@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RESULT_DIR="${ROOT_DIR}/experiments/dpg_0_3_0"
 mkdir -p "${RESULT_DIR}/logs"
+PID_FILE="${RESULT_DIR}/logs/benchmark.pid"
+printf '%s\n' "$$" > "${PID_FILE}"
+trap 'rm -f "${PID_FILE}"' EXIT
 
 WORKERS="${DPG_WORKERS:-$(nproc)}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
