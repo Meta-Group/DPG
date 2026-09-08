@@ -61,6 +61,10 @@ E3 uses 300 cells over controlled synthetic S1–S4 datasets, varying only
 irrelevant-feature count and label noise, to test whether auto-k grows with
 irrelevant features.
 
+E4 uses 16 resource-intensive cells on S5 (100k×50) and S6 (10k×500), with
+Random Forest and Extra Trees at 10/25 learners and seeds 0/1. It records k=1
+and auto-k construction time, graph size, node ratio, and violation history.
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
