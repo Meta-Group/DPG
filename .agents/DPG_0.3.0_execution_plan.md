@@ -57,6 +57,10 @@ E2 uses 375 cells across the same datasets and model families, learner counts
 5/10/25/50/100, and seeds 0–4. It compares k=1 with auto-k for phantom path
 rate/mass, graph size, construction time, and enumeration exactness.
 
+E3 uses 300 cells over controlled synthetic S1–S4 datasets, varying only
+irrelevant-feature count and label noise, to test whether auto-k grows with
+irrelevant features.
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
