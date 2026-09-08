@@ -618,9 +618,6 @@ def _render_local_dpg_subgraph_case(
     critical_comp_id = critical_structure.get("critical_successor_comp_id")
 
     dot = Digraph(name=f"{plot_name}_sid_{local_explanation.sample_id}", format="png")
-    title_bits = [f"sample_id={local_explanation.sample_id}", f"mode={mode_label}"]
-    if critical_structure.get("critical_node_label"):
-        title_bits.append(f"critical={critical_structure['critical_node_label']}")
     dot.attr(
         rankdir="LR",
         bgcolor="white",
@@ -630,10 +627,6 @@ def _render_local_dpg_subgraph_case(
         margin="0.03",
         splines="polyline",
         concentrate="true",
-        label=" | ".join(title_bits),
-        labelloc="t",
-        fontsize="18",
-        fontname="Helvetica",
     )
     dot.attr(
         "node",
@@ -710,116 +703,154 @@ def _render_local_dpg_subgraph_case(
             width = "1.0"
         dot.edge(src, dst, color=color, penwidth=width)
 
-    with dot.subgraph(name="cluster_legend") as legend:
-        legend.attr(
-            label="Legend",
-            labelloc="t",
-            fontsize="14",
-            fontname="Helvetica",
-            color="#c9d2dc",
-            style="rounded",
-            margin="12",
-        )
-        legend.attr(rankdir="TB")
-        legend.attr(
-            "node",
-            shape="box",
-            style="rounded,filled",
-            fontname="Helvetica",
-            fontsize="11",
-            margin="0.07,0.04",
-        )
-        legend.attr("edge", arrowsize="0.7")
-
-        legend.node(
-            "legend_critical_node",
-            "Critical node",
-            fillcolor="#ffd966",
-            color="#7f6000",
-            penwidth="2.6",
-        )
-        legend.node(
-            "legend_pred_successor",
-            "Predicted branch",
-            fillcolor="#b6d7a8",
-            color="#38761d",
-            penwidth="2.2",
-        )
-        legend.node(
-            "legend_comp_successor",
-            "Competitor branch",
-            fillcolor="#f4cccc",
-            color="#990000",
-            penwidth="2.2",
-        )
-        legend.node(
-            "legend_focus_node",
-            "Focused path node",
-            fillcolor="#9fc5e8",
-            color="#0b5394",
-            penwidth="2.1",
-        )
-        legend.node(
-            "legend_context_node",
-            "Context node",
-            fillcolor="#f8f9fb" if focus_path_idx is not None else "#ddebf7",
-            color="#7f8c99",
-            penwidth="1.1",
-        )
-        legend.node(
-            "legend_true_leaf",
-            "True class leaf",
-            fillcolor="#93c47d",
-            color="#5f6b7a",
-            penwidth="1.4",
-        )
-        legend.node(
-            "legend_other_leaf",
-            "Other class leaf",
-            fillcolor="#e6b8af",
-            color="#5f6b7a",
-            penwidth="1.4",
-        )
-
-        legend.node("legend_edge_pred_src", "", shape="point", width="0.03", color="#ffffff")
-        legend.node("legend_edge_pred_dst", "Critical predicted edge", fillcolor="#ffffff", color="#ffffff")
-        legend.edge("legend_edge_pred_src", "legend_edge_pred_dst", color="#38761d", penwidth="3.2")
-
-        legend.node("legend_edge_comp_src", "", shape="point", width="0.03", color="#ffffff")
-        legend.node("legend_edge_comp_dst", "Critical competitor edge", fillcolor="#ffffff", color="#ffffff")
-        legend.edge("legend_edge_comp_src", "legend_edge_comp_dst", color="#990000", penwidth="3.2")
-
-        legend.node("legend_edge_focus_src", "", shape="point", width="0.03", color="#ffffff")
-        legend.node("legend_edge_focus_dst", "Focused path edge", fillcolor="#ffffff", color="#ffffff")
-        legend.edge("legend_edge_focus_src", "legend_edge_focus_dst", color="#0b5394", penwidth="3.2")
-
-        legend.node("legend_edge_high_src", "", shape="point", width="0.03", color="#ffffff")
-        legend.node("legend_edge_high_dst", "High-support edge", fillcolor="#ffffff", color="#ffffff")
-        legend.edge("legend_edge_high_src", "legend_edge_high_dst", color="#6fa8dc", penwidth="3.0")
-
-        legend.node("legend_edge_low_src", "", shape="point", width="0.03", color="#ffffff")
-        legend.node("legend_edge_low_dst", "Low-support edge", fillcolor="#ffffff", color="#ffffff")
-        legend.edge("legend_edge_low_src", "legend_edge_low_dst", color="#cfe2f3", penwidth="1.2")
-
-        legend.node(
-            "legend_edge_note",
-            "Edge width encodes shared support.\nThicker edges appear more often in the local subgraph.",
-            shape="note",
-            fillcolor="#ffffff",
-            color="#d0d7de",
-            penwidth="1.0",
-        )
-
-        legend.edge("legend_critical_node", "legend_pred_successor", color="#38761d", penwidth="3.2")
-        legend.edge("legend_critical_node", "legend_comp_successor", color="#990000", penwidth="3.2")
-
-    if roots:
-        dot.edge(roots[0], "legend_critical_node", style="invis", weight="0")
+    # Legend is rendered in LaTeX below the image to keep the graph area compact.
 
     png_path = save_dir / f"{plot_name}_sid_{local_explanation.sample_id}.png"
     png_bytes = dot.pipe(format="png")
     Image.open(BytesIO(png_bytes)).save(png_path)
     return str(png_path.resolve())
+
+
+def _build_case_export_payload(
+    local_explanation: Any,
+    true_label: str,
+    critical_structure: Optional[dict[str, Optional[str]]] = None,
+    pred_path_idx: Optional[int] = None,
+    comp_path_idx: Optional[int] = None,
+) -> dict[str, Any]:
+    context_paths = [_normalized_node_path(path) for path in local_explanation.tree_paths]
+    context_paths = [path for path in context_paths if path]
+    if not context_paths:
+        raise ValueError("No valid local explanation paths to export.")
+
+    node_labels: dict[str, str] = {}
+    node_counter: Counter[str] = Counter()
+    edge_counter: Counter[tuple[str, str]] = Counter()
+    pred_nodes: set[str] = set()
+    pred_edges: set[tuple[str, str]] = set()
+    comp_nodes: set[str] = set()
+    comp_edges: set[tuple[str, str]] = set()
+
+    for idx, path in enumerate(context_paths):
+        node_ids = [node_id for node_id, _ in path]
+        for node_id, label in path:
+            node_labels.setdefault(node_id, label)
+            node_counter[node_id] += 1
+        for src, dst in zip(node_ids, node_ids[1:]):
+            edge_counter[(src, dst)] += 1
+        if pred_path_idx is not None and idx == int(pred_path_idx):
+            pred_nodes.update(node_ids)
+            pred_edges.update(zip(node_ids, node_ids[1:]))
+        if comp_path_idx is not None and idx == int(comp_path_idx):
+            comp_nodes.update(node_ids)
+            comp_edges.update(zip(node_ids, node_ids[1:]))
+
+    max_node_visits = max(node_counter.values()) if node_counter else 1
+    max_edge_visits = max(edge_counter.values()) if edge_counter else 1
+    critical_structure = critical_structure or {}
+    critical_node_id = critical_structure.get("critical_node_id")
+    critical_pred_id = critical_structure.get("critical_successor_pred_id")
+    critical_comp_id = critical_structure.get("critical_successor_comp_id")
+
+    nodes_payload: list[dict[str, Any]] = []
+    for node_id in sorted(node_labels):
+        raw_label = node_labels[node_id]
+        visits = int(node_counter[node_id])
+        intensity = visits / max_node_visits if max_node_visits else 0.0
+        roles: list[str] = []
+        if node_id == critical_node_id:
+            roles.append("critical_node")
+        if node_id == critical_pred_id:
+            roles.append("critical_pred_successor")
+        if node_id == critical_comp_id:
+            roles.append("critical_competitor_successor")
+        if node_id in pred_nodes:
+            roles.append("predicted_path")
+        if node_id in comp_nodes:
+            roles.append("competitor_path")
+        if raw_label.startswith("Class "):
+            leaf_cls = raw_label.replace("Class ", "", 1)
+            roles.append("true_class_leaf" if leaf_cls == str(true_label) else "other_class_leaf")
+        if not roles:
+            roles.append("context")
+        nodes_payload.append(
+            {
+                "id": node_id,
+                "label": raw_label,
+                "visit_count": visits,
+                "visit_fraction": float(intensity),
+                "roles": roles,
+            }
+        )
+
+    edges_payload: list[dict[str, Any]] = []
+    for (src, dst), visits in sorted(edge_counter.items()):
+        frac = visits / max_edge_visits if max_edge_visits else 0.0
+        roles: list[str] = []
+        if critical_node_id is not None and (src, dst) == (critical_node_id, critical_pred_id):
+            roles.append("critical_predicted_edge")
+        if critical_node_id is not None and (src, dst) == (critical_node_id, critical_comp_id):
+            roles.append("critical_competitor_edge")
+        if (src, dst) in pred_edges:
+            roles.append("predicted_path_edge")
+        if (src, dst) in comp_edges:
+            roles.append("competitor_path_edge")
+        if not roles:
+            roles.append("context_edge")
+        edges_payload.append(
+            {
+                "source": src,
+                "target": dst,
+                "visit_count": int(visits),
+                "visit_fraction": float(frac),
+                "roles": roles,
+            }
+        )
+
+    paths_payload: list[dict[str, Any]] = []
+    for idx, path in enumerate(local_explanation.tree_paths):
+        pairs = _normalized_node_path(path)
+        if not pairs:
+            continue
+        paths_payload.append(
+            {
+                "path_index": int(idx),
+                "tree_index": int(path.tree_index),
+                "tree_prefix": str(path.tree_prefix),
+                "node_ids": [node_id for node_id, _ in pairs],
+                "labels": [label for _, label in pairs],
+                "leaf_class": str(path.labels[-1]).replace("Class ", "", 1) if path.labels else None,
+                "graph_path_valid": path.graph_path_valid,
+                "path_confidence": path.path_confidence,
+                "is_predicted_path": bool(pred_path_idx is not None and idx == int(pred_path_idx)),
+                "is_competitor_path": bool(comp_path_idx is not None and idx == int(comp_path_idx)),
+            }
+        )
+
+    return {
+        "sample_id": int(local_explanation.sample_id),
+        "majority_vote": local_explanation.majority_vote,
+        "class_votes": local_explanation.class_votes,
+        "true_label": str(true_label),
+        "sample_confidence": local_explanation.sample_confidence,
+        "critical_structure": critical_structure,
+        "predicted_path_index": None if pred_path_idx is None else int(pred_path_idx),
+        "competitor_path_index": None if comp_path_idx is None else int(comp_path_idx),
+        "nodes": nodes_payload,
+        "edges": edges_payload,
+        "paths": paths_payload,
+        "render_semantics": {
+            "critical_node": "gold",
+            "critical_pred_successor": "green",
+            "critical_competitor_successor": "red",
+            "predicted_path": "blue",
+            "competitor_path": "blue",
+            "true_class_leaf": "green_leaf",
+            "other_class_leaf": "salmon_leaf",
+            "context": "light_context",
+            "edge_width": "proportional_to_visit_count",
+        },
+    }
 
 
 def _render_case_studies(
@@ -893,6 +924,16 @@ def _render_case_studies(
                     critical_structure=critical_structure,
                 )
 
+            export_payload = _build_case_export_payload(
+                local_explanation=local,
+                true_label=true_label,
+                critical_structure=critical_structure,
+                pred_path_idx=pred_path_idx,
+                comp_path_idx=comp_path_idx,
+            )
+            export_json = case_mode_dir / f"{plot_prefix}_metadata_sid_{sample_idx}.json"
+            export_json.write_text(json.dumps(export_payload, indent=2), encoding="utf-8")
+
             rows.append(
                 {
                     "case_label": case_label,
@@ -921,6 +962,7 @@ def _render_case_studies(
                     "aggregate_png": aggregate_png,
                     "pred_path_png": pred_path_png,
                     "competitor_path_png": comp_path_png,
+                    "case_metadata_json": str(export_json.resolve()),
                 }
             )
 

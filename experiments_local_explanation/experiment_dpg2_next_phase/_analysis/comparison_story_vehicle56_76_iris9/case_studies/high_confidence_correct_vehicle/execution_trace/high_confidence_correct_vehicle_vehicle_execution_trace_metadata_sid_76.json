@@ -1,0 +1,998 @@
+{
+  "sample_id": 76,
+  "majority_vote": "1",
+  "class_votes": {
+    "1": 7,
+    "2": 3
+  },
+  "true_label": "1",
+  "sample_confidence": {
+    "graph_construction_mode": "execution_trace",
+    "num_active_nodes": 32.0,
+    "num_active_edges_raw": 40.0,
+    "num_active_edges_filtered": 39.0,
+    "num_paths_raw": 10.0,
+    "num_paths_pruned": 10.0,
+    "num_paths": 10.0,
+    "num_executed_paths": 10.0,
+    "num_executed_predicates": 40.0,
+    "num_executed_edges": 40.0,
+    "num_trace_predicates_missing_from_dpg": 0.0,
+    "num_trace_edges_missing_from_dpg": 0.0,
+    "trace_node_coverage": 1.0,
+    "trace_edge_coverage": 1.0,
+    "mean_lrc_active_nodes": 0.25166887877741534,
+    "mean_bc_active_nodes": 0.0014046397681266103,
+    "evidence_score_pred": 0.6359453398706133,
+    "top_competitor_class_pred": "2",
+    "evidence_score_competitor_pred": 0.3640546601293867,
+    "evidence_margin_pred_vs_competitor": 0.2718906797412266,
+    "class_support": {
+      "1": 0.25159502890616786,
+      "2": 0.1596905070224475
+    },
+    "evidence_scores": {
+      "1": 0.6359453398706133,
+      "2": 0.3640546601293867
+    },
+    "evidence_variant": "top_competitor",
+    "evidence_score_rule": "ratio_top_competitor",
+    "evidence_lambda_rule": "log_classes",
+    "evidence_lambda": 1.6,
+    "evidence_base_lambda": 0.8,
+    "edge_threshold": 0.0,
+    "path_prune_ratio": 0.0,
+    "path_confidence_max": 0.07400733636214989,
+    "path_confidence_min_kept": 0.003899175096765651,
+    "n_model_classes": 4,
+    "n_features": 18,
+    "evidence_score_margin": 0.2718906797412266,
+    "vote_confidence": 0.6359453398706133,
+    "class_scores": {
+      "1": 0.6359453398706133,
+      "2": 0.3640546601293867
+    },
+    "score_margin": 0.2718906797412266,
+    "support_pred_class": "1",
+    "support_top_competitor_class": "2",
+    "support_pred_score": 0.6117283661276728,
+    "support_top_competitor_score": 0.3882716338698958,
+    "support_margin": 0.22345673225777696,
+    "predicted_class_concentration_top3": 0.727121519271835,
+    "model_vote_agreement": 0.7,
+    "trace_coverage_score": 0.9999999999999705,
+    "explanation_confidence": 0.5501927505098544,
+    "node_recall": 0.9999999999999667,
+    "node_precision": 0.9999999999999667,
+    "edge_recall": 0.9999999999999744,
+    "edge_precision": 0.9999999999999744,
+    "path_purity": 0.6117283661276728,
+    "competitor_exposure": 0.3882716338723272,
+    "recombination_rate": 0.0,
+    "critical_node_label": "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+    "critical_split_depth": 2,
+    "critical_successor_pred": "COMPACTNESS <= 1.232292",
+    "critical_successor_comp": "COMPACTNESS <= 1.47669",
+    "critical_node_contrast": 0.015617555206954986,
+    "trace_node_count_unique": 30,
+    "trace_edge_count_unique": 39,
+    "explanation_node_count_unique": 30,
+    "explanation_edge_count_unique": 39
+  },
+  "critical_structure": {
+    "critical_node_id": "1405146926791304749609580730065493849195877189654",
+    "critical_successor_pred_id": "342235764051949967951080307277423001050579262066",
+    "critical_successor_comp_id": "512925309183002151069551403536948084474222786753",
+    "critical_node_label": "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+    "critical_successor_pred_label": "COMPACTNESS <= 1.232292",
+    "critical_successor_comp_label": "COMPACTNESS <= 1.47669"
+  },
+  "predicted_path_index": 4,
+  "competitor_path_index": 1,
+  "nodes": [
+    {
+      "id": "1046915485277773126531944013305127407344274613108",
+      "label": "ELONGATEDNESS > -1.36384",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1147088197548533472063320537697655513181364533148",
+      "label": "MAX.LENGTH_RECTANGULARITY <= 1.703596",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1176685874030446736230558571515735269201639210018",
+      "label": "RADIUS_RATIO > -0.031329",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1233405464114304471027608634413393142620646986092",
+      "label": "DISTANCE_CIRCULARITY > 0.844525",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1270768732992140824282704780431787437998241260132",
+      "label": "SCALED_VARIANCE_MINOR > -0.383098",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1397445188630489385895775033493766835492262963566",
+      "label": "SCATTER_RATIO <= 1.667167",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1405146926791304749609580730065493849195877189654",
+      "label": "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+      "visit_count": 6,
+      "visit_fraction": 0.8571428571428571,
+      "roles": [
+        "critical_node",
+        "predicted_path",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1449979435861996280135147024549533384490185070243",
+      "label": "RADIUS_RATIO <= 1.829539",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "171982518954274878349485416184092168691833932185",
+      "label": "Class 1",
+      "visit_count": 7,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path",
+        "true_class_leaf"
+      ]
+    },
+    {
+      "id": "225983775830414342463402756013981518240591508670",
+      "label": "PR.AXIS_RECTANGULARITY <= 1.934732",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "297817732823587729967602229737787305853913916328",
+      "label": "MAX.LENGTH_RECTANGULARITY <= 1.634471",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "325132334667559313543858271377472597778307766529",
+      "label": "SCALED_VARIANCE_MAJOR > -0.245338",
+      "visit_count": 2,
+      "visit_fraction": 0.2857142857142857,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "332084651868771514466780760576528669160472787733",
+      "label": "DISTANCE_CIRCULARITY > 0.428511",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "342235764051949967951080307277423001050579262066",
+      "label": "COMPACTNESS <= 1.232292",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "critical_pred_successor",
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "346411387416270816520415316984450835126008792697",
+      "label": "KURTOSIS_ABOUT_MINOR > -0.547865",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "462412723428587199083372436639457936916262305523",
+      "label": "PR.AXIS_ASPECT_RATIO <= 1.048517",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "512925309183002151069551403536948084474222786753",
+      "label": "COMPACTNESS <= 1.47669",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "critical_competitor_successor",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "547225859343829702855277247732430932154899914364",
+      "label": "SKEWNESS_ABOUT_MAJOR <= 0.388513",
+      "visit_count": 2,
+      "visit_fraction": 0.2857142857142857,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "626708846708862742021058578691812226378002958349",
+      "label": "HOLLOWS_RATIO > -0.552342",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "640563831666262910456430279906026612650861443257",
+      "label": "ELONGATEDNESS <= 0.182417",
+      "visit_count": 4,
+      "visit_fraction": 0.5714285714285714,
+      "roles": [
+        "predicted_path",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "648603391091140808085057838418221274535058841820",
+      "label": "SCALED_VARIANCE_MAJOR > 1.173826",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "692737883948674392189888193853226250729006126842",
+      "label": "MAX.LENGTH_RECTANGULARITY <= 1.772722",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "707484479782880061608171426031051775213016662096",
+      "label": "SCATTER_RATIO <= 1.454272",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "798632401425868876102363028961352418648092585552",
+      "label": "HOLLOWS_RATIO <= 0.123098",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "834620242516657314882401030133887803915772762131",
+      "label": "SCALED_VARIANCE_MAJOR <= 1.738266",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "83577103538013742684920124219176939084565185786",
+      "label": "RADIUS_RATIO <= 2.110146",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "877759356299334497336458156579206057513802931642",
+      "label": "SCALED_VARIANCE_MAJOR > -0.309846",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "897842035620100398466150621479840228868178307178",
+      "label": "MAX.LENGTH_ASPECT_RATIO > -0.431937",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "928621589127927934620961952074257259595278295629",
+      "label": "Class 2",
+      "visit_count": 3,
+      "visit_fraction": 0.42857142857142855,
+      "roles": [
+        "competitor_path",
+        "other_class_leaf"
+      ]
+    },
+    {
+      "id": "954703549218879490200950471858618284292341955650",
+      "label": "CIRCULARITY > 1.587019",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "977821451040995333603949608762874702095290680593",
+      "label": "HOLLOWS_RATIO <= 0.393274",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "997993812433472032985437860821075728564695967369",
+      "label": "COMPACTNESS <= 1.598889",
+      "visit_count": 1,
+      "visit_fraction": 0.14285714285714285,
+      "roles": [
+        "context"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "1046915485277773126531944013305127407344274613108",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1147088197548533472063320537697655513181364533148",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1176685874030446736230558571515735269201639210018",
+      "target": "547225859343829702855277247732430932154899914364",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1233405464114304471027608634413393142620646986092",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1270768732992140824282704780431787437998241260132",
+      "target": "225983775830414342463402756013981518240591508670",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1397445188630489385895775033493766835492262963566",
+      "target": "798632401425868876102363028961352418648092585552",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "1176685874030446736230558571515735269201639210018",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "1397445188630489385895775033493766835492262963566",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "342235764051949967951080307277423001050579262066",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "critical_predicted_edge",
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "512925309183002151069551403536948084474222786753",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "critical_competitor_edge",
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "640563831666262910456430279906026612650861443257",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1405146926791304749609580730065493849195877189654",
+      "target": "83577103538013742684920124219176939084565185786",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1449979435861996280135147024549533384490185070243",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "225983775830414342463402756013981518240591508670",
+      "target": "897842035620100398466150621479840228868178307178",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "297817732823587729967602229737787305853913916328",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "325132334667559313543858271377472597778307766529",
+      "target": "1405146926791304749609580730065493849195877189654",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "325132334667559313543858271377472597778307766529",
+      "target": "346411387416270816520415316984450835126008792697",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "332084651868771514466780760576528669160472787733",
+      "target": "1405146926791304749609580730065493849195877189654",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "342235764051949967951080307277423001050579262066",
+      "target": "297817732823587729967602229737787305853913916328",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "346411387416270816520415316984450835126008792697",
+      "target": "692737883948674392189888193853226250729006126842",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "462412723428587199083372436639457936916262305523",
+      "target": "1233405464114304471027608634413393142620646986092",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "512925309183002151069551403536948084474222786753",
+      "target": "707484479782880061608171426031051775213016662096",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "547225859343829702855277247732430932154899914364",
+      "target": "1147088197548533472063320537697655513181364533148",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "547225859343829702855277247732430932154899914364",
+      "target": "977821451040995333603949608762874702095290680593",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "626708846708862742021058578691812226378002958349",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "640563831666262910456430279906026612650861443257",
+      "target": "1405146926791304749609580730065493849195877189654",
+      "visit_count": 2,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path_edge",
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "640563831666262910456430279906026612650861443257",
+      "target": "834620242516657314882401030133887803915772762131",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "640563831666262910456430279906026612650861443257",
+      "target": "954703549218879490200950471858618284292341955650",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "648603391091140808085057838418221274535058841820",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "692737883948674392189888193853226250729006126842",
+      "target": "626708846708862742021058578691812226378002958349",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "707484479782880061608171426031051775213016662096",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "798632401425868876102363028961352418648092585552",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "834620242516657314882401030133887803915772762131",
+      "target": "462412723428587199083372436639457936916262305523",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "83577103538013742684920124219176939084565185786",
+      "target": "1046915485277773126531944013305127407344274613108",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "877759356299334497336458156579206057513802931642",
+      "target": "547225859343829702855277247732430932154899914364",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "897842035620100398466150621479840228868178307178",
+      "target": "997993812433472032985437860821075728564695967369",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "954703549218879490200950471858618284292341955650",
+      "target": "1449979435861996280135147024549533384490185070243",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "977821451040995333603949608762874702095290680593",
+      "target": "648603391091140808085057838418221274535058841820",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "997993812433472032985437860821075728564695967369",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.5,
+      "roles": [
+        "context_edge"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "path_index": 0,
+      "tree_index": 0,
+      "tree_prefix": "tree:0",
+      "node_ids": [
+        "325132334667559313543858271377472597778307766529",
+        "1405146926791304749609580730065493849195877189654",
+        "83577103538013742684920124219176939084565185786",
+        "1046915485277773126531944013305127407344274613108",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "SCALED_VARIANCE_MAJOR > -0.245338",
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "RADIUS_RATIO <= 2.110146",
+        "ELONGATEDNESS > -1.36384",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06464255938271284,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 1,
+      "tree_index": 1,
+      "tree_prefix": "tree:1",
+      "node_ids": [
+        "640563831666262910456430279906026612650861443257",
+        "1405146926791304749609580730065493849195877189654",
+        "512925309183002151069551403536948084474222786753",
+        "707484479782880061608171426031051775213016662096",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "ELONGATEDNESS <= 0.182417",
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "COMPACTNESS <= 1.47669",
+        "SCATTER_RATIO <= 1.454272",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.07400733636214989,
+      "is_predicted_path": false,
+      "is_competitor_path": true
+    },
+    {
+      "path_index": 2,
+      "tree_index": 2,
+      "tree_prefix": "tree:2",
+      "node_ids": [
+        "1405146926791304749609580730065493849195877189654",
+        "1176685874030446736230558571515735269201639210018",
+        "547225859343829702855277247732430932154899914364",
+        "1147088197548533472063320537697655513181364533148",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "RADIUS_RATIO > -0.031329",
+        "SKEWNESS_ABOUT_MAJOR <= 0.388513",
+        "MAX.LENGTH_RECTANGULARITY <= 1.703596",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.04201642869471248,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 3,
+      "tree_index": 3,
+      "tree_prefix": "tree:3",
+      "node_ids": [
+        "640563831666262910456430279906026612650861443257",
+        "834620242516657314882401030133887803915772762131",
+        "462412723428587199083372436639457936916262305523",
+        "1233405464114304471027608634413393142620646986092",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "ELONGATEDNESS <= 0.182417",
+        "SCALED_VARIANCE_MAJOR <= 1.738266",
+        "PR.AXIS_ASPECT_RATIO <= 1.048517",
+        "DISTANCE_CIRCULARITY > 0.844525",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05071353847813319,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 4,
+      "tree_index": 4,
+      "tree_prefix": "tree:4",
+      "node_ids": [
+        "640563831666262910456430279906026612650861443257",
+        "1405146926791304749609580730065493849195877189654",
+        "342235764051949967951080307277423001050579262066",
+        "297817732823587729967602229737787305853913916328",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "ELONGATEDNESS <= 0.182417",
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "COMPACTNESS <= 1.232292",
+        "MAX.LENGTH_RECTANGULARITY <= 1.634471",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06758406179894705,
+      "is_predicted_path": true,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 5,
+      "tree_index": 5,
+      "tree_prefix": "tree:5",
+      "node_ids": [
+        "332084651868771514466780760576528669160472787733",
+        "1405146926791304749609580730065493849195877189654",
+        "1397445188630489385895775033493766835492262963566",
+        "798632401425868876102363028961352418648092585552",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "DISTANCE_CIRCULARITY > 0.428511",
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "SCATTER_RATIO <= 1.667167",
+        "HOLLOWS_RATIO <= 0.123098",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03591947455627272,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 6,
+      "tree_index": 6,
+      "tree_prefix": "tree:6",
+      "node_ids": [
+        "1405146926791304749609580730065493849195877189654",
+        "640563831666262910456430279906026612650861443257",
+        "954703549218879490200950471858618284292341955650",
+        "1449979435861996280135147024549533384490185070243",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "MAX.LENGTH_ASPECT_RATIO > -0.231807",
+        "ELONGATEDNESS <= 0.182417",
+        "CIRCULARITY > 1.587019",
+        "RADIUS_RATIO <= 1.829539",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.022325315756043268,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 7,
+      "tree_index": 7,
+      "tree_prefix": "tree:7",
+      "node_ids": [
+        "325132334667559313543858271377472597778307766529",
+        "346411387416270816520415316984450835126008792697",
+        "692737883948674392189888193853226250729006126842",
+        "626708846708862742021058578691812226378002958349",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "SCALED_VARIANCE_MAJOR > -0.245338",
+        "KURTOSIS_ABOUT_MINOR > -0.547865",
+        "MAX.LENGTH_RECTANGULARITY <= 1.772722",
+        "HOLLOWS_RATIO > -0.552342",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.04366674196558514,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 8,
+      "tree_index": 8,
+      "tree_prefix": "tree:8",
+      "node_ids": [
+        "1270768732992140824282704780431787437998241260132",
+        "225983775830414342463402756013981518240591508670",
+        "897842035620100398466150621479840228868178307178",
+        "997993812433472032985437860821075728564695967369",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "SCALED_VARIANCE_MINOR > -0.383098",
+        "PR.AXIS_RECTANGULARITY <= 1.934732",
+        "MAX.LENGTH_ASPECT_RATIO > -0.431937",
+        "COMPACTNESS <= 1.598889",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.006510903837293147,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 9,
+      "tree_index": 9,
+      "tree_prefix": "tree:9",
+      "node_ids": [
+        "877759356299334497336458156579206057513802931642",
+        "547225859343829702855277247732430932154899914364",
+        "977821451040995333603949608762874702095290680593",
+        "648603391091140808085057838418221274535058841820",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "SCALED_VARIANCE_MAJOR > -0.309846",
+        "SKEWNESS_ABOUT_MAJOR <= 0.388513",
+        "HOLLOWS_RATIO <= 0.393274",
+        "SCALED_VARIANCE_MAJOR > 1.173826",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.003899175096765651,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    }
+  ],
+  "render_semantics": {
+    "critical_node": "gold",
+    "critical_pred_successor": "green",
+    "critical_competitor_successor": "red",
+    "predicted_path": "blue",
+    "competitor_path": "blue",
+    "true_class_leaf": "green_leaf",
+    "other_class_leaf": "salmon_leaf",
+    "context": "light_context",
+    "edge_width": "proportional_to_visit_count"
+  }
+}

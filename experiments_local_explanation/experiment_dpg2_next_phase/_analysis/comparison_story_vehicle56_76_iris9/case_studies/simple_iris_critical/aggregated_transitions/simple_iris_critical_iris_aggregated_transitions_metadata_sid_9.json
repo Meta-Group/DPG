@@ -1,0 +1,1748 @@
+{
+  "sample_id": 9,
+  "majority_vote": "1",
+  "class_votes": {
+    "1": 46,
+    "2": 4
+  },
+  "true_label": "1",
+  "sample_confidence": {
+    "graph_construction_mode": "aggregated_transitions",
+    "num_active_nodes": 20.0,
+    "num_active_edges_raw": 50.0,
+    "num_active_edges_filtered": 50.0,
+    "num_paths_raw": 50.0,
+    "num_paths_pruned": 50.0,
+    "num_paths": 50.0,
+    "mean_lrc_active_nodes": 0.5214015532658495,
+    "mean_bc_active_nodes": 0.010052677787532924,
+    "evidence_score_pred": 0.9902974785385814,
+    "top_competitor_class_pred": "2",
+    "evidence_score_competitor_pred": 0.00970252146141864,
+    "evidence_margin_pred_vs_competitor": 0.9805949570771628,
+    "class_support": {
+      "1": 3.588678864585488,
+      "2": 0.044322457484820284
+    },
+    "evidence_scores": {
+      "1": 0.9902974785385814,
+      "2": 0.00970252146141864
+    },
+    "evidence_variant": "top_competitor",
+    "evidence_score_rule": "ratio_top_competitor",
+    "evidence_lambda_rule": "log_classes",
+    "evidence_lambda": 1.267970000576925,
+    "evidence_base_lambda": 0.8,
+    "edge_threshold": 0.0,
+    "path_prune_ratio": 0.0,
+    "path_confidence_max": 0.236528443688267,
+    "path_confidence_min_kept": 0.0,
+    "n_model_classes": 3,
+    "n_features": 4,
+    "evidence_score_margin": 0.9805949570771628,
+    "vote_confidence": 0.9902974785385814,
+    "class_scores": {
+      "1": 0.9902974785385814,
+      "2": 0.00970252146141864
+    },
+    "score_margin": 0.9805949570771628,
+    "support_pred_class": "1",
+    "support_top_competitor_class": "2",
+    "support_pred_score": 0.987800043667325,
+    "support_top_competitor_score": 0.012199956332399684,
+    "support_margin": 0.9756000873349253,
+    "predicted_class_concentration_top3": 0.1665691195142231,
+    "model_vote_agreement": 0.92,
+    "trace_coverage_score": 0.8973684210525932,
+    "explanation_confidence": 0.616841841697833,
+    "node_recall": 0.8947368421052162,
+    "node_precision": 0.944444444444392,
+    "edge_recall": 0.89999999999997,
+    "edge_precision": 0.89999999999997,
+    "path_purity": 0.987800043667325,
+    "competitor_exposure": 0.01219995633267501,
+    "recombination_rate": 0.09999999999999667,
+    "critical_node_label": "petal width (cm) <= 0.585928",
+    "critical_split_depth": 2,
+    "critical_successor_pred": null,
+    "critical_successor_comp": "petal width (cm) > -0.53326",
+    "critical_node_contrast": null,
+    "trace_node_count_unique": 19,
+    "trace_edge_count_unique": 30,
+    "explanation_node_count_unique": 18,
+    "explanation_edge_count_unique": 30
+  },
+  "critical_structure": {
+    "critical_node_id": "62582905129758814892850233105921759201251889641",
+    "critical_successor_pred_id": "171982518954274878349485416184092168691833932185",
+    "critical_successor_comp_id": "1354614322093467595041843410604706441025754602223",
+    "critical_node_label": "petal width (cm) <= 0.585928",
+    "critical_successor_pred_label": "Class 1",
+    "critical_successor_comp_label": "petal width (cm) > -0.53326"
+  },
+  "predicted_path_index": 0,
+  "competitor_path_index": 4,
+  "nodes": [
+    {
+      "id": "1065624045895404628781515650222264818502369680998",
+      "label": "petal length (cm) > 0.130598",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1250119665708260677662657499554236431504545337830",
+      "label": "petal length (cm) > -0.806298",
+      "visit_count": 12,
+      "visit_fraction": 0.2608695652173913,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1301279894705705634496788295728316326978918730345",
+      "label": "sepal length (cm) <= -0.467709",
+      "visit_count": 12,
+      "visit_fraction": 0.2608695652173913,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1354614322093467595041843410604706441025754602223",
+      "label": "petal width (cm) > -0.53326",
+      "visit_count": 36,
+      "visit_fraction": 0.782608695652174,
+      "roles": [
+        "critical_competitor_successor",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1401558529085745819413030138326213292594146546899",
+      "label": "petal width (cm) <= 0.520093",
+      "visit_count": 1,
+      "visit_fraction": 0.021739130434782608,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1421685436200205225674786711764158727221294486530",
+      "label": "petal length (cm) <= 0.698413",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "151448544894795944854412475567677632599433314330",
+      "label": "sepal length (cm) <= 0.487612",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "171982518954274878349485416184092168691833932185",
+      "label": "Class 1",
+      "visit_count": 46,
+      "visit_fraction": 1.0,
+      "roles": [
+        "critical_pred_successor",
+        "predicted_path",
+        "true_class_leaf"
+      ]
+    },
+    {
+      "id": "17549784986378298826553234967255827156956411800",
+      "label": "sepal length (cm) <= -0.348294",
+      "visit_count": 12,
+      "visit_fraction": 0.2608695652173913,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "326134902842758134194213661420161781017016281072",
+      "label": "sepal length (cm) <= 0.368196",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "355048926652228798573099432814109986636190889407",
+      "label": "sepal length (cm) <= 1.50264",
+      "visit_count": 8,
+      "visit_fraction": 0.17391304347826086,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "396191263661860018578189567184022912292846108201",
+      "label": "sepal length (cm) > -1.005077",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "49580383669892588621248240113590709523458396144",
+      "label": "sepal width (cm) <= 1.682895",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "573436456989461150941546928566911968127808452836",
+      "label": "petal width (cm) > -0.66493",
+      "visit_count": 2,
+      "visit_fraction": 0.043478260869565216,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "62582905129758814892850233105921759201251889641",
+      "label": "petal width (cm) <= 0.585928",
+      "visit_count": 36,
+      "visit_fraction": 0.782608695652174,
+      "roles": [
+        "critical_node",
+        "predicted_path",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "683257520099053851419261183627632186490095154886",
+      "label": "sepal width (cm) > -1.787376",
+      "visit_count": 16,
+      "visit_fraction": 0.34782608695652173,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "731211962443012793916801455179252163516633769727",
+      "label": "petal length (cm) <= 0.556459",
+      "visit_count": 2,
+      "visit_fraction": 0.043478260869565216,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "792436853353305499105833404523480066304588403937",
+      "label": "petal length (cm) > -0.607562",
+      "visit_count": 12,
+      "visit_fraction": 0.2608695652173913,
+      "roles": [
+        "predicted_path",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "924636592708911987470999503977898783284968790148",
+      "label": "petal length (cm) <= 0.613241",
+      "visit_count": 20,
+      "visit_fraction": 0.43478260869565216,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "928621589127927934620961952074257259595278295629",
+      "label": "Class 2",
+      "visit_count": 4,
+      "visit_fraction": 0.08695652173913043,
+      "roles": [
+        "competitor_path",
+        "other_class_leaf"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "1065624045895404628781515650222264818502369680998",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1250119665708260677662657499554236431504545337830",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1301279894705705634496788295728316326978918730345",
+      "target": "1354614322093467595041843410604706441025754602223",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "1065624045895404628781515650222264818502369680998",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "396191263661860018578189567184022912292846108201",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "683257520099053851419261183627632186490095154886",
+      "visit_count": 8,
+      "visit_fraction": 0.4,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "924636592708911987470999503977898783284968790148",
+      "visit_count": 20,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1401558529085745819413030138326213292594146546899",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.05,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1421685436200205225674786711764158727221294486530",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "151448544894795944854412475567677632599433314330",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "17549784986378298826553234967255827156956411800",
+      "target": "1354614322093467595041843410604706441025754602223",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "326134902842758134194213661420161781017016281072",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "355048926652228798573099432814109986636190889407",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 8,
+      "visit_fraction": 0.4,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "396191263661860018578189567184022912292846108201",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "49580383669892588621248240113590709523458396144",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "573436456989461150941546928566911968127808452836",
+      "target": "731211962443012793916801455179252163516633769727",
+      "visit_count": 2,
+      "visit_fraction": 0.1,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "1354614322093467595041843410604706441025754602223",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "critical_competitor_edge",
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "1421685436200205225674786711764158727221294486530",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "151448544894795944854412475567677632599433314330",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "critical_predicted_edge",
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "49580383669892588621248240113590709523458396144",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "683257520099053851419261183627632186490095154886",
+      "visit_count": 8,
+      "visit_fraction": 0.4,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "683257520099053851419261183627632186490095154886",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 8,
+      "visit_fraction": 0.4,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "683257520099053851419261183627632186490095154886",
+      "target": "355048926652228798573099432814109986636190889407",
+      "visit_count": 8,
+      "visit_fraction": 0.4,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "731211962443012793916801455179252163516633769727",
+      "target": "1401558529085745819413030138326213292594146546899",
+      "visit_count": 1,
+      "visit_fraction": 0.05,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "731211962443012793916801455179252163516633769727",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.05,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "792436853353305499105833404523480066304588403937",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "predicted_path_edge",
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "326134902842758134194213661420161781017016281072",
+      "visit_count": 4,
+      "visit_fraction": 0.2,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 12,
+      "visit_fraction": 0.6,
+      "roles": [
+        "context_edge"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "path_index": 0,
+      "tree_index": 0,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.236528443688267,
+      "is_predicted_path": true,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 1,
+      "tree_index": 1,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1421685436200205225674786711764158727221294486530",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal length (cm) <= 0.698413",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.12470619131737767,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 2,
+      "tree_index": 2,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.09349161664834853,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 3,
+      "tree_index": 3,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "326134902842758134194213661420161781017016281072",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "sepal length (cm) <= 0.368196",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.07845124620198717,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 4,
+      "tree_index": 4,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "1065624045895404628781515650222264818502369680998",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) > 0.130598",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.01697667486876103,
+      "is_predicted_path": false,
+      "is_competitor_path": true
+    },
+    {
+      "path_index": 5,
+      "tree_index": 5,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "396191263661860018578189567184022912292846108201",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal length (cm) > -1.005077",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04496187802507895,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 6,
+      "tree_index": 6,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.10600346016250788,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 7,
+      "tree_index": 7,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.061354321948363814,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 8,
+      "tree_index": 8,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "151448544894795944854412475567677632599433314330",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "sepal length (cm) <= 0.487612",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.1067919877888531,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 9,
+      "tree_index": 9,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "49580383669892588621248240113590709523458396144",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) <= 1.682895",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.10445634525969523,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 10,
+      "tree_index": 10,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.12374470361399469,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 11,
+      "tree_index": 11,
+      "tree_prefix": "source:petal length (cm) > -0.607562",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06889891220802533,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 12,
+      "tree_index": 12,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.236528443688267,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 13,
+      "tree_index": 13,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1421685436200205225674786711764158727221294486530",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal length (cm) <= 0.698413",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.12470619131737767,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 14,
+      "tree_index": 14,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.09349161664834853,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 15,
+      "tree_index": 15,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "326134902842758134194213661420161781017016281072",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "sepal length (cm) <= 0.368196",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.07845124620198717,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 16,
+      "tree_index": 16,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "1065624045895404628781515650222264818502369680998",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) > 0.130598",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.01697667486876103,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 17,
+      "tree_index": 17,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "396191263661860018578189567184022912292846108201",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal length (cm) > -1.005077",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04496187802507895,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 18,
+      "tree_index": 18,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.10600346016250788,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 19,
+      "tree_index": 19,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.061354321948363814,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 20,
+      "tree_index": 20,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "151448544894795944854412475567677632599433314330",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "sepal length (cm) <= 0.487612",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.1067919877888531,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 21,
+      "tree_index": 21,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "49580383669892588621248240113590709523458396144",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) <= 1.682895",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.10445634525969523,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 22,
+      "tree_index": 22,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.12374470361399469,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 23,
+      "tree_index": 23,
+      "tree_prefix": "source:petal length (cm) > -0.806298",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06889891220802533,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 24,
+      "tree_index": 24,
+      "tree_prefix": "source:petal width (cm) > -0.66493",
+      "node_ids": [
+        "573436456989461150941546928566911968127808452836",
+        "731211962443012793916801455179252163516633769727",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.66493",
+        "petal length (cm) <= 0.556459",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.12164788058659488,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 25,
+      "tree_index": 25,
+      "tree_prefix": "source:petal width (cm) > -0.66493",
+      "node_ids": [
+        "573436456989461150941546928566911968127808452836",
+        "731211962443012793916801455179252163516633769727",
+        "1401558529085745819413030138326213292594146546899",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.66493",
+        "petal length (cm) <= 0.556459",
+        "petal width (cm) <= 0.520093",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05509546357552602,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 26,
+      "tree_index": 26,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06029029974152061,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 27,
+      "tree_index": 27,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.09656636880412078,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 28,
+      "tree_index": 28,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "1421685436200205225674786711764158727221294486530",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "petal length (cm) <= 0.698413",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05951461612816992,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 29,
+      "tree_index": 29,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "151448544894795944854412475567677632599433314330",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal length (cm) <= 0.487612",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.0542300676975435,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 30,
+      "tree_index": 30,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "49580383669892588621248240113590709523458396144",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) <= 1.682895",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05351569124691277,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 31,
+      "tree_index": 31,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05922285953947043,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 32,
+      "tree_index": 32,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03657680008979233,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 33,
+      "tree_index": 33,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "326134902842758134194213661420161781017016281072",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "sepal length (cm) <= 0.368196",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06235185839017749,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 34,
+      "tree_index": 34,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "1065624045895404628781515650222264818502369680998",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) > 0.130598",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.0059396814522758735,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 35,
+      "tree_index": 35,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "396191263661860018578189567184022912292846108201",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "sepal length (cm) > -1.005077",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.021771189486316265,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 36,
+      "tree_index": 36,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.06854709323158799,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 37,
+      "tree_index": 37,
+      "tree_prefix": "source:sepal length (cm) <= -0.348294",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04342559901271559,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 38,
+      "tree_index": 38,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04525466186952089,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 39,
+      "tree_index": 39,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.07790140313700586,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 40,
+      "tree_index": 40,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "1421685436200205225674786711764158727221294486530",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "petal length (cm) <= 0.698413",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05000136041424185,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 41,
+      "tree_index": 41,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "151448544894795944854412475567677632599433314330",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal length (cm) <= 0.487612",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.045560897431527574,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 42,
+      "tree_index": 42,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "49580383669892588621248240113590709523458396144",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) <= 1.682895",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04496064203362162,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 43,
+      "tree_index": 43,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.049759516625513714,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 44,
+      "tree_index": 44,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "62582905129758814892850233105921759201251889641",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.585928",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03157616978731769,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 45,
+      "tree_index": 45,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "924636592708911987470999503977898783284968790148",
+        "326134902842758134194213661420161781017016281072",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.613241",
+        "sepal length (cm) <= 0.368196",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.050078977291279726,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 46,
+      "tree_index": 46,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "1065624045895404628781515650222264818502369680998",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "petal length (cm) > 0.130598",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.004429426295022354,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 47,
+      "tree_index": 47,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "396191263661860018578189567184022912292846108201",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "sepal length (cm) > -1.005077",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.016236158540873034,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 48,
+      "tree_index": 48,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05114251616584332,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 49,
+      "tree_index": 49,
+      "tree_prefix": "source:sepal length (cm) <= -0.467709",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1354614322093467595041843410604706441025754602223",
+        "683257520099053851419261183627632186490095154886",
+        "355048926652228798573099432814109986636190889407",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.53326",
+        "sepal width (cm) > -1.787376",
+        "sepal length (cm) <= 1.50264",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03467256003329539,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    }
+  ],
+  "render_semantics": {
+    "critical_node": "gold",
+    "critical_pred_successor": "green",
+    "critical_competitor_successor": "red",
+    "predicted_path": "blue",
+    "competitor_path": "blue",
+    "true_class_leaf": "green_leaf",
+    "other_class_leaf": "salmon_leaf",
+    "context": "light_context",
+    "edge_width": "proportional_to_visit_count"
+  }
+}

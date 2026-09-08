@@ -1,0 +1,504 @@
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/banknote-authentication --datasets banknote-authentication --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/breast_cancer --datasets breast_cancer --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/diabetes --datasets diabetes --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/digits --datasets digits --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/ionosphere --datasets ionosphere --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/iris --datasets iris --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/isolet --datasets isolet --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/madelon --datasets madelon --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/digits/checkpoints_baselines
+
+=== DATASET: digits ===
+[1/4] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/288 (digits | rf20_d4_pv0.0001_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/ionosphere/checkpoints_baselines
+
+=== DATASET: ionosphere ===
+[1/4] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/56 (ionosphere | rf20_d4_pv0.0001_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/diabetes/checkpoints_baselines
+
+=== DATASET: diabetes ===
+[1/4] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/breast_cancer/checkpoints_baselines
+
+=== DATASET: breast_cancer ===
+[1/4] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/iris/checkpoints_baselines
+
+=== DATASET: iris ===
+[1/4] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/123 (diabetes | rf20_d4_pv0.0001_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/banknote-authentication/checkpoints_baselines
+
+=== DATASET: banknote-authentication ===
+[1/4] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/24 (iris | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1/91 (breast_cancer | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 24/24 (iris | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/24 (iris | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 56/56 (ionosphere | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 24/24 (iris | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+[2/4] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/56 (ionosphere | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1/24 (iris | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 24/24 (iris | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/24 (iris | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 24/24 (iris | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/123 (diabetes | rf20_d4_pv0.0001_dt6_s27 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/iris/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/iris/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/iris/dataset_overview_baselines.csv
+  baseline progress: 101/288 (digits | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 123/123 (diabetes | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/123 (diabetes | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 56/56 (ionosphere | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/56 (ionosphere | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 91/91 (breast_cancer | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 220/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+[2/4] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/91 (breast_cancer | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/123 (diabetes | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 56/56 (ionosphere | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/56 (ionosphere | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 123/123 (diabetes | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/123 (diabetes | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/288 (digits | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 56/56 (ionosphere | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/ionosphere/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/ionosphere/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/ionosphere/dataset_overview_baselines.csv
+  baseline progress: 201/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/123 (diabetes | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 220/220 (banknote-authentication | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 91/91 (breast_cancer | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s27 | lore)
+[3/4] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 123/123 (diabetes | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1/91 (breast_cancer | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/123 (diabetes | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 288/288 (digits | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/288 (digits | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/123 (diabetes | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 123/123 (diabetes | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/diabetes/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/diabetes/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/diabetes/dataset_overview_baselines.csv
+  baseline progress: 201/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 220/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 91/91 (breast_cancer | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s42 | lore)
+[4/4] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/91 (breast_cancer | rf20_d4_pv1e-05_dt6_s42 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/isolet/checkpoints_baselines
+
+=== DATASET: isolet ===
+[1/4] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 101/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/288 (digits | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 220/220 (banknote-authentication | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/banknote-authentication/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/banknote-authentication/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/banknote-authentication/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/madelon/checkpoints_baselines
+
+=== DATASET: madelon ===
+[1/4] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 91/91 (breast_cancer | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/breast_cancer/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/breast_cancer/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/breast_cancer/dataset_overview_baselines.csv
+  baseline progress: 201/288 (digits | rf20_d4_pv0.0001_dt6_s42 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/phoneme/checkpoints_baselines
+
+=== DATASET: phoneme ===
+[1/4] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 288/288 (digits | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/288 (digits | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/qsar-biodeg/checkpoints_baselines
+
+=== DATASET: qsar-biodeg ===
+[1/4] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/288 (digits | rf20_d4_pv1e-05_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/segment/checkpoints_baselines
+
+=== DATASET: segment ===
+[1/4] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/370 (segment | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/288 (digits | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/370 (segment | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 401/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 169/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 501/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/370 (segment | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 288/288 (digits | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/288 (digits | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 601/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/370 (segment | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 701/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 370/370 (segment | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/370 (segment | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/288 (digits | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 801/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 169/169 (qsar-biodeg | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/370 (segment | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 865/865 (phoneme | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/288 (digits | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 201/370 (segment | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 301/370 (segment | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 288/288 (digits | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 169/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s27 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/digits/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/digits/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/digits/dataset_overview_baselines.csv
+[4/4] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 301/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 370/370 (segment | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/370 (segment | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/370 (segment | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 501/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/370 (segment | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 169/169 (qsar-biodeg | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/qsar-biodeg/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/qsar-biodeg/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/qsar-biodeg/dataset_overview_baselines.csv
+  baseline progress: 601/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/spambase/checkpoints_baselines
+
+=== DATASET: spambase ===
+[1/4] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 701/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 301/370 (segment | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 370/370 (segment | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/370 (segment | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 801/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 865/865 (phoneme | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/370 (segment | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/vehicle/checkpoints_baselines
+
+=== DATASET: vehicle ===
+[1/4] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 201/370 (segment | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1/136 (vehicle | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/370 (segment | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 301/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/136 (vehicle | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 136/136 (vehicle | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/136 (vehicle | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 370/370 (segment | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 401/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/segment/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/segment/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/segment/dataset_overview_baselines.csv
+  baseline progress: 301/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 501/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/136 (vehicle | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 136/136 (vehicle | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/136 (vehicle | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 601/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/136 (vehicle | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 701/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 136/136 (vehicle | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/136 (vehicle | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 801/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wdbc/checkpoints_baselines
+
+=== DATASET: wdbc ===
+[1/4] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/91 (wdbc | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 865/865 (phoneme | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 501/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/136 (vehicle | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 136/136 (vehicle | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/vehicle/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/vehicle/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/vehicle/dataset_overview_baselines.csv
+  baseline progress: 101/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 91/91 (wdbc | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/91 (wdbc | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 601/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 91/91 (wdbc | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/91 (wdbc | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 701/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 91/91 (wdbc | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/91 (wdbc | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 501/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 736/736 (spambase | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wine/checkpoints_baselines
+
+=== DATASET: wine ===
+[1/4] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lore
+  baseline progress: 1/29 (wine | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 29/29 (wine | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/29 (wine | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 601/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 29/29 (wine | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/29 (wine | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 29/29 (wine | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/29 (wine | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 91/91 (wdbc | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 29/29 (wine | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wdbc/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wdbc/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wdbc/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wine/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wine/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wine/dataset_overview_baselines.csv
+  baseline progress: 701/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 801/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 865/865 (phoneme | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/phoneme/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/phoneme/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/phoneme/dataset_overview_baselines.csv
+  baseline progress: 201/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 301/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 401/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 501/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 601/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 701/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 736/736 (spambase | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 301/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 501/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 601/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 701/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 736/736 (spambase | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 201/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 401/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 416/416 (madelon | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 401/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+[2/4] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 501/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 601/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 701/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 736/736 (spambase | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/spambase/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/spambase/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/spambase/dataset_overview_baselines.csv
+  baseline progress: 101/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 301/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 401/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 416/416 (madelon | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 101/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 416/416 (madelon | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 201/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 301/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 401/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 416/416 (madelon | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/madelon/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/madelon/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/madelon/dataset_overview_baselines.csv
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv0.0001_dt6_s27 | lore)
+[2/4] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lore
+  baseline progress: 1/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv0.0001_dt6_s42 | lore)
+[3/4] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lore
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s27 | lore)
+[4/4] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lore
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lore)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/isolet/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/isolet/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/isolet/dataset_overview_baselines.csv
+/usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/phoneme --datasets phoneme --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/qsar-biodeg --datasets qsar-biodeg --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/segment --datasets segment --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/spambase --datasets spambase --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/vehicle --datasets vehicle --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wdbc --datasets wdbc --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset/wine --datasets wine --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+Native thread caps: OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+START banknote-authentication
+START breast_cancer
+START diabetes
+START digits
+START ionosphere
+START iris
+DONE iris
+START isolet
+DONE ionosphere
+START madelon
+DONE diabetes
+START phoneme
+DONE banknote-authentication
+START qsar-biodeg
+DONE breast_cancer
+START segment
+DONE digits
+START spambase
+DONE qsar-biodeg
+START vehicle
+DONE segment
+START wdbc
+DONE vehicle
+START wine
+DONE wdbc
+DONE wine
+DONE phoneme
+DONE spambase
+DONE madelon
+DONE isolet
+Journal launcher
+  kind=baselines
+  phase=validation
+  train_split=train_core
+  eval_split=validation
+  parallel=6
+  rf_n_jobs=1
+  native thread caps: OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_per_dataset_baselines.py --data_dir experiments_local_explanation/data_numeric --out_root experiments_local_explanation/results_journal_v1/lore_validation_moderate_by_dataset --datasets banknote-authentication,breast_cancer,diabetes,digits,ionosphere,iris,isolet,madelon,phoneme,qsar-biodeg,segment,spambase,vehicle,wdbc,wine --parallel 6 --methods lore --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation --native_threads 1

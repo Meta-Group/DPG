@@ -1,0 +1,1371 @@
+{
+  "sample_id": 9,
+  "majority_vote": "1",
+  "class_votes": {
+    "1": 18,
+    "2": 2
+  },
+  "true_label": "1",
+  "sample_confidence": {
+    "graph_construction_mode": "execution_trace",
+    "num_active_nodes": 32.0,
+    "num_active_edges_raw": 65.0,
+    "num_active_edges_filtered": 58.0,
+    "num_paths_raw": 20.0,
+    "num_paths_pruned": 20.0,
+    "num_paths": 20.0,
+    "num_executed_paths": 20.0,
+    "num_executed_predicates": 65.0,
+    "num_executed_edges": 65.0,
+    "num_trace_predicates_missing_from_dpg": 0.0,
+    "num_trace_edges_missing_from_dpg": 0.0,
+    "trace_node_coverage": 1.0,
+    "trace_edge_coverage": 1.0,
+    "mean_lrc_active_nodes": 0.6999436303195558,
+    "mean_bc_active_nodes": 0.0156543227852197,
+    "evidence_score_pred": 0.9962689351059767,
+    "top_competitor_class_pred": "2",
+    "evidence_score_competitor_pred": 0.0037310648940233624,
+    "evidence_margin_pred_vs_competitor": 0.9925378702119533,
+    "class_support": {
+      "1": 0.46273824387812035,
+      "2": 0.0021923966412689157
+    },
+    "evidence_scores": {
+      "1": 0.9962689351059767,
+      "2": 0.0037310648940233624
+    },
+    "evidence_variant": "top_competitor",
+    "evidence_score_rule": "ratio_top_competitor",
+    "evidence_lambda_rule": "log_classes",
+    "evidence_lambda": 1.267970000576925,
+    "evidence_base_lambda": 0.8,
+    "edge_threshold": 0.0,
+    "path_prune_ratio": 0.0,
+    "path_confidence_max": 0.05556581441701187,
+    "path_confidence_min_kept": 0.000600283446639873,
+    "n_model_classes": 3,
+    "n_features": 4,
+    "evidence_score_margin": 0.9925378702119533,
+    "vote_confidence": 0.9962689351059767,
+    "class_scores": {
+      "1": 0.9962689351059767,
+      "2": 0.0037310648940233624
+    },
+    "score_margin": 0.9925378702119533,
+    "support_pred_class": "1",
+    "support_top_competitor_class": "2",
+    "support_pred_score": 0.9952844651412629,
+    "support_top_competitor_score": 0.004715534856586354,
+    "support_margin": 0.9905689302846765,
+    "predicted_class_concentration_top3": 0.28680452318347305,
+    "model_vote_agreement": 0.9,
+    "trace_coverage_score": 0.9999999999999747,
+    "explanation_confidence": 0.7257911511560315,
+    "node_recall": 0.9999999999999667,
+    "node_precision": 0.9999999999999667,
+    "edge_recall": 0.9999999999999827,
+    "edge_precision": 0.9999999999999827,
+    "path_purity": 0.9952844651412629,
+    "competitor_exposure": 0.004715534858737103,
+    "recombination_rate": 0.0,
+    "critical_node_label": null,
+    "critical_split_depth": null,
+    "critical_successor_pred": null,
+    "critical_successor_comp": null,
+    "critical_node_contrast": null,
+    "trace_node_count_unique": 30,
+    "trace_edge_count_unique": 58,
+    "explanation_node_count_unique": 30,
+    "explanation_edge_count_unique": 58
+  },
+  "critical_structure": {
+    "critical_node_id": null,
+    "critical_successor_pred_id": null,
+    "critical_successor_comp_id": null,
+    "critical_node_label": null,
+    "critical_successor_pred_label": null,
+    "critical_successor_comp_label": null
+  },
+  "predicted_path_index": 17,
+  "competitor_path_index": 6,
+  "nodes": [
+    {
+      "id": "1015100791066033703224260688410436928161145951985",
+      "label": "petal length (cm) <= 0.670022",
+      "visit_count": 3,
+      "visit_fraction": 0.16666666666666666,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "1045258906002458675182476699090144048148557279061",
+      "label": "petal length (cm) <= 0.528068",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1171267428451548001600524662753270738344241219953",
+      "label": "petal width (cm) > 0.256755",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1186102917772648655477053767598719916113656572039",
+      "label": "sepal length (cm) > -0.94537",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1250119665708260677662657499554236431504545337830",
+      "label": "petal length (cm) > -0.806298",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "1259029540480442467193518532726470219758999855746",
+      "label": "petal length (cm) > -0.749516",
+      "visit_count": 8,
+      "visit_fraction": 0.4444444444444444,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1273148495295172491257084855572364600571906988314",
+      "label": "sepal width (cm) > -1.115711",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1301279894705705634496788295728316326978918730345",
+      "label": "sepal length (cm) <= -0.467709",
+      "visit_count": 4,
+      "visit_fraction": 0.2222222222222222,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1354614322093467595041843410604706441025754602223",
+      "label": "petal width (cm) > -0.53326",
+      "visit_count": 2,
+      "visit_fraction": 0.1111111111111111,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1401558529085745819413030138326213292594146546899",
+      "label": "petal width (cm) <= 0.520093",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1414894890549213385092516781088896146873270083519",
+      "label": "petal width (cm) > 0.388424",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1439471199626955666709831677602670887694413933689",
+      "label": "petal width (cm) > -0.599095",
+      "visit_count": 5,
+      "visit_fraction": 0.2777777777777778,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "14955536097380226282644155058437730821485910394",
+      "label": "sepal length (cm) > -1.064785",
+      "visit_count": 3,
+      "visit_fraction": 0.16666666666666666,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "151448544894795944854412475567677632599433314330",
+      "label": "sepal length (cm) <= 0.487612",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "160288362280101012267365289749144734591318697897",
+      "label": "petal width (cm) <= 0.651763",
+      "visit_count": 3,
+      "visit_fraction": 0.16666666666666666,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "171982518954274878349485416184092168691833932185",
+      "label": "Class 1",
+      "visit_count": 18,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path",
+        "true_class_leaf"
+      ]
+    },
+    {
+      "id": "17549784986378298826553234967255827156956411800",
+      "label": "sepal length (cm) <= -0.348294",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "326134902842758134194213661420161781017016281072",
+      "label": "sepal length (cm) <= 0.368196",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "396191263661860018578189567184022912292846108201",
+      "label": "sepal length (cm) > -1.005077",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "573436456989461150941546928566911968127808452836",
+      "label": "petal width (cm) > -0.66493",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "606455761489582617198356717270200319862520166073",
+      "label": "sepal width (cm) > -1.675431",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "62582905129758814892850233105921759201251889641",
+      "label": "petal width (cm) <= 0.585928",
+      "visit_count": 5,
+      "visit_fraction": 0.2777777777777778,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "673957779849623118020023451035201136350061647139",
+      "label": "petal width (cm) <= 0.454259",
+      "visit_count": 2,
+      "visit_fraction": 0.1111111111111111,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "683257520099053851419261183627632186490095154886",
+      "label": "sepal width (cm) > -1.787376",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "731211962443012793916801455179252163516633769727",
+      "label": "petal length (cm) <= 0.556459",
+      "visit_count": 3,
+      "visit_fraction": 0.16666666666666666,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "748653922577742828676647306779294442933108513805",
+      "label": "sepal length (cm) <= 0.308489",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "792436853353305499105833404523480066304588403937",
+      "label": "petal length (cm) > -0.607562",
+      "visit_count": 2,
+      "visit_fraction": 0.1111111111111111,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "921901477422632352722729737620781824247616655358",
+      "label": "petal width (cm) > -0.401591",
+      "visit_count": 1,
+      "visit_fraction": 0.05555555555555555,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "924636592708911987470999503977898783284968790148",
+      "label": "petal length (cm) <= 0.613241",
+      "visit_count": 4,
+      "visit_fraction": 0.2222222222222222,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "928621589127927934620961952074257259595278295629",
+      "label": "Class 2",
+      "visit_count": 2,
+      "visit_fraction": 0.1111111111111111,
+      "roles": [
+        "competitor_path",
+        "other_class_leaf"
+      ]
+    },
+    {
+      "id": "93348210561434757316338066117532421172092063836",
+      "label": "petal width (cm) > 0.32259",
+      "visit_count": 2,
+      "visit_fraction": 0.1111111111111111,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "977885558010524152110263997431204094612227080467",
+      "label": "petal length (cm) <= 0.641631",
+      "visit_count": 3,
+      "visit_fraction": 0.16666666666666666,
+      "roles": [
+        "context"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "1015100791066033703224260688410436928161145951985",
+      "target": "1045258906002458675182476699090144048148557279061",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1015100791066033703224260688410436928161145951985",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1015100791066033703224260688410436928161145951985",
+      "target": "924636592708911987470999503977898783284968790148",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1045258906002458675182476699090144048148557279061",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1171267428451548001600524662753270738344241219953",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1186102917772648655477053767598719916113656572039",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1250119665708260677662657499554236431504545337830",
+      "target": "1015100791066033703224260688410436928161145951985",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "1015100791066033703224260688410436928161145951985",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "1171267428451548001600524662753270738344241219953",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "1414894890549213385092516781088896146873270083519",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "151448544894795944854412475567677632599433314330",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "160288362280101012267365289749144734591318697897",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "673957779849623118020023451035201136350061647139",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1259029540480442467193518532726470219758999855746",
+      "target": "924636592708911987470999503977898783284968790148",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1273148495295172491257084855572364600571906988314",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1301279894705705634496788295728316326978918730345",
+      "target": "1259029540480442467193518532726470219758999855746",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1301279894705705634496788295728316326978918730345",
+      "target": "1439471199626955666709831677602670887694413933689",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1301279894705705634496788295728316326978918730345",
+      "target": "792436853353305499105833404523480066304588403937",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1301279894705705634496788295728316326978918730345",
+      "target": "921901477422632352722729737620781824247616655358",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "1015100791066033703224260688410436928161145951985",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1354614322093467595041843410604706441025754602223",
+      "target": "160288362280101012267365289749144734591318697897",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1401558529085745819413030138326213292594146546899",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1414894890549213385092516781088896146873270083519",
+      "target": "928621589127927934620961952074257259595278295629",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1439471199626955666709831677602670887694413933689",
+      "target": "14955536097380226282644155058437730821485910394",
+      "visit_count": 2,
+      "visit_fraction": 0.6666666666666666,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1439471199626955666709831677602670887694413933689",
+      "target": "326134902842758134194213661420161781017016281072",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1439471199626955666709831677602670887694413933689",
+      "target": "62582905129758814892850233105921759201251889641",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1439471199626955666709831677602670887694413933689",
+      "target": "673957779849623118020023451035201136350061647139",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "14955536097380226282644155058437730821485910394",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 3,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "151448544894795944854412475567677632599433314330",
+      "target": "924636592708911987470999503977898783284968790148",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "160288362280101012267365289749144734591318697897",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "160288362280101012267365289749144734591318697897",
+      "target": "606455761489582617198356717270200319862520166073",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "160288362280101012267365289749144734591318697897",
+      "target": "977885558010524152110263997431204094612227080467",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "17549784986378298826553234967255827156956411800",
+      "target": "1259029540480442467193518532726470219758999855746",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "326134902842758134194213661420161781017016281072",
+      "target": "160288362280101012267365289749144734591318697897",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "396191263661860018578189567184022912292846108201",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "573436456989461150941546928566911968127808452836",
+      "target": "731211962443012793916801455179252163516633769727",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "606455761489582617198356717270200319862520166073",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "1301279894705705634496788295728316326978918730345",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 2,
+      "visit_fraction": 0.6666666666666666,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "62582905129758814892850233105921759201251889641",
+      "target": "93348210561434757316338066117532421172092063836",
+      "visit_count": 2,
+      "visit_fraction": 0.6666666666666666,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "673957779849623118020023451035201136350061647139",
+      "target": "683257520099053851419261183627632186490095154886",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "673957779849623118020023451035201136350061647139",
+      "target": "977885558010524152110263997431204094612227080467",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "683257520099053851419261183627632186490095154886",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "731211962443012793916801455179252163516633769727",
+      "target": "1439471199626955666709831677602670887694413933689",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "731211962443012793916801455179252163516633769727",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "731211962443012793916801455179252163516633769727",
+      "target": "396191263661860018578189567184022912292846108201",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "748653922577742828676647306779294442933108513805",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "792436853353305499105833404523480066304588403937",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "792436853353305499105833404523480066304588403937",
+      "target": "924636592708911987470999503977898783284968790148",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "921901477422632352722729737620781824247616655358",
+      "target": "1186102917772648655477053767598719916113656572039",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "1273148495295172491257084855572364600571906988314",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "1401558529085745819413030138326213292594146546899",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "14955536097380226282644155058437730821485910394",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "924636592708911987470999503977898783284968790148",
+      "target": "731211962443012793916801455179252163516633769727",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "93348210561434757316338066117532421172092063836",
+      "target": "748653922577742828676647306779294442933108513805",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "93348210561434757316338066117532421172092063836",
+      "target": "977885558010524152110263997431204094612227080467",
+      "visit_count": 1,
+      "visit_fraction": 0.3333333333333333,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "977885558010524152110263997431204094612227080467",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 3,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "path_index": 0,
+      "tree_index": 0,
+      "tree_prefix": "tree:0",
+      "node_ids": [
+        "1439471199626955666709831677602670887694413933689",
+        "673957779849623118020023451035201136350061647139",
+        "977885558010524152110263997431204094612227080467",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.599095",
+        "petal width (cm) <= 0.454259",
+        "petal length (cm) <= 0.641631",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.028074971793406622,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 1,
+      "tree_index": 1,
+      "tree_prefix": "tree:1",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "924636592708911987470999503977898783284968790148",
+        "731211962443012793916801455179252163516633769727",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "petal length (cm) <= 0.613241",
+        "petal length (cm) <= 0.556459",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.04102348948595604,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 2,
+      "tree_index": 2,
+      "tree_prefix": "tree:2",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "160288362280101012267365289749144734591318697897",
+        "606455761489582617198356717270200319862520166073",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "petal width (cm) <= 0.651763",
+        "sepal width (cm) > -1.675431",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.026911803312846604,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 3,
+      "tree_index": 3,
+      "tree_prefix": "tree:3",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "151448544894795944854412475567677632599433314330",
+        "924636592708911987470999503977898783284968790148",
+        "1401558529085745819413030138326213292594146546899",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "sepal length (cm) <= 0.487612",
+        "petal length (cm) <= 0.613241",
+        "petal width (cm) <= 0.520093",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.018667713519541322,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 4,
+      "tree_index": 4,
+      "tree_prefix": "tree:4",
+      "node_ids": [
+        "1354614322093467595041843410604706441025754602223",
+        "1015100791066033703224260688410436928161145951985",
+        "924636592708911987470999503977898783284968790148",
+        "1273148495295172491257084855572364600571906988314",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.53326",
+        "petal length (cm) <= 0.670022",
+        "petal length (cm) <= 0.613241",
+        "sepal width (cm) > -1.115711",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.02114135381008888,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 5,
+      "tree_index": 5,
+      "tree_prefix": "tree:5",
+      "node_ids": [
+        "573436456989461150941546928566911968127808452836",
+        "731211962443012793916801455179252163516633769727",
+        "396191263661860018578189567184022912292846108201",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.66493",
+        "petal length (cm) <= 0.556459",
+        "sepal length (cm) > -1.005077",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.025871272278855353,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 6,
+      "tree_index": 6,
+      "tree_prefix": "tree:6",
+      "node_ids": [
+        "17549784986378298826553234967255827156956411800",
+        "1259029540480442467193518532726470219758999855746",
+        "1414894890549213385092516781088896146873270083519",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.348294",
+        "petal length (cm) > -0.749516",
+        "petal width (cm) > 0.388424",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.001275809327961108,
+      "is_predicted_path": false,
+      "is_competitor_path": true
+    },
+    {
+      "path_index": 7,
+      "tree_index": 7,
+      "tree_prefix": "tree:7",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1439471199626955666709831677602670887694413933689",
+        "14955536097380226282644155058437730821485910394",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.599095",
+        "sepal length (cm) > -1.064785",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.013911978774669126,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 8,
+      "tree_index": 8,
+      "tree_prefix": "tree:8",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "1259029540480442467193518532726470219758999855746",
+        "1171267428451548001600524662753270738344241219953",
+        "928621589127927934620961952074257259595278295629"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal length (cm) > -0.749516",
+        "petal width (cm) > 0.256755",
+        "Class 2"
+      ],
+      "leaf_class": "2",
+      "graph_path_valid": true,
+      "path_confidence": 0.0009165873133078076,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 9,
+      "tree_index": 9,
+      "tree_prefix": "tree:9",
+      "node_ids": [
+        "1354614322093467595041843410604706441025754602223",
+        "160288362280101012267365289749144734591318697897",
+        "977885558010524152110263997431204094612227080467",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.53326",
+        "petal width (cm) <= 0.651763",
+        "petal length (cm) <= 0.641631",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.036126117491387416,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 10,
+      "tree_index": 10,
+      "tree_prefix": "tree:10",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "62582905129758814892850233105921759201251889641",
+        "93348210561434757316338066117532421172092063836",
+        "977885558010524152110263997431204094612227080467",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > 0.32259",
+        "petal length (cm) <= 0.641631",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.016356376967000326,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 11,
+      "tree_index": 11,
+      "tree_prefix": "tree:11",
+      "node_ids": [
+        "1439471199626955666709831677602670887694413933689",
+        "62582905129758814892850233105921759201251889641",
+        "93348210561434757316338066117532421172092063836",
+        "748653922577742828676647306779294442933108513805",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.599095",
+        "petal width (cm) <= 0.585928",
+        "petal width (cm) > 0.32259",
+        "sepal length (cm) <= 0.308489",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.008440062762190687,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 12,
+      "tree_index": 12,
+      "tree_prefix": "tree:12",
+      "node_ids": [
+        "792436853353305499105833404523480066304588403937",
+        "924636592708911987470999503977898783284968790148",
+        "14955536097380226282644155058437730821485910394",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.607562",
+        "petal length (cm) <= 0.613241",
+        "sepal length (cm) > -1.064785",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.035215618640220755,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 13,
+      "tree_index": 13,
+      "tree_prefix": "tree:13",
+      "node_ids": [
+        "62582905129758814892850233105921759201251889641",
+        "1301279894705705634496788295728316326978918730345",
+        "792436853353305499105833404523480066304588403937",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) <= 0.585928",
+        "sepal length (cm) <= -0.467709",
+        "petal length (cm) > -0.607562",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.007050660782017643,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 14,
+      "tree_index": 14,
+      "tree_prefix": "tree:14",
+      "node_ids": [
+        "1439471199626955666709831677602670887694413933689",
+        "326134902842758134194213661420161781017016281072",
+        "160288362280101012267365289749144734591318697897",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal width (cm) > -0.599095",
+        "sepal length (cm) <= 0.368196",
+        "petal width (cm) <= 0.651763",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03365745575112462,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 15,
+      "tree_index": 15,
+      "tree_prefix": "tree:15",
+      "node_ids": [
+        "731211962443012793916801455179252163516633769727",
+        "1439471199626955666709831677602670887694413933689",
+        "14955536097380226282644155058437730821485910394",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) <= 0.556459",
+        "petal width (cm) > -0.599095",
+        "sepal length (cm) > -1.064785",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.034169686638806,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 16,
+      "tree_index": 16,
+      "tree_prefix": "tree:16",
+      "node_ids": [
+        "1301279894705705634496788295728316326978918730345",
+        "921901477422632352722729737620781824247616655358",
+        "1186102917772648655477053767598719916113656572039",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "sepal length (cm) <= -0.467709",
+        "petal width (cm) > -0.401591",
+        "sepal length (cm) > -0.94537",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.000600283446639873,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 17,
+      "tree_index": 17,
+      "tree_prefix": "tree:17",
+      "node_ids": [
+        "1250119665708260677662657499554236431504545337830",
+        "1015100791066033703224260688410436928161145951985",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.806298",
+        "petal length (cm) <= 0.670022",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.05556581441701187,
+      "is_predicted_path": true,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 18,
+      "tree_index": 18,
+      "tree_prefix": "tree:18",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "1015100791066033703224260688410436928161145951985",
+        "1045258906002458675182476699090144048148557279061",
+        "62582905129758814892850233105921759201251889641",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "petal length (cm) <= 0.670022",
+        "petal length (cm) <= 0.528068",
+        "petal width (cm) <= 0.585928",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.03489260168052659,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 19,
+      "tree_index": 19,
+      "tree_prefix": "tree:19",
+      "node_ids": [
+        "1259029540480442467193518532726470219758999855746",
+        "673957779849623118020023451035201136350061647139",
+        "683257520099053851419261183627632186490095154886",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "petal length (cm) > -0.749516",
+        "petal width (cm) <= 0.454259",
+        "sepal width (cm) > -1.787376",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.025060982325830615,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    }
+  ],
+  "render_semantics": {
+    "critical_node": "gold",
+    "critical_pred_successor": "green",
+    "critical_competitor_successor": "red",
+    "predicted_path": "blue",
+    "competitor_path": "blue",
+    "true_class_leaf": "green_leaf",
+    "other_class_leaf": "salmon_leaf",
+    "context": "light_context",
+    "edge_width": "proportional_to_visit_count"
+  }
+}

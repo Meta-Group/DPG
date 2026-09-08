@@ -15,13 +15,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 # Ensure we import DPG from this repository (not an older installed package).
@@ -30,12 +30,15 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dpg import DPGExplainer
+from experiments_local_explanation.journal_splits import apply_split_registry, load_split_registry
+from experiments_local_explanation.model_factory import build_classifier, parse_model_families
 
 EXCLUDED_DATASETS = {"fashion_mnist_784", "mnist_784"}
 
 
 @dataclass
 class ExperimentConfig:
+    model_family: str
     n_estimators: int
     max_depth: int | None
     perc_var: float
@@ -52,16 +55,23 @@ class DatasetBundle:
     X_test: np.ndarray
     y_test: np.ndarray
     feature_names: List[str]
+    train_split: str = "existing_train"
+    eval_split: str = "existing_test"
+    split_registry_path: str | None = None
 
 
 @dataclass(frozen=True)
 class RunIdentity:
     dataset: str
     config_id: str
+    train_split: str = "existing_train"
+    eval_split: str = "existing_test"
 
     @property
     def key(self) -> str:
-        return f"{self.dataset}__{self.config_id}"
+        if self.train_split == "existing_train" and self.eval_split in {"existing_test", "test"}:
+            return f"{self.dataset}__{self.config_id}"
+        return f"{self.dataset}__tr{self.train_split}__ev{self.eval_split}__{self.config_id}"
 
 
 def _parse_int_list(text: str) -> List[int]:
@@ -132,27 +142,30 @@ def _make_configs(args: argparse.Namespace) -> List[ExperimentConfig]:
     perc_var_list = _parse_float_list(args.perc_var)
     decimal_threshold_list = _parse_int_list(args.decimal_threshold)
     seeds = _parse_int_list(args.seeds)
+    model_families = parse_model_families(args.model_families)
     graph_construction_modes = [
         x.strip().lower() for x in args.graph_construction_modes.split(",") if x.strip()
     ]
 
     configs: List[ExperimentConfig] = []
-    for n_estimators in n_estimators_list:
-        for max_depth in max_depth_list:
-            for perc_var in perc_var_list:
-                for decimal_threshold in decimal_threshold_list:
-                    for seed in seeds:
-                        for graph_construction_mode in graph_construction_modes:
-                            configs.append(
-                                ExperimentConfig(
-                                    n_estimators=n_estimators,
-                                    max_depth=max_depth,
-                                    perc_var=perc_var,
-                                    decimal_threshold=decimal_threshold,
-                                    random_state=seed,
-                                    graph_construction_mode=graph_construction_mode,
+    for model_family in model_families:
+        for n_estimators in n_estimators_list:
+            for max_depth in max_depth_list:
+                for perc_var in perc_var_list:
+                    for decimal_threshold in decimal_threshold_list:
+                        for seed in seeds:
+                            for graph_construction_mode in graph_construction_modes:
+                                configs.append(
+                                    ExperimentConfig(
+                                        model_family=model_family,
+                                        n_estimators=n_estimators,
+                                        max_depth=max_depth,
+                                        perc_var=perc_var,
+                                        decimal_threshold=decimal_threshold,
+                                        random_state=seed,
+                                        graph_construction_mode=graph_construction_mode,
+                                    )
                                 )
-                            )
     return configs
 
 
@@ -160,13 +173,23 @@ def _config_id(cfg: ExperimentConfig) -> str:
     # max_depth=None in sklearn means unlimited tree depth.
     depth = "unlimited" if cfg.max_depth is None else str(cfg.max_depth)
     return (
-        f"rf{cfg.n_estimators}_d{depth}_pv{cfg.perc_var:g}"
+        f"{cfg.model_family}_n{cfg.n_estimators}_d{depth}_pv{cfg.perc_var:g}"
         f"_dt{cfg.decimal_threshold}_gm{cfg.graph_construction_mode}_s{cfg.random_state}"
     )
 
 
-def _run_identity(dataset: str, cfg: ExperimentConfig) -> RunIdentity:
-    return RunIdentity(dataset=dataset, config_id=_config_id(cfg))
+def _run_identity(
+    dataset: str,
+    cfg: ExperimentConfig,
+    train_split: str = "existing_train",
+    eval_split: str = "existing_test",
+) -> RunIdentity:
+    return RunIdentity(
+        dataset=dataset,
+        config_id=_config_id(cfg),
+        train_split=train_split,
+        eval_split=eval_split,
+    )
 
 
 def _checkpoint_dir(out_dir: Path) -> Path:
@@ -257,15 +280,23 @@ def _read_checkpoints(out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     if len(summary_df):
         summary_sort_cols = [c for c in ["dataset", "method", "config_id"] if c in summary_df.columns]
+        summary_unique_cols = [
+            c for c in ["dataset", "train_split", "eval_split", "config_id", "seed"] if c in summary_df.columns
+        ]
         summary_df = (
-            summary_df.drop_duplicates(subset=["dataset", "config_id", "seed"], keep="last")
+            summary_df.drop_duplicates(subset=summary_unique_cols, keep="last")
             .sort_values(summary_sort_cols)
             .reset_index(drop=True)
         )
     if len(detail_df):
         detail_sort_cols = [c for c in ["dataset", "method", "config_id", "sample_idx"] if c in detail_df.columns]
+        detail_unique_cols = [
+            c
+            for c in ["dataset", "train_split", "eval_split", "config_id", "seed", "sample_idx"]
+            if c in detail_df.columns
+        ]
         detail_df = (
-            detail_df.drop_duplicates(subset=["dataset", "config_id", "seed", "sample_idx"], keep="last")
+            detail_df.drop_duplicates(subset=detail_unique_cols, keep="last")
             .sort_values(detail_sort_cols)
             .reset_index(drop=True)
         )
@@ -286,7 +317,8 @@ def _run_one_dataset(
             f"Loaded module path: {loaded_path}"
         )
 
-    model = RandomForestClassifier(
+    model = build_classifier(
+        cfg.model_family,
         n_estimators=cfg.n_estimators,
         max_depth=cfg.max_depth,
         random_state=cfg.random_state,
@@ -338,8 +370,11 @@ def _run_one_dataset(
         y_hat = str(y_pred[idx])
         local_status = "ok"
         local_error = ""
+        runtime_ms = np.nan
         try:
+            start_time = time.perf_counter()
             local = explainer.explain_local(sample=sample, sample_id=idx, validate_graph=True)
+            runtime_ms = (time.perf_counter() - start_time) * 1000.0
             scores = local.sample_confidence.get("evidence_scores", {}) or {}
             support = local.sample_confidence.get("class_support", {}) or {}
 
@@ -409,6 +444,7 @@ def _run_one_dataset(
             local_failures += 1
             local_status = "failed"
             local_error = f"{type(exc).__name__}: {exc}"
+            runtime_ms = np.nan
             print(
                 f"  explain_local failed on sample {idx + 1}/{n_eval} "
                 f"({bundle.name} | {_config_id(cfg)}): {local_error}",
@@ -476,8 +512,12 @@ def _run_one_dataset(
         sample_rows.append(
             {
                 "dataset": bundle.name,
+                "train_split": bundle.train_split,
+                "eval_split": bundle.eval_split,
+                "split_registry_path": bundle.split_registry_path,
                 "method": method,
                 "graph_construction_mode": graph_construction_mode,
+                "model_family": cfg.model_family,
                 "config_id": _config_id(cfg),
                 "seed": cfg.random_state,
                 "sample_idx": idx,
@@ -539,6 +579,7 @@ def _run_one_dataset(
                 "path_purity": path_purity,
                 "competitor_exposure": competitor_exposure,
                 "recombination_rate": recombination_rate,
+                "runtime_ms": runtime_ms,
                 "critical_node_label": critical_node_label,
                 "critical_split_depth": critical_split_depth,
                 "critical_successor_pred": critical_successor_pred,
@@ -558,8 +599,12 @@ def _run_one_dataset(
     method = "dpg" if cfg.graph_construction_mode == "aggregated_transitions" else "dpg_execution_trace"
     summary: Dict[str, float | int | str | None] = {
         "dataset": bundle.name,
+        "train_split": bundle.train_split,
+        "eval_split": bundle.eval_split,
+        "split_registry_path": bundle.split_registry_path,
         "method": method,
         "graph_construction_mode": cfg.graph_construction_mode,
+        "model_family": cfg.model_family,
         "config_id": _config_id(cfg),
         "seed": cfg.random_state,
         "n_estimators": cfg.n_estimators,
@@ -598,6 +643,7 @@ def _run_one_dataset(
         "avg_edge_recall": float(df["edge_recall"].mean()) if len(df) else np.nan,
         "avg_edge_precision": float(df["edge_precision"].mean()) if len(df) else np.nan,
         "avg_recombination_rate": float(df["recombination_rate"].mean()) if len(df) else np.nan,
+        "avg_runtime_ms": float(df["runtime_ms"].mean()) if len(df) else np.nan,
         "avg_path_purity": float(df["path_purity"].mean()) if len(df) else np.nan,
         "avg_competitor_exposure": float(df["competitor_exposure"].mean()) if len(df) else np.nan,
         "avg_support_margin": float(df["support_margin"].mean()) if len(df) else np.nan,
@@ -718,16 +764,25 @@ def main() -> None:
         help="Comma-separated dataset names. Empty means all subdirs in data_dir.",
     )
     parser.add_argument(
+        "--model_families",
+        type=str,
+        default="random_forest",
+        help=(
+            "Comma-separated model families. Supported: random_forest, extra_trees, "
+            "gradient_boosting, adaboost, bagging."
+        ),
+    )
+    parser.add_argument(
         "--n_estimators",
         type=str,
         default="10,20",
-        help="Comma-separated RandomForest n_estimators values.",
+        help="Comma-separated ensemble n_estimators values.",
     )
     parser.add_argument(
         "--rf_n_jobs",
         type=int,
         default=-1,
-        help="RandomForest n_jobs per process. Use with --parallel to control total CPU usage.",
+        help="Model n_jobs per process where supported. Use with --parallel to control total CPU usage.",
     )
     parser.add_argument(
         "--max_depth",
@@ -766,6 +821,24 @@ def main() -> None:
         help="Max test samples to explain per dataset/config. 0 means all test samples.",
     )
     parser.add_argument(
+        "--split_registry",
+        type=str,
+        default="",
+        help="Optional split_registry.json for journal train/validation/test protocol.",
+    )
+    parser.add_argument(
+        "--train_split",
+        type=str,
+        default="existing_train",
+        help="Training split: existing_train, train_core, or train_core_validation.",
+    )
+    parser.add_argument(
+        "--eval_split",
+        type=str,
+        default="existing_test",
+        help="Evaluation split: existing_test/test or validation.",
+    )
+    parser.add_argument(
         "--progress_every",
         type=int,
         default=25,
@@ -786,6 +859,10 @@ def main() -> None:
 
     data_dir = _resolve_cli_path(args.data_dir, script_dir=script_dir)
     out_dir = _resolve_cli_path(args.out_dir, script_dir=script_dir)
+    split_registry_path = (
+        _resolve_cli_path(args.split_registry, script_dir=script_dir) if args.split_registry else None
+    )
+    split_registry = load_split_registry(split_registry_path)
     only = [x.strip() for x in args.datasets.split(",") if x.strip()]
 
     dataset_paths = _dataset_dirs(data_dir, only=only)
@@ -805,10 +882,16 @@ def main() -> None:
     executed_runs = 0
     skipped_runs = 0
     for ds_path in dataset_paths:
-        bundle = _load_bundle(ds_path)
+        bundle = apply_split_registry(
+            bundle=_load_bundle(ds_path),
+            registry=split_registry,
+            registry_path=split_registry_path,
+            train_split=args.train_split,
+            eval_split=args.eval_split,
+        )
         for cfg in configs:
             run_idx += 1
-            run_id = _run_identity(bundle.name, cfg)
+            run_id = _run_identity(bundle.name, cfg, bundle.train_split, bundle.eval_split)
             if run_id.key in already_done:
                 skipped_runs += 1
                 print(f"[{run_idx}/{total_runs}] skip (checkpoint) {bundle.name} | {_config_id(cfg)}")

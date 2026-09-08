@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/sbarbonjr/projects/DPG/experiments_local_explanation/run_selected_journal_test.py", line 251, in <module>
+    main()
+  File "/home/sbarbonjr/projects/DPG/experiments_local_explanation/run_selected_journal_test.py", line 209, in main
+    cmd = _build_command(row, out_dir=out_dir, args=args)
+  File "/home/sbarbonjr/projects/DPG/experiments_local_explanation/run_selected_journal_test.py", line 68, in _build_command
+    _depth_text(_value(row, "max_depth")),
+  File "/home/sbarbonjr/projects/DPG/experiments_local_explanation/run_selected_journal_test.py", line 47, in _depth_text
+    return str(int(float(value)))
+ValueError: could not convert string to float: ''

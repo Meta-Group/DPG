@@ -1,0 +1,1960 @@
+{
+  "sample_id": 859,
+  "majority_vote": "0",
+  "class_votes": {
+    "0": 19,
+    "1": 1
+  },
+  "true_label": "1",
+  "sample_confidence": {
+    "graph_construction_mode": "execution_trace",
+    "num_active_nodes": 72.0,
+    "num_active_edges_raw": 80.0,
+    "num_active_edges_filtered": 80.0,
+    "num_paths_raw": 20.0,
+    "num_paths_pruned": 20.0,
+    "num_paths": 20.0,
+    "num_executed_paths": 20.0,
+    "num_executed_predicates": 80.0,
+    "num_executed_edges": 80.0,
+    "num_trace_predicates_missing_from_dpg": 0.0,
+    "num_trace_edges_missing_from_dpg": 0.0,
+    "trace_node_coverage": 1.0,
+    "trace_edge_coverage": 1.0,
+    "mean_lrc_active_nodes": 0.08731014940246028,
+    "mean_bc_active_nodes": 0.00013860520856973362,
+    "evidence_score_pred": 0.9719767138381249,
+    "top_competitor_class_pred": "1",
+    "evidence_score_competitor_pred": 0.02802328616187509,
+    "evidence_margin_pred_vs_competitor": 0.9439534276762498,
+    "class_support": {
+      "0": 0.19263475709489336,
+      "1": 0.004488856184036697
+    },
+    "evidence_scores": {
+      "0": 0.9719767138381249,
+      "1": 0.02802328616187509
+    },
+    "evidence_variant": "top_competitor",
+    "evidence_score_rule": "ratio_top_competitor",
+    "evidence_lambda_rule": "log_classes",
+    "evidence_lambda": 0.8,
+    "evidence_base_lambda": 0.8,
+    "edge_threshold": 0.0,
+    "path_prune_ratio": 0.0,
+    "path_confidence_max": 0.0421369025471801,
+    "path_confidence_min_kept": 0.00016246281812740734,
+    "n_model_classes": 2,
+    "n_features": 57,
+    "evidence_score_margin": 0.9439534276762498,
+    "vote_confidence": 0.9719767138381249,
+    "class_scores": {
+      "0": 0.9719767138381249,
+      "1": 0.02802328616187509
+    },
+    "score_margin": 0.9439534276762498,
+    "support_pred_class": "0",
+    "support_top_competitor_class": "1",
+    "support_pred_score": 0.9772282168008853,
+    "support_top_competitor_score": 0.02277178319404175,
+    "support_margin": 0.9544564336068436,
+    "predicted_class_concentration_top3": 0.5511691132435033,
+    "model_vote_agreement": 0.95,
+    "trace_coverage_score": 0.9999999999999867,
+    "explanation_confidence": 0.8185418489501047,
+    "node_recall": 0.9999999999999858,
+    "node_precision": 0.9999999999999858,
+    "edge_recall": 0.9999999999999876,
+    "edge_precision": 0.9999999999999876,
+    "path_purity": 0.9772282168008853,
+    "competitor_exposure": 0.02277178319911466,
+    "recombination_rate": 0.0,
+    "critical_node_label": null,
+    "critical_split_depth": null,
+    "critical_successor_pred": null,
+    "critical_successor_comp": null,
+    "critical_node_contrast": null,
+    "trace_node_count_unique": 70,
+    "trace_edge_count_unique": 80,
+    "explanation_node_count_unique": 70,
+    "explanation_edge_count_unique": 80
+  },
+  "critical_structure": {
+    "critical_node_id": null,
+    "critical_successor_pred_id": null,
+    "critical_successor_comp_id": null,
+    "critical_node_label": null,
+    "critical_successor_pred_label": null,
+    "critical_successor_comp_label": null
+  },
+  "predicted_path_index": 11,
+  "competitor_path_index": 4,
+  "nodes": [
+    {
+      "id": "1000190579909870018974591899517616722942319930732",
+      "label": "word_freq_your <= -0.047566",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "1018731600897993912173187735506353197510482942279",
+      "label": "word_freq_all <= -0.269549",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1037561383102834445058769519849425136170110817520",
+      "label": "word_freq_internet <= -0.217622",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1064643935070015758413053840766123308076945086246",
+      "label": "word_freq_your <= 0.01212",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1082720990368426575437143271840192589777992332618",
+      "label": "word_freq_free <= -0.129529",
+      "visit_count": 2,
+      "visit_fraction": 0.10526315789473684,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "109656917425353921498788313242800787955687644520",
+      "label": "capital_run_length_total <= -0.366011",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1105591683622772606195681846889647420574673733377",
+      "label": "capital_run_length_total <= -0.462407",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1146271346724304308570007477515819762484910168912",
+      "label": "word_freq_1999 <= -0.17443",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1147257542945440298109815666246017244067397811172",
+      "label": "Class 0",
+      "visit_count": 19,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path",
+        "other_class_leaf"
+      ]
+    },
+    {
+      "id": "1163858897854181874021890752556874260563968709893",
+      "label": "word_freq_3d <= 0.077962",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1178270865338090656738013113657585268439688452525",
+      "label": "char_freq_%24 <= -0.195938",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1178315256044389087550116700270754743011438632500",
+      "label": "capital_run_length_total <= -0.378061",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1189068616555387744715771686222025696023002727831",
+      "label": "word_freq_all <= -0.017588",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1267241328111220397723910314403966291649449672848",
+      "label": "word_freq_free <= -0.176854",
+      "visit_count": 2,
+      "visit_fraction": 0.10526315789473684,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "12680943694776447130747299248635432003596543431",
+      "label": "word_freq_free <= 0.148504",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "1307184878350407992984008186996204569144171526656",
+      "label": "char_freq_%24 <= -0.12645",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1308360848827350559275410210104664086188301782339",
+      "label": "word_freq_money > -0.130005",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "1313667799675611757228854969306841551438894165306",
+      "label": "word_freq_internet <= 1.298111",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "predicted_path"
+      ]
+    },
+    {
+      "id": "1329846218101653235336023447463585579754182235740",
+      "label": "word_freq_free <= 0.036108",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1348256907899868785218166135592417910702165691622",
+      "label": "capital_run_length_total <= -0.3006",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1353890783424738625910287139509586586413000679062",
+      "label": "word_freq_1999 <= -0.231595",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1360377853581339349991826517349231170241098675816",
+      "label": "capital_run_length_average <= -0.031862",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1367716496300890261368876239823665919726815096155",
+      "label": "word_freq_hpl <= -0.230426",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1371002877794699191987586986235377219776087141025",
+      "label": "word_freq_your <= 0.387294",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1379784030251419406561433676613601941763810433145",
+      "label": "char_freq_%21 <= -0.280167",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1409396098234079479492018554672757071058184254916",
+      "label": "word_freq_addresses <= 0.169267",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "1418660246227118462272490110745705819730319286552",
+      "label": "word_freq_you > 0.068535",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "145950715146709586519863110217238083703299774117",
+      "label": "char_freq_%21 <= -0.220873",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "16709196817697956046094951698744380588242243124",
+      "label": "word_freq_your <= -0.19252",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "171982518954274878349485416184092168691833932185",
+      "label": "Class 1",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "competitor_path",
+        "true_class_leaf"
+      ]
+    },
+    {
+      "id": "183743044549373007246395231324735644390894569924",
+      "label": "word_freq_hpl <= -0.257958",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "257183849257877529608939051414707090640646100228",
+      "label": "word_freq_receive <= 1.397977",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "262982355055923773971235245681014988467028613059",
+      "label": "char_freq_%21 <= -0.223244",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "296091741026370606110604652718239556469787920703",
+      "label": "word_freq_remove <= 1.056712",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "313972482347651319928183852095104017912459902618",
+      "label": "word_freq_remove <= -0.22617",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "333133046643544918019679794770398186215350743160",
+      "label": "word_freq_hp <= -0.25892",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "381979033658374307850903180105296445551651753137",
+      "label": "word_freq_business <= 5.076428",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "396292115783156835799256108644932676637538436541",
+      "label": "char_freq_%24 <= -0.083985",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "413824174908881803944696468044874632169761249384",
+      "label": "word_freq_remove <= -0.138983",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "466827812485334606811682068894670442204944772992",
+      "label": "word_freq_your <= 0.080334",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "495302835462977344980647427448359031727798022144",
+      "label": "word_freq_your <= -0.14136",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "503323477907840667885166494561995364525443057404",
+      "label": "capital_run_length_total <= -0.431422",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "514755679789469370141089955687049064703613086427",
+      "label": "capital_run_length_longest <= -0.161928",
+      "visit_count": 2,
+      "visit_fraction": 0.10526315789473684,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "519274672904671663030541048769669471064774872877",
+      "label": "word_freq_over <= 0.577252",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "522111398806122063140029714495280811932847334378",
+      "label": "word_freq_money > -0.198786",
+      "visit_count": 3,
+      "visit_fraction": 0.15789473684210525,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "545436307231073833945773271947979137220821706056",
+      "label": "word_freq_internet <= -0.246221",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "551495804259608814151526824385344304288553087766",
+      "label": "word_freq_hpl <= -0.16435",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "586049735054799308438594139650795862560062619104",
+      "label": "word_freq_credit <= 1.277365",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "588766928578649230496181162699338423104642678451",
+      "label": "word_freq_over <= 0.298976",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "633088987015744457347023465583786438153494925789",
+      "label": "capital_run_length_average <= -0.044283",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "651342022091962555459675046460403594054770107773",
+      "label": "word_freq_business <= 1.055194",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "68670295136758828491264738113771116373933204219",
+      "label": "capital_run_length_average <= -0.058704",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "689295037421320171993837617989334381347199243288",
+      "label": "capital_run_length_longest <= -0.229799",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "705731579803986283034858148363345036322443379858",
+      "label": "word_freq_remove <= -0.263535",
+      "visit_count": 4,
+      "visit_fraction": 0.21052631578947367,
+      "roles": [
+        "predicted_path",
+        "competitor_path"
+      ]
+    },
+    {
+      "id": "709523790513674348789689816520573658535178955934",
+      "label": "word_freq_our <= 1.956726",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "749319537860600973129377044365179383060649598251",
+      "label": "word_freq_your <= -0.16694",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "755973854277913973155762644466746939683824071949",
+      "label": "word_freq_over <= -0.048868",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "810773838739452054009916977715406160767685723007",
+      "label": "word_freq_project <= 0.059517",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "813474134510753741104246697633248831360539961009",
+      "label": "word_freq_original <= 1.139961",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "827180127808839561303177977339495767531394000079",
+      "label": "capital_run_length_average <= -0.049888",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "844540011971211083993300507946841130144599659221",
+      "label": "word_freq_000 <= 0.866482",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "846191650718237166740363897246567470397807511554",
+      "label": "word_freq_you > -0.477752",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "854786067480357907798833355254137540136390803084",
+      "label": "word_freq_addresses <= 0.984845",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "856222409837611316622860687489523627074992618972",
+      "label": "char_freq_%24 <= -0.095567",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "862667817706396675505548917115067776738366079099",
+      "label": "capital_run_length_longest <= -0.205559",
+      "visit_count": 3,
+      "visit_fraction": 0.15789473684210525,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "883470364753490368346359962407033083807204081533",
+      "label": "word_freq_our <= -0.330608",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "901209586881588753347966564875355951016713076118",
+      "label": "capital_run_length_longest <= -0.195864",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "905419272673268313913709050484060254738598508367",
+      "label": "word_freq_over <= -0.083653",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "948276791010380843548527731314222358343385727739",
+      "label": "word_freq_money > 21.37556",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "954284183812347831588441223567176506212741319178",
+      "label": "word_freq_650 <= -0.216906",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "963709802535713910808145346013529053756382116099",
+      "label": "word_freq_font <= 0.212471",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    },
+    {
+      "id": "990607705932974601056105050007409140243362775273",
+      "label": "word_freq_000 <= -0.079949",
+      "visit_count": 1,
+      "visit_fraction": 0.05263157894736842,
+      "roles": [
+        "context"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "1000190579909870018974591899517616722942319930732",
+      "target": "12680943694776447130747299248635432003596543431",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1018731600897993912173187735506353197510482942279",
+      "target": "171982518954274878349485416184092168691833932185",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1037561383102834445058769519849425136170110817520",
+      "target": "1371002877794699191987586986235377219776087141025",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1064643935070015758413053840766123308076945086246",
+      "target": "413824174908881803944696468044874632169761249384",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1082720990368426575437143271840192589777992332618",
+      "target": "588766928578649230496181162699338423104642678451",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1082720990368426575437143271840192589777992332618",
+      "target": "749319537860600973129377044365179383060649598251",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "109656917425353921498788313242800787955687644520",
+      "target": "503323477907840667885166494561995364525443057404",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1105591683622772606195681846889647420574673733377",
+      "target": "689295037421320171993837617989334381347199243288",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1146271346724304308570007477515819762484910168912",
+      "target": "1379784030251419406561433676613601941763810433145",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1163858897854181874021890752556874260563968709893",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1178270865338090656738013113657585268439688452525",
+      "target": "1064643935070015758413053840766123308076945086246",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1178315256044389087550116700270754743011438632500",
+      "target": "651342022091962555459675046460403594054770107773",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1189068616555387744715771686222025696023002727831",
+      "target": "1082720990368426575437143271840192589777992332618",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1267241328111220397723910314403966291649449672848",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1267241328111220397723910314403966291649449672848",
+      "target": "905419272673268313913709050484060254738598508367",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "12680943694776447130747299248635432003596543431",
+      "target": "1313667799675611757228854969306841551438894165306",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1307184878350407992984008186996204569144171526656",
+      "target": "183743044549373007246395231324735644390894569924",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1308360848827350559275410210104664086188301782339",
+      "target": "1018731600897993912173187735506353197510482942279",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "1313667799675611757228854969306841551438894165306",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "1329846218101653235336023447463585579754182235740",
+      "target": "901209586881588753347966564875355951016713076118",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1348256907899868785218166135592417910702165691622",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1353890783424738625910287139509586586413000679062",
+      "target": "1329846218101653235336023447463585579754182235740",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1360377853581339349991826517349231170241098675816",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1367716496300890261368876239823665919726815096155",
+      "target": "522111398806122063140029714495280811932847334378",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1371002877794699191987586986235377219776087141025",
+      "target": "381979033658374307850903180105296445551651753137",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1379784030251419406561433676613601941763810433145",
+      "target": "1348256907899868785218166135592417910702165691622",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1409396098234079479492018554672757071058184254916",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "1418660246227118462272490110745705819730319286552",
+      "target": "68670295136758828491264738113771116373933204219",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "145950715146709586519863110217238083703299774117",
+      "target": "522111398806122063140029714495280811932847334378",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "16709196817697956046094951698744380588242243124",
+      "target": "1418660246227118462272490110745705819730319286552",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "183743044549373007246395231324735644390894569924",
+      "target": "1178315256044389087550116700270754743011438632500",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "257183849257877529608939051414707090640646100228",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "262982355055923773971235245681014988467028613059",
+      "target": "519274672904671663030541048769669471064774872877",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "296091741026370606110604652718239556469787920703",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "313972482347651319928183852095104017912459902618",
+      "target": "1409396098234079479492018554672757071058184254916",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "333133046643544918019679794770398186215350743160",
+      "target": "862667817706396675505548917115067776738366079099",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "381979033658374307850903180105296445551651753137",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "396292115783156835799256108644932676637538436541",
+      "target": "16709196817697956046094951698744380588242243124",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "413824174908881803944696468044874632169761249384",
+      "target": "709523790513674348789689816520573658535178955934",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "466827812485334606811682068894670442204944772992",
+      "target": "1163858897854181874021890752556874260563968709893",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "495302835462977344980647427448359031727798022144",
+      "target": "844540011971211083993300507946841130144599659221",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "503323477907840667885166494561995364525443057404",
+      "target": "1105591683622772606195681846889647420574673733377",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "514755679789469370141089955687049064703613086427",
+      "target": "1037561383102834445058769519849425136170110817520",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "514755679789469370141089955687049064703613086427",
+      "target": "1353890783424738625910287139509586586413000679062",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "519274672904671663030541048769669471064774872877",
+      "target": "633088987015744457347023465583786438153494925789",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "522111398806122063140029714495280811932847334378",
+      "target": "813474134510753741104246697633248831360539961009",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "522111398806122063140029714495280811932847334378",
+      "target": "862667817706396675505548917115067776738366079099",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "522111398806122063140029714495280811932847334378",
+      "target": "883470364753490368346359962407033083807204081533",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "545436307231073833945773271947979137220821706056",
+      "target": "1308360848827350559275410210104664086188301782339",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "551495804259608814151526824385344304288553087766",
+      "target": "1267241328111220397723910314403966291649449672848",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "586049735054799308438594139650795862560062619104",
+      "target": "257183849257877529608939051414707090640646100228",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "588766928578649230496181162699338423104642678451",
+      "target": "466827812485334606811682068894670442204944772992",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "633088987015744457347023465583786438153494925789",
+      "target": "854786067480357907798833355254137540136390803084",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "651342022091962555459675046460403594054770107773",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "68670295136758828491264738113771116373933204219",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "689295037421320171993837617989334381347199243288",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "705731579803986283034858148363345036322443379858",
+      "target": "1000190579909870018974591899517616722942319930732",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "predicted_path_edge"
+      ]
+    },
+    {
+      "source": "705731579803986283034858148363345036322443379858",
+      "target": "1367716496300890261368876239823665919726815096155",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "705731579803986283034858148363345036322443379858",
+      "target": "545436307231073833945773271947979137220821706056",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "competitor_path_edge"
+      ]
+    },
+    {
+      "source": "705731579803986283034858148363345036322443379858",
+      "target": "856222409837611316622860687489523627074992618972",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "709523790513674348789689816520573658535178955934",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "749319537860600973129377044365179383060649598251",
+      "target": "296091741026370606110604652718239556469787920703",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "755973854277913973155762644466746939683824071949",
+      "target": "1146271346724304308570007477515819762484910168912",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "810773838739452054009916977715406160767685723007",
+      "target": "948276791010380843548527731314222358343385727739",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "813474134510753741104246697633248831360539961009",
+      "target": "810773838739452054009916977715406160767685723007",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "827180127808839561303177977339495767531394000079",
+      "target": "551495804259608814151526824385344304288553087766",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "844540011971211083993300507946841130144599659221",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "846191650718237166740363897246567470397807511554",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "854786067480357907798833355254137540136390803084",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "856222409837611316622860687489523627074992618972",
+      "target": "963709802535713910808145346013529053756382116099",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "862667817706396675505548917115067776738366079099",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "862667817706396675505548917115067776738366079099",
+      "target": "313972482347651319928183852095104017912459902618",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "862667817706396675505548917115067776738366079099",
+      "target": "586049735054799308438594139650795862560062619104",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "883470364753490368346359962407033083807204081533",
+      "target": "1360377853581339349991826517349231170241098675816",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "901209586881588753347966564875355951016713076118",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "905419272673268313913709050484060254738598508367",
+      "target": "495302835462977344980647427448359031727798022144",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "948276791010380843548527731314222358343385727739",
+      "target": "1147257542945440298109815666246017244067397811172",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "954284183812347831588441223567176506212741319178",
+      "target": "862667817706396675505548917115067776738366079099",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "963709802535713910808145346013529053756382116099",
+      "target": "846191650718237166740363897246567470397807511554",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    },
+    {
+      "source": "990607705932974601056105050007409140243362775273",
+      "target": "827180127808839561303177977339495767531394000079",
+      "visit_count": 1,
+      "visit_fraction": 1.0,
+      "roles": [
+        "context_edge"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "path_index": 0,
+      "tree_index": 0,
+      "tree_prefix": "tree:0",
+      "node_ids": [
+        "755973854277913973155762644466746939683824071949",
+        "1146271346724304308570007477515819762484910168912",
+        "1379784030251419406561433676613601941763810433145",
+        "1348256907899868785218166135592417910702165691622",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_over <= -0.048868",
+        "word_freq_1999 <= -0.17443",
+        "char_freq_%21 <= -0.280167",
+        "capital_run_length_total <= -0.3006",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.005499728859549045,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 1,
+      "tree_index": 1,
+      "tree_prefix": "tree:1",
+      "node_ids": [
+        "522111398806122063140029714495280811932847334378",
+        "813474134510753741104246697633248831360539961009",
+        "810773838739452054009916977715406160767685723007",
+        "948276791010380843548527731314222358343385727739",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_money > -0.198786",
+        "word_freq_original <= 1.139961",
+        "word_freq_project <= 0.059517",
+        "word_freq_money > 21.37556",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.00016246281812740734,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 2,
+      "tree_index": 2,
+      "tree_prefix": "tree:2",
+      "node_ids": [
+        "705731579803986283034858148363345036322443379858",
+        "1367716496300890261368876239823665919726815096155",
+        "522111398806122063140029714495280811932847334378",
+        "862667817706396675505548917115067776738366079099",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_remove <= -0.263535",
+        "word_freq_hpl <= -0.230426",
+        "word_freq_money > -0.198786",
+        "capital_run_length_longest <= -0.205559",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.005425089027278979,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 3,
+      "tree_index": 3,
+      "tree_prefix": "tree:3",
+      "node_ids": [
+        "1307184878350407992984008186996204569144171526656",
+        "183743044549373007246395231324735644390894569924",
+        "1178315256044389087550116700270754743011438632500",
+        "651342022091962555459675046460403594054770107773",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "char_freq_%24 <= -0.12645",
+        "word_freq_hpl <= -0.257958",
+        "capital_run_length_total <= -0.378061",
+        "word_freq_business <= 1.055194",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.0036713440089464586,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 4,
+      "tree_index": 4,
+      "tree_prefix": "tree:4",
+      "node_ids": [
+        "705731579803986283034858148363345036322443379858",
+        "545436307231073833945773271947979137220821706056",
+        "1308360848827350559275410210104664086188301782339",
+        "1018731600897993912173187735506353197510482942279",
+        "171982518954274878349485416184092168691833932185"
+      ],
+      "labels": [
+        "word_freq_remove <= -0.263535",
+        "word_freq_internet <= -0.246221",
+        "word_freq_money > -0.130005",
+        "word_freq_all <= -0.269549",
+        "Class 1"
+      ],
+      "leaf_class": "1",
+      "graph_path_valid": true,
+      "path_confidence": 0.004488856184036697,
+      "is_predicted_path": false,
+      "is_competitor_path": true
+    },
+    {
+      "path_index": 5,
+      "tree_index": 5,
+      "tree_prefix": "tree:5",
+      "node_ids": [
+        "514755679789469370141089955687049064703613086427",
+        "1037561383102834445058769519849425136170110817520",
+        "1371002877794699191987586986235377219776087141025",
+        "381979033658374307850903180105296445551651753137",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "capital_run_length_longest <= -0.161928",
+        "word_freq_internet <= -0.217622",
+        "word_freq_your <= 0.387294",
+        "word_freq_business <= 5.076428",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.0068053857983193305,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 6,
+      "tree_index": 6,
+      "tree_prefix": "tree:6",
+      "node_ids": [
+        "990607705932974601056105050007409140243362775273",
+        "827180127808839561303177977339495767531394000079",
+        "551495804259608814151526824385344304288553087766",
+        "1267241328111220397723910314403966291649449672848",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_000 <= -0.079949",
+        "capital_run_length_average <= -0.049888",
+        "word_freq_hpl <= -0.16435",
+        "word_freq_free <= -0.176854",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.026123738894120438,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 7,
+      "tree_index": 7,
+      "tree_prefix": "tree:7",
+      "node_ids": [
+        "262982355055923773971235245681014988467028613059",
+        "519274672904671663030541048769669471064774872877",
+        "633088987015744457347023465583786438153494925789",
+        "854786067480357907798833355254137540136390803084",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "char_freq_%21 <= -0.223244",
+        "word_freq_over <= 0.577252",
+        "capital_run_length_average <= -0.044283",
+        "word_freq_addresses <= 0.984845",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.004355916350342263,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 8,
+      "tree_index": 8,
+      "tree_prefix": "tree:8",
+      "node_ids": [
+        "514755679789469370141089955687049064703613086427",
+        "1353890783424738625910287139509586586413000679062",
+        "1329846218101653235336023447463585579754182235740",
+        "901209586881588753347966564875355951016713076118",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "capital_run_length_longest <= -0.161928",
+        "word_freq_1999 <= -0.231595",
+        "word_freq_free <= 0.036108",
+        "capital_run_length_longest <= -0.195864",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.005289356853419163,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 9,
+      "tree_index": 9,
+      "tree_prefix": "tree:9",
+      "node_ids": [
+        "954284183812347831588441223567176506212741319178",
+        "862667817706396675505548917115067776738366079099",
+        "586049735054799308438594139650795862560062619104",
+        "257183849257877529608939051414707090640646100228",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_650 <= -0.216906",
+        "capital_run_length_longest <= -0.205559",
+        "word_freq_credit <= 1.277365",
+        "word_freq_receive <= 1.397977",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.012128519282121837,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 10,
+      "tree_index": 10,
+      "tree_prefix": "tree:10",
+      "node_ids": [
+        "145950715146709586519863110217238083703299774117",
+        "522111398806122063140029714495280811932847334378",
+        "883470364753490368346359962407033083807204081533",
+        "1360377853581339349991826517349231170241098675816",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "char_freq_%21 <= -0.220873",
+        "word_freq_money > -0.198786",
+        "word_freq_our <= -0.330608",
+        "capital_run_length_average <= -0.031862",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.0007720873947729919,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 11,
+      "tree_index": 11,
+      "tree_prefix": "tree:11",
+      "node_ids": [
+        "705731579803986283034858148363345036322443379858",
+        "1000190579909870018974591899517616722942319930732",
+        "12680943694776447130747299248635432003596543431",
+        "1313667799675611757228854969306841551438894165306",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_remove <= -0.263535",
+        "word_freq_your <= -0.047566",
+        "word_freq_free <= 0.148504",
+        "word_freq_internet <= 1.298111",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.0421369025471801,
+      "is_predicted_path": true,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 12,
+      "tree_index": 12,
+      "tree_prefix": "tree:12",
+      "node_ids": [
+        "109656917425353921498788313242800787955687644520",
+        "503323477907840667885166494561995364525443057404",
+        "1105591683622772606195681846889647420574673733377",
+        "689295037421320171993837617989334381347199243288",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "capital_run_length_total <= -0.366011",
+        "capital_run_length_total <= -0.431422",
+        "capital_run_length_total <= -0.462407",
+        "capital_run_length_longest <= -0.229799",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.00042296502003028014,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 13,
+      "tree_index": 13,
+      "tree_prefix": "tree:13",
+      "node_ids": [
+        "705731579803986283034858148363345036322443379858",
+        "856222409837611316622860687489523627074992618972",
+        "963709802535713910808145346013529053756382116099",
+        "846191650718237166740363897246567470397807511554",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_remove <= -0.263535",
+        "char_freq_%24 <= -0.095567",
+        "word_freq_font <= 0.212471",
+        "word_freq_you > -0.477752",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.03791368680667814,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 14,
+      "tree_index": 14,
+      "tree_prefix": "tree:14",
+      "node_ids": [
+        "1267241328111220397723910314403966291649449672848",
+        "905419272673268313913709050484060254738598508367",
+        "495302835462977344980647427448359031727798022144",
+        "844540011971211083993300507946841130144599659221",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_free <= -0.176854",
+        "word_freq_over <= -0.083653",
+        "word_freq_your <= -0.14136",
+        "word_freq_000 <= 0.866482",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.005352153004715143,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 15,
+      "tree_index": 15,
+      "tree_prefix": "tree:15",
+      "node_ids": [
+        "1189068616555387744715771686222025696023002727831",
+        "1082720990368426575437143271840192589777992332618",
+        "749319537860600973129377044365179383060649598251",
+        "296091741026370606110604652718239556469787920703",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_all <= -0.017588",
+        "word_freq_free <= -0.129529",
+        "word_freq_your <= -0.16694",
+        "word_freq_remove <= 1.056712",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.011904489904983225,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 16,
+      "tree_index": 16,
+      "tree_prefix": "tree:16",
+      "node_ids": [
+        "333133046643544918019679794770398186215350743160",
+        "862667817706396675505548917115067776738366079099",
+        "313972482347651319928183852095104017912459902618",
+        "1409396098234079479492018554672757071058184254916",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_hp <= -0.25892",
+        "capital_run_length_longest <= -0.205559",
+        "word_freq_remove <= -0.22617",
+        "word_freq_addresses <= 0.169267",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.007636288094367734,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 17,
+      "tree_index": 17,
+      "tree_prefix": "tree:17",
+      "node_ids": [
+        "1082720990368426575437143271840192589777992332618",
+        "588766928578649230496181162699338423104642678451",
+        "466827812485334606811682068894670442204944772992",
+        "1163858897854181874021890752556874260563968709893",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "word_freq_free <= -0.129529",
+        "word_freq_over <= 0.298976",
+        "word_freq_your <= 0.080334",
+        "word_freq_3d <= 0.077962",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.008379231339560214,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 18,
+      "tree_index": 18,
+      "tree_prefix": "tree:18",
+      "node_ids": [
+        "396292115783156835799256108644932676637538436541",
+        "16709196817697956046094951698744380588242243124",
+        "1418660246227118462272490110745705819730319286552",
+        "68670295136758828491264738113771116373933204219",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "char_freq_%24 <= -0.083985",
+        "word_freq_your <= -0.19252",
+        "word_freq_you > 0.068535",
+        "capital_run_length_average <= -0.058704",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.002811663744768901,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    },
+    {
+      "path_index": 19,
+      "tree_index": 19,
+      "tree_prefix": "tree:19",
+      "node_ids": [
+        "1178270865338090656738013113657585268439688452525",
+        "1064643935070015758413053840766123308076945086246",
+        "413824174908881803944696468044874632169761249384",
+        "709523790513674348789689816520573658535178955934",
+        "1147257542945440298109815666246017244067397811172"
+      ],
+      "labels": [
+        "char_freq_%24 <= -0.195938",
+        "word_freq_your <= 0.01212",
+        "word_freq_remove <= -0.138983",
+        "word_freq_our <= 1.956726",
+        "Class 0"
+      ],
+      "leaf_class": "0",
+      "graph_path_valid": true,
+      "path_confidence": 0.005843747345611732,
+      "is_predicted_path": false,
+      "is_competitor_path": false
+    }
+  ],
+  "render_semantics": {
+    "critical_node": "gold",
+    "critical_pred_successor": "green",
+    "critical_competitor_successor": "red",
+    "predicted_path": "blue",
+    "competitor_path": "blue",
+    "true_class_leaf": "green_leaf",
+    "other_class_leaf": "salmon_leaf",
+    "context": "light_context",
+    "edge_width": "proportional_to_visit_count"
+  }
+}

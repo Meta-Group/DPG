@@ -1,0 +1,104 @@
+\begin{thebibliography}{10}
+
+\bibitem{adadi2018peeking}
+Amina Adadi and Mohammed Berrada.
+\newblock Peeking inside the black-box: A survey on explainable artificial intelligence (xai).
+\newblock {\em IEEE Access}, 6:52138--52160, 2018.
+
+\bibitem{arrighi2024decision}
+Leonardo Arrighi, Luca Pennella, Gabriel Marques~Tavares, and Sylvio Barbon~Junior.
+\newblock Decision predicate graphs: Enhancing interpretability in tree ensembles.
+\newblock In {\em World Conference on Explainable Artificial Intelligence}, pages 311--332. Springer, 2024.
+
+\bibitem{arrieta2020explainable}
+Alejandro Barredo~Arrieta, Natalia D{\'i}az-Rodr{\'i}guez, Javier Del~Ser, Adrien Bennetot, Siham Tabik, Alberto Barbado, Salvador Garc{\'i}a, Sergio Gil-L{\'o}pez, Daniel Molina, Richard Benjamins, Raja Chatila, and Francisco Herrera.
+\newblock Explainable artificial intelligence (xai): Concepts, taxonomies, opportunities and challenges toward responsible ai.
+\newblock {\em Information Fusion}, 58:82--115, 2020.
+
+\bibitem{ceschin2025extending}
+Matteo Ceschin, Leonardo Arrighi, Luca Longo, and Sylvio Barbon~Junior.
+\newblock Extending decision predicate graphs for comprehensive explanation of isolation forest.
+\newblock In {\em World Conference on Explainable Artificial Intelligence}, pages 271--293. Springer, 2025.
+
+\bibitem{dedja2023bellatrex}
+Klest Dedja, Felipe~Kenji Nakano, Konstantinos Pliakos, and Celine Vens.
+\newblock Bellatrex: building explanations through a locally accurate rule extractor.
+\newblock {\em Ieee Access}, 11:41348--41367, 2023.
+
+\bibitem{doshi2017rigorous}
+Finale Doshi-Velez and Been Kim.
+\newblock Towards a rigorous science of interpretable machine learning.
+\newblock {\em arXiv preprint arXiv:1702.08608}, 2017.
+
+\bibitem{framling2023importanceinfluence}
+Kary Fr{\"a}mling.
+\newblock Feature importance versus feature influence and what it signifies for explainable ai.
+\newblock In {\em Explainable Artificial Intelligence (xAI 2023), Communications in Computer and Information Science}. Springer, 2023.
+
+\bibitem{friedman2008predictive}
+Jerome~H. Friedman and Bogdan~E. Popescu.
+\newblock Predictive learning via rule ensembles.
+\newblock {\em The Annals of Applied Statistics}, 2(3):916--954, 2008.
+
+\bibitem{goldstein2015ice}
+Alex Goldstein, Adam Kapelner, Justin Bleich, and Emil Pitkin.
+\newblock Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation.
+\newblock {\em Journal of Computational and Graphical Statistics}, 2015.
+
+\bibitem{goldstein2015peeking}
+Alex Goldstein, Adam Kapelner, Justin Bleich, and Emil Pitkin.
+\newblock Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation.
+\newblock {\em Journal of Computational and Graphical Statistics}, 24(1):44--65, 2015.
+
+\bibitem{krishna2022disagreement}
+Satyapriya Krishna, Tessa Han, Alex Gu, Steven Wu, Shahin Jabbari, and Himabindu Lakkaraju.
+\newblock The disagreement problem in explainable machine learning: A practitioner's perspective.
+\newblock {\em arXiv preprint arXiv:2202.01602}, 2022.
+
+\bibitem{lundberg2018consistent}
+Scott~M. Lundberg, Gabriel~G. Erion, and Su-In Lee.
+\newblock Consistent individualized feature attribution for tree ensembles.
+\newblock {\em arXiv preprint arXiv:1802.03888}, 2018.
+
+\bibitem{lundberg2017unified}
+Scott~M. Lundberg and Su-In Lee.
+\newblock A unified approach to interpreting model predictions.
+\newblock {\em Advances in Neural Information Processing Systems}, 2017.
+
+\bibitem{miller2019explanation}
+Tim Miller.
+\newblock Explanation in artificial intelligence: Insights from the social sciences.
+\newblock {\em Artificial Intelligence}, 267:1--38, 2 2019.
+
+\bibitem{molnar2019iml}
+Christoph Molnar.
+\newblock {\em Interpretable Machine Learning}.
+\newblock Lulu.com, 2019.
+\newblock Online edition available at \url{https://christophm.github.io/interpretable-ml-book/}.
+
+\bibitem{nauta2023anecdotal}
+Meike Nauta, Jan Trienes, Shreyasi Pathak, Elisa Nguyen, Michelle Peters, Yasmin Schmitt, J{\"o}rg Schl{\"o}tterer, Maurice van Keulen, and Christin Seifert.
+\newblock From anecdotal evidence to quantitative evaluation methods: A systematic review on evaluating explainable ai.
+\newblock {\em ACM Computing Surveys}, 55(13s), 2023.
+
+\bibitem{palczewska2014interpreting}
+Anna Palczewska, Jan Palczewski, Richard~M. Robinson, and Daniel Neagu.
+\newblock Interpreting random forest classification models using a feature contribution method.
+\newblock In {\em Proceedings of the 2014 International Conference on Information Reuse and Integration (IRI)}, pages 112--119, 2014.
+
+\bibitem{ribeiro2016why}
+Marco~Tulio Ribeiro, Sameer Singh, and Carlos Guestrin.
+\newblock ``why should i trust you?'': Explaining the predictions of any classifier.
+\newblock In {\em Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, 2016.
+
+\bibitem{ribeiro2018anchors}
+Marco~Tulio Ribeiro, Sameer Singh, and Carlos Guestrin.
+\newblock Anchors: High-precision model-agnostic explanations.
+\newblock In {\em Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)}, 2018.
+
+\bibitem{vilone2021notions}
+Giulia Vilone and Luca Longo.
+\newblock Notions of explainability and evaluation approaches for explainable artificial intelligence.
+\newblock {\em Information Fusion}, 76:89--106, 2021.
+
+\end{thebibliography}

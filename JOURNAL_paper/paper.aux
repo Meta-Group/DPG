@@ -1,0 +1,128 @@
+\relax 
+\citation{vilone2021notions}
+\citation{nauta2023anecdotal}
+\@writefile{toc}{\contentsline {title}{Decision Predicate Graphs for Faithful Local Explanations: Aligning Decision Structure and Outputs}{1}{}\protected@file@percent }
+\@writefile{toc}{\authcount {2}}
+\@writefile{toc}{\contentsline {author}{Sylvio Barbon Junior(*)\and Luca Longo}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\citation{ribeiro2016why,lundberg2017unified}
+\citation{goldstein2015ice,ribeiro2018anchors}
+\citation{framling2023importanceinfluence}
+\citation{vilone2021notions}
+\citation{arrighi2024decision}
+\citation{arrighi2024decision,ceschin2025extending}
+\citation{krishna2022disagreement}
+\citation{miller2019explanation}
+\citation{molnar2019iml,adadi2018peeking,arrieta2020explainable}
+\citation{arrieta2020explainable,doshi2017rigorous}
+\citation{lundberg2017unified,lundberg2018consistent}
+\citation{ribeiro2016why}
+\citation{ribeiro2018anchors}
+\citation{dedja2023bellatrex}
+\citation{friedman2008predictive}
+\citation{goldstein2015peeking}
+\citation{palczewska2014interpreting}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{4}{}\protected@file@percent }
+\citation{miller2019explanation}
+\citation{krishna2022disagreement}
+\citation{nauta2023anecdotal,doshi2017rigorous}
+\citation{arrighi2024decision}
+\citation{lundberg2018consistent}
+\citation{ribeiro2016why}
+\citation{goldstein2015peeking}
+\citation{ribeiro2018anchors}
+\citation{dedja2023bellatrex}
+\citation{friedman2008predictive}
+\citation{palczewska2014interpreting}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Positioning of local explanation methods. Symbols indicate support ($\text  {$\mathsurround \z@ \mathchar "458$}$), partial support ($\sim $), or not supported ($\times $). Access uses \texttt  {d} for model-direct and \texttt  {a} for model-agnostic. Faith.\ denotes structural faithfulness checks against executed traces, and Contrast denotes explicit predicted-versus-competitor diagnostics.}}{5}{}\protected@file@percent }
+\newlabel{tab:positioning}{{1}{5}{}{table.1}{}}
+\newlabel{tab:positioning@cref}{{[table][1][]1}{[1][5][]5}{}{}{}}
+\citation{arrighi2024decision}
+\citation{ceschin2025extending}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Illustrative DPG-local graph for one sample. Rectangles are standardized predicate nodes, rounded blue rectangles are class terminals, and edge labels are normalized transition support. Dominant routes and competitor routes can be inspected directly from edge support and branching structure.}}{6}{}\protected@file@percent }
+\newlabel{fig:dpg-example}{{1}{6}{}{figure.1}{}}
+\newlabel{fig:dpg-example@cref}{{[figure][1][]1}{[1][6][]6}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}DPG and the Local-Explanation Gap}{6}{}\protected@file@percent }
+\citation{nauta2023anecdotal,krishna2022disagreement}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}DPG-local Construction}{7}{}\protected@file@percent }
+\newlabel{sec:dpg-construction}{{3.2}{7}{}{subsection.3.2}{}}
+\newlabel{sec:dpg-construction@cref}{{[subsection][2][3]3.2}{[1][7][]7}{}{}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces DPG-local construction}}{8}{}\protected@file@percent }
+\newlabel{alg:exec-trace-dpg}{{1}{8}{}{algorithm.1}{}}
+\newlabel{alg:exec-trace-dpg@cref}{{[algorithm][1][]1}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Semantic Graph View}{9}{}\protected@file@percent }
+\newlabel{sec:semantic-layer}{{3.3}{9}{}{subsection.3.3}{}}
+\newlabel{sec:semantic-layer@cref}{{[subsection][3][3]3.3}{[1][9][]9}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Semantic Graph View metrics and explainability use.}}{10}{}\protected@file@percent }
+\newlabel{tab:semantic-metrics}{{2}{10}{}{table.2}{}}
+\newlabel{tab:semantic-metrics@cref}{{[table][2][]2}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Critical Node and Structural Faithfulness}{10}{}\protected@file@percent }
+\newlabel{sec:structural-faithfulness}{{3.4}{10}{}{subsection.3.4}{}}
+\newlabel{sec:structural-faithfulness@cref}{{[subsection][4][3]3.4}{[1][10][]10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Critical-node example with a more complex local structure. The two strongest explanation paths share a longer prefix \tmspace  +\thickmuskip {.2777em}$x_3 \le 2.4$ $\rightarrow $ $x_7 > -0.6$ $\rightarrow $ \textcolor {black}{critical node} and then diverge toward predicted and competitor successors. Additional side branches illustrate that the local graph can contain alternatives that are not part of the two strongest paths.}}{11}{}\protected@file@percent }
+\newlabel{fig:critical-node-example}{{2}{11}{}{figure.2}{}}
+\newlabel{fig:critical-node-example@cref}{{[figure][2][]2}{[1][11][]11}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Dataset and model summary used in Section~4.1. Avg. RF Perf. reports the average Random Forest predictive performance across the selected configurations and seeds.}}{12}{}\protected@file@percent }
+\newlabel{tab:datasets-models-summary}{{3}{12}{}{table.3}{}}
+\newlabel{tab:datasets-models-summary@cref}{{[table][3][]3}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Datasets and Models}{12}{}\protected@file@percent }
+\citation{vilone2021notions,nauta2023anecdotal,doshi2017rigorous}
+\citation{miller2019explanation}
+\citation{nauta2023anecdotal}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Compared Methods and Metrics}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{DPG-local-Specific Metrics}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Reporting and Statistical Analysis}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Baseline Comparison on Shared Metrics}{14}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Per-dataset shared quantitative metrics visualized as heatmaps. Rows are datasets and columns are methods (including both DPG variants: DPG-local and DPG-global); darker cells indicate higher values.}}{15}{}\protected@file@percent }
+\newlabel{fig:per-dataset-results}{{3}{15}{}{figure.3}{}}
+\newlabel{fig:per-dataset-results@cref}{{[figure][3][]3}{[1][14][]15}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Semantic Faithfulness}{16}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Semantic-faithfulness comparison for the focused subgroup (DPG-local, LIME, ICE) under the matched feature-budget protocol. Higher sufficiency probability and comprehensiveness drop are better. The critical-flip rate is defined only for DPG-local samples with a valid non-root critical node and is reported as a pooled global rate across all evaluated benchmark samples.}}{16}{}\protected@file@percent }
+\newlabel{tab:semantic-faithfulness}{{4}{16}{}{table.4}{}}
+\newlabel{tab:semantic-faithfulness@cref}{{[table][4][]4}{[1][16][]16}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Structural Faithfulness, Disagreement, and Misclassification}{16}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces DPG-local-specific structural and semantic diagnostics for DPG-local. The first row reports overall averages across the 15 datasets; the remaining rows summarize agreement and cohort regimes. Higher is better for confidence, support margin, and path purity; lower is better for competitor exposure and recombination. Edge precision/recombination should be interpreted as construction-consistency checks for DPG-local, while edge recall and cohort/disagreement shifts are the main empirical diagnostics.}}{17}{}\protected@file@percent }
+\newlabel{tab:dpg-structural}{{5}{17}{}{table.5}{}}
+\newlabel{tab:dpg-structural@cref}{{[table][5][]5}{[1][16][]17}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces DPG-local graph for \texttt  {vehicle} sample 56 (final Phase C analysis). The yellow node is the critical node. From this node, the red edge marks the predicted-class successor and the green edge marks the competitor successor. Blue-toned edges represent the remaining local context; thicker edges indicate higher support in the local subgraph.}}{18}{}\protected@file@percent }
+\newlabel{fig:phase-cases}{{4}{18}{}{figure.4}{}}
+\newlabel{fig:phase-cases@cref}{{[figure][4][]4}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Case Study}{18}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{18}{}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{18}{}{section.6}{}}
+\newlabel{sec:discussion@cref}{{[section][6][]6}{[1][18][]18}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces DPG properties and how each advances faithful local explanation beyond the state of the art (discussion-level summary).}}{19}{}\protected@file@percent }
+\newlabel{tab:dpg-metrics-properties}{{6}{19}{}{table.6}{}}
+\newlabel{tab:dpg-metrics-properties@cref}{{[table][6][]6}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Limitations}{19}{}\protected@file@percent }
+\newlabel{sec:limitations}{{7}{19}{}{section.7}{}}
+\newlabel{sec:limitations@cref}{{[section][7][]7}{[1][19][]19}{}{}{}}
+\bibstyle{plain}
+\bibdata{bibliography}
+\bibcite{adadi2018peeking}{1}
+\bibcite{arrighi2024decision}{2}
+\bibcite{arrieta2020explainable}{3}
+\bibcite{ceschin2025extending}{4}
+\bibcite{dedja2023bellatrex}{5}
+\bibcite{doshi2017rigorous}{6}
+\bibcite{framling2023importanceinfluence}{7}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{20}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{8}{20}{}{section.8}{}}
+\newlabel{sec:conclusion@cref}{{[section][8][]8}{[1][20][]20}{}{}{}}
+\bibcite{friedman2008predictive}{8}
+\bibcite{goldstein2015ice}{9}
+\bibcite{goldstein2015peeking}{10}
+\bibcite{krishna2022disagreement}{11}
+\bibcite{lundberg2018consistent}{12}
+\bibcite{lundberg2017unified}{13}
+\bibcite{miller2019explanation}{14}
+\bibcite{molnar2019iml}{15}
+\bibcite{nauta2023anecdotal}{16}
+\bibcite{palczewska2014interpreting}{17}
+\bibcite{ribeiro2016why}{18}
+\bibcite{ribeiro2018anchors}{19}
+\bibcite{vilone2021notions}{20}
+\gdef \@abspage@last{21}

@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.tree import DecisionTreeClassifier
 
 # Ensure we import DPG from this repository (not an older installed package).
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dpg import DPGExplainer
+from experiments_local_explanation.journal_splits import apply_split_registry, load_split_registry
 
 try:
     import shap
@@ -44,7 +46,18 @@ except Exception:
 
 
 EXCLUDED_DATASETS = {"fashion_mnist_784", "mnist_784"}
-METHODS_DEFAULT = ("dpg", "shap", "lime", "ice", "anchors", "tree_path")
+METHODS_DEFAULT = (
+    "dpg",
+    "shap",
+    "lime",
+    "ice",
+    "anchors",
+    "tree_path",
+    "lore",
+    "raw_path_union",
+    "path_bag",
+    "random_same_size_path",
+)
 
 
 @dataclass
@@ -64,6 +77,9 @@ class DatasetBundle:
     X_test: np.ndarray
     y_test: np.ndarray
     feature_names: List[str]
+    train_split: str = "existing_train"
+    eval_split: str = "existing_test"
+    split_registry_path: str | None = None
 
 
 @dataclass(frozen=True)
@@ -71,10 +87,14 @@ class RunIdentity:
     dataset: str
     config_id: str
     method: str
+    train_split: str = "existing_train"
+    eval_split: str = "existing_test"
 
     @property
     def key(self) -> str:
-        return f"{self.dataset}__{self.config_id}__{self.method}"
+        if self.train_split == "existing_train" and self.eval_split in {"existing_test", "test"}:
+            return f"{self.dataset}__{self.config_id}__{self.method}"
+        return f"{self.dataset}__tr{self.train_split}__ev{self.eval_split}__{self.config_id}__{self.method}"
 
 
 def _parse_int_list(text: str) -> List[int]:
@@ -175,8 +195,20 @@ def _config_id(cfg: ExperimentConfig) -> str:
     )
 
 
-def _run_identity(dataset: str, cfg: ExperimentConfig, method: str) -> RunIdentity:
-    return RunIdentity(dataset=dataset, config_id=_config_id(cfg), method=method)
+def _run_identity(
+    dataset: str,
+    cfg: ExperimentConfig,
+    method: str,
+    train_split: str = "existing_train",
+    eval_split: str = "existing_test",
+) -> RunIdentity:
+    return RunIdentity(
+        dataset=dataset,
+        config_id=_config_id(cfg),
+        method=method,
+        train_split=train_split,
+        eval_split=eval_split,
+    )
 
 
 def _checkpoint_dir(out_dir: Path) -> Path:
@@ -236,16 +268,24 @@ def _read_checkpoints(out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     detail_df = pd.concat(detail_frames, ignore_index=True) if detail_frames else pd.DataFrame()
 
     if len(summary_df):
+        summary_unique_cols = [
+            c
+            for c in ["dataset", "method", "train_split", "eval_split", "config_id", "seed"]
+            if c in summary_df.columns
+        ]
         summary_df = (
-            summary_df.drop_duplicates(subset=["dataset", "method", "config_id", "seed"], keep="last")
+            summary_df.drop_duplicates(subset=summary_unique_cols, keep="last")
             .sort_values(["dataset", "method", "config_id"])
             .reset_index(drop=True)
         )
     if len(detail_df):
+        detail_unique_cols = [
+            c
+            for c in ["dataset", "method", "train_split", "eval_split", "config_id", "seed", "sample_idx"]
+            if c in detail_df.columns
+        ]
         detail_df = (
-            detail_df.drop_duplicates(
-                subset=["dataset", "method", "config_id", "seed", "sample_idx"], keep="last"
-            )
+            detail_df.drop_duplicates(subset=detail_unique_cols, keep="last")
             .sort_values(["dataset", "method", "config_id", "sample_idx"])
             .reset_index(drop=True)
         )
@@ -372,6 +412,128 @@ def _rule_mask(X: np.ndarray, rule: Sequence[Tuple[int, str, str, float]]) -> np
 
 def _format_anchor_rule(rule: Sequence[Tuple[int, str, str, float]]) -> str:
     return " AND ".join(f"{feat_name} {op} {threshold:.6f}" for _, feat_name, op, threshold in rule)
+
+
+def _predicate_key(predicate: Tuple[int, str, str, float]) -> Tuple[int, str, str, float]:
+    feat_idx, feat_name, op, threshold = predicate
+    return (int(feat_idx), str(feat_name), str(op), round(float(threshold), 6))
+
+
+def _forest_predicate_vocabulary(
+    model: RandomForestClassifier,
+    feature_names: Sequence[str],
+) -> List[Tuple[int, str, str, float]]:
+    vocab: List[Tuple[int, str, str, float]] = []
+    seen = set()
+    for estimator in model.estimators_:
+        tree = estimator.tree_
+        for node_id in range(tree.node_count):
+            feat_idx = int(tree.feature[node_id])
+            if feat_idx < 0:
+                continue
+            key = (feat_idx, str(feature_names[feat_idx]), "<=", round(float(tree.threshold[node_id]), 6))
+            if key not in seen:
+                vocab.append(key)
+                seen.add(key)
+            mirror = (feat_idx, str(feature_names[feat_idx]), ">", round(float(tree.threshold[node_id]), 6))
+            if mirror not in seen:
+                vocab.append(mirror)
+                seen.add(mirror)
+    return vocab
+
+
+def _path_control_output(
+    model: RandomForestClassifier,
+    sample: np.ndarray,
+    feature_names: Sequence[str],
+    method: str,
+    random_state: int,
+) -> Dict[str, Any]:
+    prob = model.predict_proba(sample.reshape(1, -1))[0]
+    pred_idx = int(np.argmax(prob))
+    pred_label = str(model.classes_[pred_idx])
+    competitor_idx = int(np.argsort(prob)[-2]) if prob.size > 1 else pred_idx
+    margin = _score_margin_from_probs(prob, pred_idx)
+
+    path_predicates: List[Tuple[int, str, str, float]] = []
+    path_lengths: List[int] = []
+    for estimator in model.estimators_:
+        _, predicates = _tree_path_nodes_and_predicates(estimator, sample, feature_names)
+        path_lengths.append(len(predicates))
+        path_predicates.extend(_predicate_key(p) for p in predicates)
+
+    unique_predicates = sorted(set(path_predicates), key=lambda p: (p[0], p[1], p[2], p[3]))
+    rng = np.random.default_rng(int(random_state))
+
+    if method == "raw_path_union":
+        selected = unique_predicates
+        denominator = max(len(unique_predicates), 1)
+        description = "union of unique executed predicates"
+    elif method == "path_bag":
+        selected = list(path_predicates)
+        denominator = max(len(path_predicates), 1)
+        description = "multiset of executed predicates"
+    elif method == "random_same_size_path":
+        vocab = _forest_predicate_vocabulary(model, feature_names)
+        size = min(len(unique_predicates), len(vocab))
+        if size > 0:
+            take = rng.choice(np.arange(len(vocab)), size=size, replace=False)
+            selected = [vocab[int(i)] for i in take]
+        else:
+            selected = []
+        denominator = max(len(selected), 1)
+        description = "random same-size forest predicate control"
+    else:
+        raise ValueError(f"Unsupported path control: {method}")
+
+    contrib_vec = np.zeros(sample.shape[0], dtype=float)
+    for feat_idx, _feat_name, _op, _threshold in selected:
+        if 0 <= int(feat_idx) < contrib_vec.size:
+            contrib_vec[int(feat_idx)] += 1.0 / denominator
+
+    abs_vec = np.abs(contrib_vec)
+    top_idx = int(np.argmax(abs_vec)) if abs_vec.size and np.any(abs_vec > 0) else -1
+    top_abs = float(abs_vec[top_idx]) if top_idx >= 0 else np.nan
+    l1, l2, nnz = _vector_stats(contrib_vec)
+    unique_features = sorted({int(p[0]) for p in selected})
+
+    return {
+        "y_local_pred": pred_label,
+        "evidence_score_local_pred": float(prob[pred_idx]),
+        "evidence_score_true_class": np.nan,
+        "top_competitor_class_pred": str(model.classes_[competitor_idx]) if prob.size > 1 else None,
+        "evidence_score_competitor_pred": float(prob[competitor_idx]) if prob.size > 1 else np.nan,
+        "score_margin_pred_vs_competitor": margin,
+        "num_paths": float(len(model.estimators_)),
+        "num_active_nodes": float(len(selected)),
+        "mean_lrc_active_nodes": np.nan,
+        "mean_bc_active_nodes": np.nan,
+        "class_support_total": np.nan,
+        "n_class_support": np.nan,
+        "top_feature_idx": top_idx if top_idx >= 0 else np.nan,
+        "top_feature_abs_contrib": top_abs,
+        "contrib_l1": l1,
+        "contrib_l2": l2,
+        "contrib_nnz": nnz,
+        "ice_feature_idx": np.nan,
+        "ice_prob_min": np.nan,
+        "ice_prob_max": np.nan,
+        "ice_prob_range": np.nan,
+        "ice_slope": np.nan,
+        "anchor_rule": None,
+        "anchor_precision": np.nan,
+        "anchor_coverage": np.nan,
+        "lore_rule": None,
+        "lore_rule_length": np.nan,
+        "lore_fidelity_neighborhood": np.nan,
+        "lore_counterfactual_distance": np.nan,
+        "lore_counterfactual_features": "",
+        "path_control_type": description,
+        "path_control_predicate_count": float(len(selected)),
+        "path_control_unique_predicate_count": float(len(set(selected))),
+        "path_control_unique_feature_count": float(len(unique_features)),
+        "path_control_mean_path_length": float(np.mean(path_lengths)) if path_lengths else np.nan,
+    }
 
 
 def _best_anchor_rule(
@@ -514,6 +676,117 @@ def _explain_with_anchors(
         "anchor_rule": _format_anchor_rule(rule) if rule else None,
         "anchor_precision": float(precision),
         "anchor_coverage": float(coverage),
+    }
+
+
+def _explain_with_lore(
+    model: RandomForestClassifier,
+    bundle: DatasetBundle,
+    sample: np.ndarray,
+    random_state: int,
+    neighborhood_size: int,
+    max_depth: int,
+    min_samples_leaf: int,
+    neighborhood_scale: float,
+) -> Dict[str, Any]:
+    rng = np.random.default_rng(int(random_state))
+    X_train = np.asarray(bundle.X_train, dtype=float)
+    sample = np.asarray(sample, dtype=float)
+    n_features = sample.shape[0]
+    n_neighbors = max(int(neighborhood_size), 32)
+
+    feature_std = np.nanstd(X_train, axis=0)
+    positive_std = feature_std[feature_std > 1e-12]
+    fallback_std = float(np.median(positive_std)) if positive_std.size else 1.0
+    feature_std = np.where(feature_std > 1e-12, feature_std, fallback_std)
+    noise = rng.normal(loc=0.0, scale=feature_std * float(neighborhood_scale), size=(n_neighbors, n_features))
+    neighborhood = sample.reshape(1, -1) + noise
+    neighborhood[0] = sample
+    lo = np.nanmin(X_train, axis=0)
+    hi = np.nanmax(X_train, axis=0)
+    neighborhood = np.clip(neighborhood, lo, hi)
+
+    model_labels = model.predict(neighborhood).astype(str)
+    classes, counts = np.unique(model_labels, return_counts=True)
+    if classes.size < 2:
+        # Borrow nearest training points if pure local noise cannot cross a model boundary.
+        train_labels = model.predict(X_train).astype(str)
+        train_dist = np.linalg.norm((X_train - sample) / feature_std, axis=1)
+        borrow_idx = np.argsort(train_dist)[: min(n_neighbors, X_train.shape[0])]
+        neighborhood = np.vstack([neighborhood, X_train[borrow_idx]])
+        model_labels = np.concatenate([model_labels, train_labels[borrow_idx]])
+
+    local_tree = DecisionTreeClassifier(
+        max_depth=max(int(max_depth), 1),
+        min_samples_leaf=max(int(min_samples_leaf), 1),
+        random_state=int(random_state),
+    )
+    local_tree.fit(neighborhood, model_labels)
+    local_pred = str(local_tree.predict(sample.reshape(1, -1))[0])
+    proba = local_tree.predict_proba(sample.reshape(1, -1))[0]
+    class_labels = [str(c) for c in local_tree.classes_]
+    local_idx = class_labels.index(local_pred)
+    sorted_idx = np.argsort(proba)
+    comp_idx = int(sorted_idx[-2]) if proba.size > 1 else local_idx
+
+    path_nodes, predicates = _tree_path_nodes_and_predicates(local_tree, sample, bundle.feature_names)
+    contrib_vec = np.zeros(n_features, dtype=float)
+    for parent, child in zip(path_nodes, path_nodes[1:]):
+        parent_probs = _tree_node_prob_vector(local_tree, parent)
+        child_probs = _tree_node_prob_vector(local_tree, child)
+        feat_idx = int(local_tree.tree_.feature[parent])
+        if feat_idx >= 0 and local_idx < child_probs.size and local_idx < parent_probs.size:
+            contrib_vec[feat_idx] += float(child_probs[local_idx] - parent_probs[local_idx])
+
+    neighborhood_pred = local_tree.predict(neighborhood).astype(str)
+    local_fidelity = float(np.mean(neighborhood_pred == model_labels)) if model_labels.size else np.nan
+
+    opposite_mask = model_labels != local_pred
+    counterfactual_distance = np.nan
+    counterfactual_features = ""
+    if np.any(opposite_mask):
+        opposite = neighborhood[opposite_mask]
+        distances = np.linalg.norm((opposite - sample) / feature_std, axis=1)
+        best_idx = int(np.argmin(distances))
+        cf = opposite[best_idx]
+        counterfactual_distance = float(distances[best_idx])
+        changed = np.argsort(np.abs((cf - sample) / feature_std))[::-1]
+        changed = [int(i) for i in changed if abs(float(cf[i] - sample[i])) > 1e-12][:5]
+        counterfactual_features = ",".join(str(bundle.feature_names[i]) for i in changed)
+
+    abs_vec = np.abs(contrib_vec)
+    top_idx = int(np.argmax(abs_vec)) if abs_vec.size else -1
+    top_abs = float(abs_vec[top_idx]) if top_idx >= 0 else np.nan
+    l1, l2, nnz = _vector_stats(contrib_vec)
+
+    return {
+        "y_local_pred": local_pred,
+        "evidence_score_local_pred": float(proba[local_idx]),
+        "evidence_score_true_class": np.nan,
+        "top_competitor_class_pred": class_labels[comp_idx] if comp_idx < len(class_labels) else None,
+        "evidence_score_competitor_pred": float(proba[comp_idx]) if comp_idx < proba.size else np.nan,
+        "score_margin_pred_vs_competitor": float(proba[local_idx] - proba[comp_idx]) if proba.size > 1 else np.nan,
+        "num_paths": 1.0,
+        "num_active_nodes": float(len(predicates)),
+        "mean_lrc_active_nodes": np.nan,
+        "mean_bc_active_nodes": np.nan,
+        "class_support_total": float(np.sum(model_labels == local_pred) / len(model_labels)) if len(model_labels) else np.nan,
+        "n_class_support": float(len(np.unique(model_labels))) if len(model_labels) else np.nan,
+        "top_feature_idx": top_idx if top_idx >= 0 else np.nan,
+        "top_feature_abs_contrib": top_abs,
+        "contrib_l1": l1,
+        "contrib_l2": l2,
+        "contrib_nnz": nnz,
+        "ice_feature_idx": np.nan,
+        "ice_prob_min": np.nan,
+        "ice_prob_max": np.nan,
+        "ice_prob_range": np.nan,
+        "ice_slope": np.nan,
+        "lore_rule": _format_anchor_rule(predicates) if predicates else None,
+        "lore_rule_length": float(len(predicates)),
+        "lore_fidelity_neighborhood": local_fidelity,
+        "lore_counterfactual_distance": counterfactual_distance,
+        "lore_counterfactual_features": counterfactual_features,
     }
 
 
@@ -824,7 +1097,11 @@ def _run_one_dataset_method(
         ice_grid_values = np.linspace(q_low, q_high, num=int(args.ice_grid_points))
     elif method == "tree_path":
         pass
+    elif method in {"raw_path_union", "path_bag", "random_same_size_path"}:
+        pass
     elif method == "anchors":
+        pass
+    elif method == "lore":
         pass
     else:
         raise ValueError(f"Unsupported method: {method}")
@@ -885,6 +1162,14 @@ def _run_one_dataset_method(
                     sample=sample,
                     feature_names=bundle.feature_names,
                 )
+            elif method in {"raw_path_union", "path_bag", "random_same_size_path"}:
+                out = _path_control_output(
+                    model=model,
+                    sample=sample,
+                    feature_names=bundle.feature_names,
+                    method=method,
+                    random_state=int(cfg.random_state + idx),
+                )
             elif method == "anchors":
                 out = _explain_with_anchors(
                     model=model,
@@ -893,6 +1178,17 @@ def _run_one_dataset_method(
                     precision_target=float(args.anchor_precision_target),
                     max_rule_len=int(args.anchor_max_rule_len),
                     max_candidates=int(args.anchor_max_candidates),
+                )
+            elif method == "lore":
+                out = _explain_with_lore(
+                    model=model,
+                    bundle=bundle,
+                    sample=sample,
+                    random_state=int(cfg.random_state + idx),
+                    neighborhood_size=int(args.lore_neighborhood_size),
+                    max_depth=int(args.lore_max_depth),
+                    min_samples_leaf=int(args.lore_min_samples_leaf),
+                    neighborhood_scale=float(args.lore_neighborhood_scale),
                 )
             else:
                 raise ValueError(method)
@@ -926,6 +1222,16 @@ def _run_one_dataset_method(
                 "anchor_rule": None,
                 "anchor_precision": np.nan,
                 "anchor_coverage": np.nan,
+                "lore_rule": None,
+                "lore_rule_length": np.nan,
+                "lore_fidelity_neighborhood": np.nan,
+                "lore_counterfactual_distance": np.nan,
+                "lore_counterfactual_features": "",
+                "path_control_type": "",
+                "path_control_predicate_count": np.nan,
+                "path_control_unique_predicate_count": np.nan,
+                "path_control_unique_feature_count": np.nan,
+                "path_control_mean_path_length": np.nan,
             }
         runtime_ms = float((time.perf_counter() - t0) * 1000.0)
 
@@ -933,6 +1239,9 @@ def _run_one_dataset_method(
         sample_rows.append(
             {
                 "dataset": bundle.name,
+                "train_split": bundle.train_split,
+                "eval_split": bundle.eval_split,
+                "split_registry_path": bundle.split_registry_path,
                 "method": method,
                 "config_id": _config_id(cfg),
                 "seed": cfg.random_state,
@@ -951,8 +1260,17 @@ def _run_one_dataset_method(
         )
 
     df = pd.DataFrame(sample_rows)
+
+    def _mean_or_nan(column: str) -> float:
+        if not len(df) or column not in df.columns:
+            return float(np.nan)
+        return float(df[column].mean())
+
     summary: Dict[str, float | int | str | None] = {
         "dataset": bundle.name,
+        "train_split": bundle.train_split,
+        "eval_split": bundle.eval_split,
+        "split_registry_path": bundle.split_registry_path,
         "method": method,
         "config_id": _config_id(cfg),
         "seed": cfg.random_state,
@@ -963,22 +1281,27 @@ def _run_one_dataset_method(
         "n_test_total": int(n_test),
         "n_test_evaluated": int(n_eval),
         "model_accuracy": model_acc,
-        "local_matches_model_rate": float(df["local_matches_model"].mean()) if len(df) else np.nan,
-        "local_accuracy": float(df["local_correct"].mean()) if len(df) else np.nan,
-        "avg_runtime_ms": float(df["runtime_ms"].mean()) if len(df) else np.nan,
-        "avg_score_margin_pred_vs_competitor": float(df["score_margin_pred_vs_competitor"].mean())
-        if len(df)
-        else np.nan,
-        "avg_top_feature_abs_contrib": float(df["top_feature_abs_contrib"].mean()) if len(df) else np.nan,
-        "avg_contrib_l1": float(df["contrib_l1"].mean()) if len(df) else np.nan,
-        "avg_contrib_l2": float(df["contrib_l2"].mean()) if len(df) else np.nan,
-        "avg_num_paths": float(df["num_paths"].mean()) if len(df) else np.nan,
-        "avg_num_active_nodes": float(df["num_active_nodes"].mean()) if len(df) else np.nan,
-        "avg_evidence_score_local_pred": float(df["evidence_score_local_pred"].mean()) if len(df) else np.nan,
-        "avg_ice_prob_range": float(df["ice_prob_range"].mean()) if len(df) else np.nan,
-        "avg_ice_slope": float(df["ice_slope"].mean()) if len(df) else np.nan,
-        "avg_anchor_precision": float(df["anchor_precision"].mean()) if len(df) else np.nan,
-        "avg_anchor_coverage": float(df["anchor_coverage"].mean()) if len(df) else np.nan,
+        "local_matches_model_rate": _mean_or_nan("local_matches_model"),
+        "local_accuracy": _mean_or_nan("local_correct"),
+        "avg_runtime_ms": _mean_or_nan("runtime_ms"),
+        "avg_score_margin_pred_vs_competitor": _mean_or_nan("score_margin_pred_vs_competitor"),
+        "avg_top_feature_abs_contrib": _mean_or_nan("top_feature_abs_contrib"),
+        "avg_contrib_l1": _mean_or_nan("contrib_l1"),
+        "avg_contrib_l2": _mean_or_nan("contrib_l2"),
+        "avg_num_paths": _mean_or_nan("num_paths"),
+        "avg_num_active_nodes": _mean_or_nan("num_active_nodes"),
+        "avg_evidence_score_local_pred": _mean_or_nan("evidence_score_local_pred"),
+        "avg_ice_prob_range": _mean_or_nan("ice_prob_range"),
+        "avg_ice_slope": _mean_or_nan("ice_slope"),
+        "avg_anchor_precision": _mean_or_nan("anchor_precision"),
+        "avg_anchor_coverage": _mean_or_nan("anchor_coverage"),
+        "avg_lore_rule_length": _mean_or_nan("lore_rule_length"),
+        "avg_lore_fidelity_neighborhood": _mean_or_nan("lore_fidelity_neighborhood"),
+        "avg_lore_counterfactual_distance": _mean_or_nan("lore_counterfactual_distance"),
+        "avg_path_control_predicate_count": _mean_or_nan("path_control_predicate_count"),
+        "avg_path_control_unique_predicate_count": _mean_or_nan("path_control_unique_predicate_count"),
+        "avg_path_control_unique_feature_count": _mean_or_nan("path_control_unique_feature_count"),
+        "avg_path_control_mean_path_length": _mean_or_nan("path_control_mean_path_length"),
         "local_failures": int(local_failures),
         "local_failure_rate": float(local_failures / n_eval) if n_eval > 0 else np.nan,
     }
@@ -1014,7 +1337,7 @@ def _write_report(
 def parse_args() -> argparse.Namespace:
     script_dir = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser(
-        description="Run DPG/SHAP/LIME/ICE baseline experiments over prepared numeric datasets."
+        description="Run DPG/SHAP/LIME/ICE/LORE-style baseline experiments over prepared numeric datasets."
     )
     parser.add_argument("--data_dir", type=str, default="experiments_local_explanation/data_numeric")
     parser.add_argument("--out_dir", type=str, default="experiments_local_explanation/results_baselines")
@@ -1028,7 +1351,11 @@ def parse_args() -> argparse.Namespace:
         "--methods",
         type=str,
         default="dpg,shap,lime,ice",
-        help="Comma-separated list of methods in {dpg,shap,lime,ice,anchors,tree_path}.",
+        help=(
+            "Comma-separated list of methods in "
+            "{dpg,shap,lime,ice,anchors,tree_path,lore,"
+            "raw_path_union,path_bag,random_same_size_path}."
+        ),
     )
     parser.add_argument("--n_estimators", type=str, default="10,20")
     parser.add_argument(
@@ -1042,6 +1369,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--decimal_threshold", type=str, default="4,6")
     parser.add_argument("--seeds", type=str, default="27,42")
     parser.add_argument("--max_test_samples", type=int, default=0)
+    parser.add_argument(
+        "--split_registry",
+        type=str,
+        default="",
+        help="Optional split_registry.json for journal train/validation/test protocol.",
+    )
+    parser.add_argument(
+        "--train_split",
+        type=str,
+        default="existing_train",
+        help="Training split: existing_train, train_core, or train_core_validation.",
+    )
+    parser.add_argument(
+        "--eval_split",
+        type=str,
+        default="existing_test",
+        help="Evaluation split: existing_test/test or validation.",
+    )
     parser.add_argument("--progress_every", type=int, default=25)
     parser.add_argument(
         "--resume",
@@ -1059,10 +1404,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--anchor_precision_target", type=float, default=0.95)
     parser.add_argument("--anchor_max_rule_len", type=int, default=4)
     parser.add_argument("--anchor_max_candidates", type=int, default=12)
+    parser.add_argument("--lore_neighborhood_size", type=int, default=512)
+    parser.add_argument("--lore_max_depth", type=int, default=4)
+    parser.add_argument("--lore_min_samples_leaf", type=int, default=10)
+    parser.add_argument("--lore_neighborhood_scale", type=float, default=0.5)
 
     args = parser.parse_args()
     args.data_dir = _resolve_cli_path(args.data_dir, script_dir=script_dir)
     args.out_dir = _resolve_cli_path(args.out_dir, script_dir=script_dir)
+    args.split_registry = (
+        _resolve_cli_path(args.split_registry, script_dir=script_dir) if args.split_registry else None
+    )
     return args
 
 
@@ -1072,6 +1424,7 @@ def main() -> None:
     methods = _parse_method_list(args.methods)
     configs = _make_configs(args)
     dataset_paths = _dataset_dirs(args.data_dir, only=only)
+    split_registry = load_split_registry(args.split_registry)
     if not dataset_paths:
         raise ValueError(f"No dataset directories found in: {args.data_dir}")
 
@@ -1097,11 +1450,17 @@ def main() -> None:
     done = 0
 
     for ds_path in dataset_paths:
-        bundle = _load_bundle(ds_path)
+        bundle = apply_split_registry(
+            bundle=_load_bundle(ds_path),
+            registry=split_registry,
+            registry_path=args.split_registry,
+            train_split=args.train_split,
+            eval_split=args.eval_split,
+        )
         print(f"\n=== DATASET: {bundle.name} ===", flush=True)
         for cfg in configs:
             for method in methods:
-                run_id = _run_identity(bundle.name, cfg, method)
+                run_id = _run_identity(bundle.name, cfg, method, bundle.train_split, bundle.eval_split)
                 done += 1
                 print(f"[{done}/{total_runs}] {run_id.key}", flush=True)
 
@@ -1135,12 +1494,22 @@ def main() -> None:
         det_df = det_ckpt_df
 
     if len(sum_df):
+        sum_unique_cols = [
+            c
+            for c in ["dataset", "method", "train_split", "eval_split", "config_id", "seed"]
+            if c in sum_df.columns
+        ]
         sum_df = sum_df.drop_duplicates(
-            subset=["dataset", "method", "config_id", "seed"], keep="last"
+            subset=sum_unique_cols, keep="last"
         ).sort_values(["dataset", "method", "config_id"])
     if len(det_df):
+        det_unique_cols = [
+            c
+            for c in ["dataset", "method", "train_split", "eval_split", "config_id", "seed", "sample_idx"]
+            if c in det_df.columns
+        ]
         det_df = det_df.drop_duplicates(
-            subset=["dataset", "method", "config_id", "seed", "sample_idx"], keep="last"
+            subset=det_unique_cols, keep="last"
         ).sort_values(["dataset", "method", "config_id", "sample_idx"])
 
     _write_report(args.out_dir, summary_df=sum_df.reset_index(drop=True), detail_df=det_df.reset_index(drop=True))

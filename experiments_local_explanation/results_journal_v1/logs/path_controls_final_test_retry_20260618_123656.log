@@ -1,0 +1,656 @@
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27 --datasets banknote-authentication --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27 --datasets banknote-authentication --n_estimators 20 --rf_n_jobs 1 --max_depth 12 --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27 --datasets banknote-authentication --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42 --datasets breast_cancer --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42 --datasets breast_cancer --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42 --datasets breast_cancer --n_estimators 20 --rf_n_jobs 1 --max_depth 12 --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42 --datasets diabetes --n_estimators 100 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42 --datasets diabetes --n_estimators 100 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42 --datasets diabetes --n_estimators 100 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42 --datasets digits --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42 --datasets digits --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42 --datasets digits --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27 --datasets ionosphere --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27 --datasets ionosphere --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27 --datasets ionosphere --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27 --datasets iris --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27 --datasets iris --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27 --datasets iris --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27 --datasets isolet --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27 --datasets isolet --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27 --datasets isolet --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27 --datasets madelon --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27 --datasets madelon --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27 --datasets madelon --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42 --datasets phoneme --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42 --datasets phoneme --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42 --datasets phoneme --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42 --datasets qsar-biodeg --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42 --datasets qsar-biodeg --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42 --datasets qsar-biodeg --n_estimators 100 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42 --datasets segment --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42 --datasets segment --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42 --datasets segment --n_estimators 100 --rf_n_jobs 1 --max_depth 12 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42 --datasets spambase --n_estimators 50 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42 --datasets spambase --n_estimators 50 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42 --datasets spambase --n_estimators 50 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42 --datasets vehicle --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42 --datasets vehicle --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42 --datasets vehicle --n_estimators 20 --rf_n_jobs 1 --max_depth None --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27 --datasets wdbc --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27 --datasets wdbc --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27 --datasets wdbc --n_estimators 20 --rf_n_jobs 1 --max_depth 8 --perc_var 0.0001 --decimal_threshold 6 --seeds 27 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42 --datasets wine --n_estimators 50 --rf_n_jobs 1 --max_depth 8 --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods path_bag --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42 --datasets wine --n_estimators 50 --rf_n_jobs 1 --max_depth None --perc_var 1e-05 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods random_same_size_path --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir experiments_local_explanation/data_numeric --out_dir experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42 --datasets wine --n_estimators 50 --rf_n_jobs 1 --max_depth 12 --perc_var 0.0001 --decimal_threshold 6 --seeds 42 --max_test_samples 0 --progress_every 200 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core_validation --eval_split test --methods raw_path_union --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --lore_neighborhood_size 512 --lore_max_depth 4 --lore_min_samples_leaf 10 --lore_neighborhood_scale 0.5
+START 0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27
+START 0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27
+START 0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27
+START 0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42
+START 0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42
+START 0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: banknote-authentication ===
+[1/1] banknote-authentication__trtrain_core_validation__evtest__rf20_dunlimited_pv0.0001_dt6_s27__path_bag
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: banknote-authentication ===
+[1/1] banknote-authentication__trtrain_core_validation__evtest__rf20_d12_pv1e-05_dt6_s27__random_same_size_path
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: breast_cancer ===
+[1/1] breast_cancer__trtrain_core_validation__evtest__rf20_d12_pv0.0001_dt6_s42__raw_path_union
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: breast_cancer ===
+[1/1] breast_cancer__trtrain_core_validation__evtest__rf20_d8_pv1e-05_dt6_s42__random_same_size_path
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: breast_cancer ===
+[1/1] breast_cancer__trtrain_core_validation__evtest__rf20_dunlimited_pv0.0001_dt6_s42__path_bag
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: banknote-authentication ===
+[1/1] banknote-authentication__trtrain_core_validation__evtest__rf20_dunlimited_pv0.0001_dt6_s27__raw_path_union
+  baseline progress: 1/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 1/275 (banknote-authentication | rf20_d12_pv1e-05_dt6_s27 | random_same_size_path)
+  baseline progress: 1/114 (breast_cancer | rf20_d12_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 1/114 (breast_cancer | rf20_dunlimited_pv0.0001_dt6_s42 | path_bag)
+  baseline progress: 1/114 (breast_cancer | rf20_d8_pv1e-05_dt6_s42 | random_same_size_path)
+  baseline progress: 1/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 114/114 (breast_cancer | rf20_d12_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 114/114 (breast_cancer | rf20_dunlimited_pv0.0001_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 201/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 201/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 114/114 (breast_cancer | rf20_d8_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 275/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 275/275 (banknote-authentication | rf20_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 201/275 (banknote-authentication | rf20_d12_pv1e-05_dt6_s27 | random_same_size_path)
+  baseline progress: 275/275 (banknote-authentication | rf20_d12_pv1e-05_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+DONE 0000__banknote-authentication__path_bag__rf20_dunlimited_pv0.0001_dt6_s27
+DONE 0002__banknote-authentication__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s27
+DONE 0003__breast_cancer__path_bag__rf20_dunlimited_pv0.0001_dt6_s42
+DONE 0004__breast_cancer__random_same_size_path__rf20_d8_pv1e-05_dt6_s42
+DONE 0005__breast_cancer__raw_path_union__rf20_d12_pv0.0001_dt6_s42
+START 0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42
+START 0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42
+START 0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42
+START 0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42
+START 0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42
+DONE 0001__banknote-authentication__random_same_size_path__rf20_d12_pv1e-05_dt6_s27
+START 0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: digits ===
+[1/1] digits__trtrain_core_validation__evtest__rf100_d12_pv1e-05_dt6_s42__random_same_size_path
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: diabetes ===
+[1/1] diabetes__trtrain_core_validation__evtest__rf100_d8_pv1e-05_dt6_s42__random_same_size_path
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: digits ===
+[1/1] digits__trtrain_core_validation__evtest__rf100_d12_pv1e-05_dt6_s42__path_bag
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: diabetes ===
+[1/1] diabetes__trtrain_core_validation__evtest__rf100_d8_pv1e-05_dt6_s42__path_bag
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: diabetes ===
+[1/1] diabetes__trtrain_core_validation__evtest__rf100_d8_pv1e-05_dt6_s42__raw_path_union
+  baseline progress: 1/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | random_same_size_path)
+  baseline progress: 1/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 1/360 (digits | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1/360 (digits | rf100_d12_pv1e-05_dt6_s42 | random_same_size_path)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: digits ===
+[1/1] digits__trtrain_core_validation__evtest__rf100_d12_pv0.0001_dt6_s42__raw_path_union
+  baseline progress: 1/360 (digits | rf100_d12_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 154/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 154/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0008__diabetes__raw_path_union__rf100_d8_pv1e-05_dt6_s42
+START 0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27
+  baseline progress: 201/360 (digits | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+DONE 0006__diabetes__path_bag__rf100_d8_pv1e-05_dt6_s42
+START 0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27
+  baseline progress: 201/360 (digits | rf100_d12_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 360/360 (digits | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0009__digits__path_bag__rf100_d12_pv1e-05_dt6_s42
+START 0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: ionosphere ===
+[1/1] ionosphere__trtrain_core_validation__evtest__rf20_d8_pv1e-05_dt6_s27__path_bag
+  baseline progress: 1/71 (ionosphere | rf20_d8_pv1e-05_dt6_s27 | path_bag)
+  baseline progress: 71/71 (ionosphere | rf20_d8_pv1e-05_dt6_s27 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 360/360 (digits | rf100_d12_pv0.0001_dt6_s42 | raw_path_union)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: ionosphere ===
+[1/1] ionosphere__trtrain_core_validation__evtest__rf20_d8_pv1e-05_dt6_s27__random_same_size_path
+  baseline progress: 1/71 (ionosphere | rf20_d8_pv1e-05_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+DONE 0012__ionosphere__path_bag__rf20_d8_pv1e-05_dt6_s27
+START 0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27
+  baseline progress: 71/71 (ionosphere | rf20_d8_pv1e-05_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+DONE 0011__digits__raw_path_union__rf100_d12_pv0.0001_dt6_s42
+START 0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: ionosphere ===
+[1/1] ionosphere__trtrain_core_validation__evtest__rf20_d8_pv0.0001_dt6_s27__raw_path_union
+  baseline progress: 1/71 (ionosphere | rf20_d8_pv0.0001_dt6_s27 | raw_path_union)
+DONE 0013__ionosphere__random_same_size_path__rf20_d8_pv1e-05_dt6_s27
+START 0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27
+  baseline progress: 71/71 (ionosphere | rf20_d8_pv0.0001_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 154/154 (diabetes | rf100_d8_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0014__ionosphere__raw_path_union__rf20_d8_pv0.0001_dt6_s27
+START 0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: iris ===
+[1/1] iris__trtrain_core_validation__evtest__rf20_d4_pv0.0001_dt6_s27__path_bag
+  baseline progress: 1/30 (iris | rf20_d4_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 30/30 (iris | rf20_d4_pv0.0001_dt6_s27 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+DONE 0007__diabetes__random_same_size_path__rf100_d8_pv1e-05_dt6_s42
+START 0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: iris ===
+[1/1] iris__trtrain_core_validation__evtest__rf20_d4_pv0.0001_dt6_s27__random_same_size_path
+  baseline progress: 1/30 (iris | rf20_d4_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 30/30 (iris | rf20_d4_pv0.0001_dt6_s27 | random_same_size_path)
+DONE 0015__iris__path_bag__rf20_d4_pv0.0001_dt6_s27
+START 0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: iris ===
+[1/1] iris__trtrain_core_validation__evtest__rf20_d4_pv0.0001_dt6_s27__raw_path_union
+  baseline progress: 1/30 (iris | rf20_d4_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 30/30 (iris | rf20_d4_pv0.0001_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+DONE 0016__iris__random_same_size_path__rf20_d4_pv0.0001_dt6_s27
+START 0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: isolet ===
+[1/1] isolet__trtrain_core_validation__evtest__rf100_dunlimited_pv0.0001_dt6_s27__path_bag
+DONE 0017__iris__raw_path_union__rf20_d4_pv0.0001_dt6_s27
+START 0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: isolet ===
+[1/1] isolet__trtrain_core_validation__evtest__rf100_dunlimited_pv0.0001_dt6_s27__random_same_size_path
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: isolet ===
+[1/1] isolet__trtrain_core_validation__evtest__rf100_dunlimited_pv0.0001_dt6_s27__raw_path_union
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: madelon ===
+[1/1] madelon__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s27__path_bag
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: madelon ===
+[1/1] madelon__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s27__random_same_size_path
+  baseline progress: 1/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | path_bag)
+  baseline progress: 1/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | random_same_size_path)
+  baseline progress: 201/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | path_bag)
+  baseline progress: 401/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | path_bag)
+  baseline progress: 201/360 (digits | rf100_d12_pv1e-05_dt6_s42 | random_same_size_path)
+  baseline progress: 1/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 520/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+DONE 0021__madelon__path_bag__rf100_dunlimited_pv1e-05_dt6_s27
+START 0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27
+  baseline progress: 401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 1/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: madelon ===
+[1/1] madelon__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s27__raw_path_union
+  baseline progress: 1/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 601/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 801/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 1/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | raw_path_union)
+  baseline progress: 201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 1001/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 201/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | raw_path_union)
+  baseline progress: 1201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 401/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | raw_path_union)
+  baseline progress: 1401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+  baseline progress: 520/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 601/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+DONE 0023__madelon__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s27
+START 0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 1560/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+DONE 0018__isolet__path_bag__rf100_dunlimited_pv0.0001_dt6_s27
+START 0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42
+  baseline progress: 360/360 (digits | rf100_d12_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: phoneme ===
+[1/1] phoneme__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s42__path_bag
+  baseline progress: 801/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+DONE 0010__digits__random_same_size_path__rf100_d12_pv1e-05_dt6_s42
+START 0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 1/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: phoneme ===
+[1/1] phoneme__trtrain_core_validation__evtest__rf100_dunlimited_pv0.0001_dt6_s42__random_same_size_path
+  baseline progress: 1/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: phoneme ===
+[1/1] phoneme__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s42__raw_path_union
+  baseline progress: 1001/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 201/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 1201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 401/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 201/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 601/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 201/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | random_same_size_path)
+  baseline progress: 1401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+  baseline progress: 401/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 801/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1560/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 1001/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+DONE 0020__isolet__raw_path_union__rf100_dunlimited_pv0.0001_dt6_s27
+START 0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 601/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 1081/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0024__phoneme__path_bag__rf100_dunlimited_pv1e-05_dt6_s42
+START 0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: qsar-biodeg ===
+[1/1] qsar-biodeg__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s42__path_bag
+  baseline progress: 1/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 801/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: qsar-biodeg ===
+[1/1] qsar-biodeg__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s42__random_same_size_path
+  baseline progress: 1/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+  baseline progress: 201/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 211/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 1001/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+DONE 0027__qsar-biodeg__path_bag__rf100_dunlimited_pv1e-05_dt6_s42
+START 0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 1081/1081 (phoneme | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0026__phoneme__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42
+START 0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: qsar-biodeg ===
+[1/1] qsar-biodeg__trtrain_core_validation__evtest__rf100_dunlimited_pv1e-05_dt6_s42__raw_path_union
+  baseline progress: 1/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: segment ===
+[1/1] segment__trtrain_core_validation__evtest__rf100_d12_pv1e-05_dt6_s42__path_bag
+  baseline progress: 1/462 (segment | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 201/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 211/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0029__qsar-biodeg__raw_path_union__rf100_dunlimited_pv1e-05_dt6_s42
+START 0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42
+  baseline progress: 201/462 (segment | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 401/462 (segment | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: segment ===
+[1/1] segment__trtrain_core_validation__evtest__rf100_d12_pv0.0001_dt6_s42__random_same_size_path
+  baseline progress: 462/462 (segment | rf100_d12_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1/462 (segment | rf100_d12_pv0.0001_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 201/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+DONE 0030__segment__path_bag__rf100_d12_pv1e-05_dt6_s42
+START 0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42
+  baseline progress: 211/211 (qsar-biodeg | rf100_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0028__qsar-biodeg__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s42
+START 0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: segment ===
+[1/1] segment__trtrain_core_validation__evtest__rf100_d12_pv1e-05_dt6_s42__raw_path_union
+  baseline progress: 1/462 (segment | rf100_d12_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 201/462 (segment | rf100_d12_pv1e-05_dt6_s42 | raw_path_union)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: spambase ===
+[1/1] spambase__trtrain_core_validation__evtest__rf50_dunlimited_pv1e-05_dt6_s42__path_bag
+  baseline progress: 1/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 401/462 (segment | rf100_d12_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 462/462 (segment | rf100_d12_pv1e-05_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+  baseline progress: 201/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+DONE 0032__segment__raw_path_union__rf100_d12_pv1e-05_dt6_s42
+START 0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42
+  baseline progress: 401/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 401/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | random_same_size_path)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: spambase ===
+[1/1] spambase__trtrain_core_validation__evtest__rf50_dunlimited_pv0.0001_dt6_s42__random_same_size_path
+  baseline progress: 601/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 1/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 201/462 (segment | rf100_d12_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 801/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 921/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0033__spambase__path_bag__rf50_dunlimited_pv1e-05_dt6_s42
+START 0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: spambase ===
+[1/1] spambase__trtrain_core_validation__evtest__rf50_dunlimited_pv1e-05_dt6_s42__raw_path_union
+  baseline progress: 1/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 201/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 201/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 401/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 520/520 (madelon | rf100_dunlimited_pv1e-05_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 601/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 401/462 (segment | rf100_d12_pv0.0001_dt6_s42 | random_same_size_path)
+DONE 0022__madelon__random_same_size_path__rf100_dunlimited_pv1e-05_dt6_s27
+START 0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 801/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+  baseline progress: 462/462 (segment | rf100_d12_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 921/921 (spambase | rf50_dunlimited_pv1e-05_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0031__segment__random_same_size_path__rf100_d12_pv0.0001_dt6_s42
+START 0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: vehicle ===
+[1/1] vehicle__trtrain_core_validation__evtest__rf20_dunlimited_pv1e-05_dt6_s42__path_bag
+  baseline progress: 1/170 (vehicle | rf20_dunlimited_pv1e-05_dt6_s42 | path_bag)
+DONE 0035__spambase__raw_path_union__rf50_dunlimited_pv1e-05_dt6_s42
+START 0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42
+  baseline progress: 170/170 (vehicle | rf20_dunlimited_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0036__vehicle__path_bag__rf20_dunlimited_pv1e-05_dt6_s42
+START 0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: vehicle ===
+[1/1] vehicle__trtrain_core_validation__evtest__rf20_dunlimited_pv1e-05_dt6_s42__random_same_size_path
+  baseline progress: 1/170 (vehicle | rf20_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: vehicle ===
+[1/1] vehicle__trtrain_core_validation__evtest__rf20_dunlimited_pv0.0001_dt6_s42__raw_path_union
+  baseline progress: 1/170 (vehicle | rf20_dunlimited_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 170/170 (vehicle | rf20_dunlimited_pv0.0001_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: wdbc ===
+[1/1] wdbc__trtrain_core_validation__evtest__rf20_d8_pv1e-05_dt6_s27__path_bag
+  baseline progress: 1/114 (wdbc | rf20_d8_pv1e-05_dt6_s27 | path_bag)
+DONE 0038__vehicle__raw_path_union__rf20_dunlimited_pv0.0001_dt6_s42
+START 0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27
+  baseline progress: 114/114 (wdbc | rf20_d8_pv1e-05_dt6_s27 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+  baseline progress: 170/170 (vehicle | rf20_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0039__wdbc__path_bag__rf20_d8_pv1e-05_dt6_s27
+START 0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27
+  baseline progress: 201/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+DONE 0037__vehicle__random_same_size_path__rf20_dunlimited_pv1e-05_dt6_s42
+START 0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/checkpoints_baselines
+
+=== DATASET: wdbc ===
+[1/1] wdbc__trtrain_core_validation__evtest__rf20_d8_pv1e-05_dt6_s27__random_same_size_path
+  baseline progress: 1/114 (wdbc | rf20_d8_pv1e-05_dt6_s27 | random_same_size_path)
+  baseline progress: 114/114 (wdbc | rf20_d8_pv1e-05_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27/checkpoints_baselines
+
+=== DATASET: wdbc ===
+[1/1] wdbc__trtrain_core_validation__evtest__rf20_d8_pv0.0001_dt6_s27__raw_path_union
+  baseline progress: 1/114 (wdbc | rf20_d8_pv0.0001_dt6_s27 | raw_path_union)
+DONE 0040__wdbc__random_same_size_path__rf20_d8_pv1e-05_dt6_s27
+START 0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42
+  baseline progress: 114/114 (wdbc | rf20_d8_pv0.0001_dt6_s27 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: wine ===
+[1/1] wine__trtrain_core_validation__evtest__rf50_d8_pv1e-05_dt6_s42__path_bag
+  baseline progress: 1/36 (wine | rf50_d8_pv1e-05_dt6_s42 | path_bag)
+  baseline progress: 36/36 (wine | rf50_d8_pv1e-05_dt6_s42 | path_bag)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0041__wdbc__raw_path_union__rf20_d8_pv0.0001_dt6_s27
+DONE 0042__wine__path_bag__rf50_d8_pv1e-05_dt6_s42
+START 0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42/checkpoints_baselines
+
+=== DATASET: wine ===
+[1/1] wine__trtrain_core_validation__evtest__rf50_dunlimited_pv1e-05_dt6_s42__random_same_size_path
+  baseline progress: 1/36 (wine | rf50_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+  baseline progress: 36/36 (wine | rf50_dunlimited_pv1e-05_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42/dataset_overview_baselines.csv
+DONE 0043__wine__random_same_size_path__rf50_dunlimited_pv1e-05_dt6_s42
+Found 0 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42/checkpoints_baselines
+
+=== DATASET: wine ===
+[1/1] wine__trtrain_core_validation__evtest__rf50_d12_pv0.0001_dt6_s42__raw_path_union
+  baseline progress: 1/36 (wine | rf50_d12_pv0.0001_dt6_s42 | raw_path_union)
+  baseline progress: 36/36 (wine | rf50_d12_pv0.0001_dt6_s42 | raw_path_union)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+DONE 0044__wine__raw_path_union__rf50_d12_pv0.0001_dt6_s42
+  baseline progress: 401/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 601/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 401/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 801/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 921/921 (spambase | rf50_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+DONE 0034__spambase__random_same_size_path__rf50_dunlimited_pv0.0001_dt6_s42
+  baseline progress: 601/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 801/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 1001/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+  baseline progress: 601/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 1081/1081 (phoneme | rf100_dunlimited_pv0.0001_dt6_s42 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42/dataset_overview_baselines.csv
+DONE 0025__phoneme__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s42
+  baseline progress: 801/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 1001/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 1201/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 1401/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+  baseline progress: 1560/1560 (isolet | rf100_dunlimited_pv0.0001_dt6_s27 | random_same_size_path)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/path_controls_final_test/runs/0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27/dataset_overview_baselines.csv
+DONE 0019__isolet__random_same_size_path__rf100_dunlimited_pv0.0001_dt6_s27
+Saved: experiments_local_explanation/results_journal_v1/path_controls_final_test/summary_selected_test.csv
+Saved: experiments_local_explanation/results_journal_v1/path_controls_final_test/per_sample_selected_test.csv

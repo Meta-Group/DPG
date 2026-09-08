@@ -1,0 +1,114 @@
+# Journal revision experiment protocol.
+#
+# This file is intentionally plain YAML so it can be read by humans and by
+# lightweight scripts. The current experiment runners still receive CLI flags;
+# this config is the registered source of truth for the journal_v1 protocol.
+
+protocol:
+  name: journal_v1
+  created_for: JOURNAL_paper
+  prepared_data_dir: experiments_local_explanation/data_numeric
+  output_root: experiments_local_explanation/results_journal_v1
+  split_registry: experiments_local_explanation/results_journal_v1/splits/split_registry.json
+  split_summary: experiments_local_explanation/results_journal_v1/splits/split_summary.csv
+  split_seed: 20260617
+  validation_size_from_existing_train: 0.20
+  final_test_policy: keep_existing_prepared_test_split_untouched
+
+datasets:
+  curated_15:
+    - banknote-authentication
+    - breast_cancer
+    - diabetes
+    - digits
+    - ionosphere
+    - iris
+    - isolet
+    - madelon
+    - phoneme
+    - qsar-biodeg
+    - segment
+    - spambase
+    - vehicle
+    - wdbc
+    - wine
+  optional_prepared_expansion:
+    - optdigits
+    - satimage
+    - wine_quality
+  smoke:
+    - iris
+    - vehicle
+    - spambase
+
+random_forest_main:
+  n_estimators: [20, 50, 100]
+  max_depth: [4, 8, 12, null]
+  seeds: [27, 42, 100, 101, 102, 103, 104, 105, 106, 107]
+  rf_n_jobs: 1
+
+dpg:
+  graph_construction_modes:
+    - aggregated_transitions
+    - execution_trace
+  perc_var: [0.0001, 0.00001]
+  decimal_threshold: [6]
+  local_evidence:
+    variant: top_competitor
+    base_lambda: 0.8
+
+baselines:
+  methods:
+    - shap
+    - lime
+    - anchors
+    - tree_path
+    - lore
+    - raw_path_union
+    - path_bag
+    - random_same_size_path
+  diagnostic_methods:
+    - ice
+  shap_background_size: 200
+  lime_num_features: 20
+  lime_num_samples: 1000
+  ice_grid_points: 21
+  anchor_precision_target: 0.95
+  anchor_max_rule_len: 4
+  anchor_max_candidates: 12
+  lore_neighborhood_size: 512
+  lore_max_depth: 4
+  lore_min_samples_leaf: 10
+  lore_neighborhood_scale: 0.5
+
+selection:
+  split: validation
+  dpg_primary_metric: local_matches_model_rate
+  dpg_tie_breakers:
+    - avg_edge_recall
+    - avg_edge_precision
+    - avg_recombination_rate_ascending
+    - avg_explanation_confidence
+  baseline_primary_metric: local_matches_model_rate
+  baseline_tie_breakers:
+    - local_accuracy
+    - avg_score_margin_pred_vs_competitor
+    - avg_runtime_ms_ascending
+
+reporting:
+  final_split: test
+  uncertainty:
+    confidence_interval: 0.95
+    bootstrap_samples: 10000
+  statistical_tests:
+    omnibus: friedman
+    pairwise: wilcoxon_signed_rank
+    correction: holm
+  required_tables:
+    - baseline_mapping_protocol
+    - validation_selected_configs
+    - final_shared_metrics_with_ci
+    - dpg_structural_diagnostics_with_ci
+    - diagnostic_value_error_disagreement
+    - critical_node_conditional_validation
+    - scalability_runtime_size

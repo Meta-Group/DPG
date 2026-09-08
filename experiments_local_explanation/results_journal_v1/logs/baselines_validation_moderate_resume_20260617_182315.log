@@ -1,0 +1,812 @@
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/banknote-authentication --datasets banknote-authentication --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/breast_cancer --datasets breast_cancer --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/diabetes --datasets diabetes --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/digits --datasets digits --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/ionosphere --datasets ionosphere --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/iris --datasets iris --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/isolet --datasets isolet --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/madelon --datasets madelon --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/phoneme --datasets phoneme --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/ionosphere/checkpoints_baselines
+
+=== DATASET: ionosphere ===
+[1/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] ionosphere__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/diabetes/checkpoints_baselines
+
+=== DATASET: diabetes ===
+[1/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] diabetes__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/breast_cancer/checkpoints_baselines
+
+=== DATASET: breast_cancer ===
+[1/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] breast_cancer__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/iris/checkpoints_baselines
+
+=== DATASET: iris ===
+[1/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] iris__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] iris__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/banknote-authentication/checkpoints_baselines
+
+=== DATASET: banknote-authentication ===
+[1/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] banknote-authentication__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/digits/checkpoints_baselines
+
+=== DATASET: digits ===
+[1/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] digits__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] digits__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/iris/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/iris/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/iris/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/ionosphere/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/ionosphere/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/ionosphere/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/breast_cancer/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/breast_cancer/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/breast_cancer/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/diabetes/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/diabetes/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/diabetes/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/banknote-authentication/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/banknote-authentication/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/banknote-authentication/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/digits/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/digits/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/digits/dataset_overview_baselines.csv
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/qsar-biodeg/checkpoints_baselines
+
+=== DATASET: qsar-biodeg ===
+[1/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] qsar-biodeg__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/phoneme/checkpoints_baselines
+
+=== DATASET: phoneme ===
+[1/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] phoneme__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/spambase/checkpoints_baselines
+
+=== DATASET: spambase ===
+[1/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] spambase__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] spambase__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/madelon/checkpoints_baselines
+
+=== DATASET: madelon ===
+[1/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] madelon__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] madelon__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/segment/checkpoints_baselines
+
+=== DATASET: segment ===
+[1/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] segment__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] segment__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 16 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/isolet/checkpoints_baselines
+
+=== DATASET: isolet ===
+[1/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] isolet__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/qsar-biodeg/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/qsar-biodeg/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/qsar-biodeg/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/segment/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/segment/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/segment/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/madelon/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/madelon/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/madelon/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/spambase/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/spambase/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/spambase/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/phoneme/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/phoneme/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/phoneme/dataset_overview_baselines.csv
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wine/checkpoints_baselines
+
+=== DATASET: wine ===
+[1/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] wine__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] wine__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wine/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wine/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wine/dataset_overview_baselines.csv
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/vehicle/checkpoints_baselines
+
+=== DATASET: vehicle ===
+[1/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] vehicle__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+Found 20 completed checkpoints in /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wdbc/checkpoints_baselines
+
+=== DATASET: wdbc ===
+[1/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__shap
+  -> checkpoint exists; skipping
+[2/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__lime
+  -> checkpoint exists; skipping
+[3/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[4/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[5/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s27__ice
+  -> checkpoint exists; skipping
+[6/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__shap
+  -> checkpoint exists; skipping
+[7/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__lime
+  -> checkpoint exists; skipping
+[8/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[9/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[10/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv0.0001_dt6_s42__ice
+  -> checkpoint exists; skipping
+[11/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__shap
+  -> checkpoint exists; skipping
+[12/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__lime
+  -> checkpoint exists; skipping
+[13/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__anchors
+  -> checkpoint exists; skipping
+[14/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__tree_path
+  -> checkpoint exists; skipping
+[15/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s27__ice
+  -> checkpoint exists; skipping
+[16/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__shap
+  -> checkpoint exists; skipping
+[17/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__lime
+  -> checkpoint exists; skipping
+[18/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  -> checkpoint exists; skipping
+[19/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  -> checkpoint exists; skipping
+[20/20] wdbc__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  -> checkpoint exists; skipping
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/vehicle/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/vehicle/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/vehicle/dataset_overview_baselines.csv
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wdbc/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wdbc/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wdbc/dataset_overview_baselines.csv
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | lime)
+[18/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__anchors
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | anchors)
+[19/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__tree_path
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | tree_path)
+[20/20] isolet__trtrain_core__evvalidation__rf20_d4_pv1e-05_dt6_s42__ice
+  baseline progress: 1/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 301/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 401/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 501/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 601/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 701/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 801/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 901/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 1001/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 1101/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 1201/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+  baseline progress: 1248/1248 (isolet | rf20_d4_pv1e-05_dt6_s42 | ice)
+
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/isolet/summary_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/isolet/per_sample_baselines.csv
+Saved: /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/isolet/dataset_overview_baselines.csv
+/usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/qsar-biodeg --datasets qsar-biodeg --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/segment --datasets segment --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/spambase --datasets spambase --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/vehicle --datasets vehicle --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wdbc --datasets wdbc --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_baseline_experiments.py --data_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/data_numeric --out_dir /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset/wine --datasets wine --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry /home/sbarbonjr/projects/DPG/experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation
+Native thread caps: OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+START banknote-authentication
+START breast_cancer
+START diabetes
+START digits
+START ionosphere
+START iris
+DONE banknote-authentication
+DONE breast_cancer
+DONE diabetes
+DONE digits
+DONE ionosphere
+DONE iris
+START isolet
+START madelon
+START phoneme
+START qsar-biodeg
+START segment
+START spambase
+DONE qsar-biodeg
+START vehicle
+DONE madelon
+DONE segment
+START wdbc
+START wine
+DONE phoneme
+DONE spambase
+DONE wine
+DONE vehicle
+DONE wdbc
+DONE isolet
+Journal launcher
+  kind=baselines
+  phase=validation
+  train_split=train_core
+  eval_split=validation
+  parallel=6
+  rf_n_jobs=1
+  native thread caps: OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+CMD: /usr/bin/python3 /home/sbarbonjr/projects/DPG/experiments_local_explanation/run_per_dataset_baselines.py --data_dir experiments_local_explanation/data_numeric --out_root experiments_local_explanation/results_journal_v1/baselines_validation_moderate_by_dataset --datasets banknote-authentication,breast_cancer,diabetes,digits,ionosphere,iris,isolet,madelon,phoneme,qsar-biodeg,segment,spambase,vehicle,wdbc,wine --parallel 6 --methods shap,lime,anchors,tree_path,ice --n_estimators 20 --rf_n_jobs 1 --max_depth 4 --perc_var 0.0001,0.00001 --decimal_threshold 6 --seeds 27,42 --max_test_samples 0 --progress_every 100 --shap_background_size 200 --lime_num_features 20 --lime_num_samples 1000 --ice_grid_points 21 --anchor_precision_target 0.95 --anchor_max_rule_len 4 --anchor_max_candidates 12 --split_registry experiments_local_explanation/results_journal_v1/splits/split_registry.json --train_split train_core --eval_split validation --native_threads 1
