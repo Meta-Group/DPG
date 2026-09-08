@@ -53,6 +53,10 @@ families, learner counts 5/10/25, seeds 0/1/2, and decimal thresholds
 1/2/4/6/auto. It writes `e0_e1_validation.csv` and reports identity, sink,
 edge-mass, misroute, and local-context checks.
 
+E2 uses 375 cells across the same datasets and model families, learner counts
+5/10/25/50/100, and seeds 0–4. It compares k=1 with auto-k for phantom path
+rate/mass, graph size, construction time, and enumeration exactness.
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
