@@ -96,10 +96,9 @@ def main():
     with args.output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
-        with ProcessPoolExecutor(max_workers=args.workers) as pool:
-            futures = [pool.submit(run_task, task) for task in tasks]
-            for future in as_completed(futures):
-                row = future.result()
+        if args.workers == 1:
+            results = (run_task(task) for task in tasks)
+            for row in results:
                 writer.writerow(row)
                 handle.flush()
                 completed += 1
@@ -108,6 +107,19 @@ def main():
                     message = f"DPG E4 progress: {completed}/{len(tasks)} complete; {ok} ok; output={args.output}"
                     print(message, flush=True)
                     send_message(message)
+        else:
+            with ProcessPoolExecutor(max_workers=args.workers) as pool:
+                futures = [pool.submit(run_task, task) for task in tasks]
+                for future in as_completed(futures):
+                    row = future.result()
+                    writer.writerow(row)
+                    handle.flush()
+                    completed += 1
+                    ok += row["status"] == "ok"
+                    if completed % args.notify_every == 0 or completed == len(tasks):
+                        message = f"DPG E4 progress: {completed}/{len(tasks)} complete; {ok} ok; output={args.output}"
+                        print(message, flush=True)
+                        send_message(message)
     message = f"DPG E4 finished: {ok}/{len(tasks)} ok; output={args.output}"
     print(message, flush=True)
     send_message(message)
