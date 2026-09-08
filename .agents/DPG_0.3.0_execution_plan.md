@@ -84,6 +84,23 @@ cell-level tested, smoke-tested end to end on a 2-cell grid; the full
 (`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) once E4 releases the
 machine, since both are CPU-bound benchmark runs.
 
+E6 (regression scope) found that regression leaves (`"Pred <value>"`) are
+already treated as terminal sinks by `_context_node`, so DPG-k mechanically
+builds a graph for regressors at any `context_order` without raising.
+However "one sink per output" is not a defined invariant there the way it is
+for classification: a regression sink is only as unique as its 2-decimal
+rounded value, an artifact of label rounding rather than a modeled output
+count. Investigating this surfaced a real, pre-existing, context_order
+-independent bug: `GraphMetrics.extract_communities` assumed at least one
+classifier "Class " sink to anchor its absorbing Markov chain, so any
+regressor made the underlying solve singular and raised an opaque
+`numpy.linalg.LinAlgError`. Decision: regression sink/community semantics
+are explicitly out of scope for 0.3.0 (documented in CHANGELOG/README); the
+`extract_communities` crash is fixed defensively (raises a clear
+`ValueError` naming the requirement) since it is a bug independent of any
+DPG-k semantic decision. No regression numeric output or classifier
+behavior changed.
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
