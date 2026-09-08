@@ -21,7 +21,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
 | C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
-| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | queued |
+| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | queued; E4 complete, E5 running |
 
 ## Coordination rules
 
@@ -64,6 +64,8 @@ irrelevant features.
 E4 uses 16 resource-intensive cells on S5 (100k×50) and S6 (10k×500), with
 Random Forest and Extra Trees at 10/25 learners and seeds 0/1. It records k=1
 and auto-k construction time, graph size, node ratio, and violation history.
+The completed audit contains 16/16 successful unique cells, including the
+isolated S5 Extra Trees retry cells in `e4_s5_extratrees.csv`.
 
 E5 (`scripts/run_dpg030_e5_lrc.py`, `scripts/lrc_aggregation.py`) compares
 execution-trace k=1 against auto-k on iris/wine/breast_cancer x 5 ensemble
@@ -80,9 +82,9 @@ not be picked by which correlates best, or the comparison becomes circular.
 with `status=skipped_no_feature_importances` and graph-construction metrics
 still populated, never omitted. Status: runner implemented, unit- and
 cell-level tested, smoke-tested end to end on a 2-cell grid; the full
-225-cell grid is queued to run on a separate output path
-(`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) once E4 releases the
-machine, since both are CPU-bound benchmark runs.
+225-cell grid is running on a separate output path
+(`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) now that E4 has
+released the machine, with two workers to limit memory pressure.
 
 E6 (regression scope) found that regression leaves (`"Pred <value>"`) are
 already treated as terminal sinks by `_context_node`, so DPG-k mechanically
