@@ -101,6 +101,24 @@ are explicitly out of scope for 0.3.0 (documented in CHANGELOG/README); the
 DPG-k semantic decision. No regression numeric output or classifier
 behavior changed.
 
+E7 (downstream compatibility) exercised every consumer named above --
+`plot_dpg`, class-boundary extraction, communities, `DPGExplainer`
+global/local explanations, and faithfulness evaluation -- at
+`context_order` 2 and `"auto"`, for RandomForest and GradientBoosting on
+iris. All pass unmodified; no production code changes were needed for
+context_order compatibility itself. No DPG-IF/DPG-CF consumers exist in
+this codebase. Two issues were found and deliberately left unfixed as
+outside E7's scope, because both reproduce identically at the k=1 default
+and are unrelated to context_order: `evaluate_faithfulness()` on
+`GradientBoostingClassifier` fails inside sklearn's own internals because
+`SklearnEnsembleNormalizer` flattens `estimators_` for DPG's traversal and
+`evaluate_faithfulness` calls `.predict()` on that same flattened copy
+(tracked via a strict `xfail` test so it is not silently lost); and
+`plot_dpg` does not visually disambiguate two nodes that share a predicate
+label but differ in context in static PNG/PDF renders (the DOT `tooltip`
+carries context but is invisible outside interactive viewers --
+`get_node_context(node)` remains the documented way to recover it).
+
 ## Long-running command
 
 Run from the repository root and disconnect safely:
