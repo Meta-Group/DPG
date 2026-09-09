@@ -59,18 +59,42 @@ def test_regressor_execution_trace_builds_without_crashing(context_order):
 
 def test_regressor_sink_count_is_not_a_fixed_output_count():
     """Sink count for regression tracks rounding collisions, not a fixed
-    'number of outputs' the way classification tracks class count."""
+    'number of outputs' the way classification tracks class count.
+
+    The earlier version of this test only asserted
+    ``0 < n_sinks <= n_leaves``, which is trivially true for any
+    non-empty label set and would not catch a regression that silently
+    collapsed every regression sink to a single label. This version
+    additionally asserts that the sinks are exactly the set of leaves
+    rounded to 2 decimals (the implementation's hard-coded leaf-rounding
+    precision, see ``_trace_execution_labels_for_tree`` in dpg/core.py):
+    a regression that changed that rounding or dropped it altogether
+    would change the set of strings, and this test would catch it.
+    """
     X, y, feature_names = _diabetes()
     model = RandomForestRegressor(n_estimators=10, random_state=0, n_jobs=1).fit(X, y)
     dpg = DecisionPredicateGraph(model, feature_names, dpg_config=_config(1))
-    graph, nodes = dpg.to_networkx(dpg.fit(X))
+    _, nodes = dpg.to_networkx(dpg.fit(X))
 
     distinct_sinks = {label for _, label in nodes if str(label).startswith("Pred ")}
     total_leaves = sum(int(tree.tree_.n_leaves) for tree in model.estimators_)
-    # There is no guarantee these match; regression sinks are an artifact of
-    # rounding collisions, not a modeled invariant. Document the relationship
-    # instead of asserting equality with any "number of outputs".
+
+    # Sanity: at least one sink, never more than total leaves.
     assert 0 < len(distinct_sinks) <= total_leaves
+
+    # The sinks are exactly ``Pred <leaf_value rounded to 2 decimals>``.
+    # A regression that changed the leaf-rounding precision or dropped
+    # the rounding altogether would change the set of strings.
+    expected_sinks = {
+        f"Pred {round(float(tree.tree_.value[leaf_id][0][0]), 2)}"
+        for tree in model.estimators_
+        for leaf_id in range(tree.tree_.node_count)
+        if tree.tree_.children_left[leaf_id] == -1  # -1 children_left marks a leaf
+    }
+    assert distinct_sinks == expected_sinks, (
+        "Regression sinks must equal the set of 2-decimal-rounded leaf "
+        "values; a mismatch means the rounding pipeline changed."
+    )
 
 
 def test_regressor_class_boundaries_are_empty_by_design():
