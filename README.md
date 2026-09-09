@@ -6,8 +6,9 @@
 [![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
-| ![DPG logo](https://github.com/Meta-Group/DPG/blob/main/DPG.png) |
-|:--:|
+<p align="center">
+  <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" alt="DPG logo" width="300">
+</p>
 
 
 DPG is a model-agnostic framework for global and local explanation of tree-based ensemble models.
