@@ -21,7 +21,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
 | C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
-| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | queued; E4 complete, E5 running |
+| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | in progress; E4/E5 complete |
 
 ## Coordination rules
 
@@ -56,6 +56,11 @@ edge-mass, misroute, and local-context checks.
 E2 uses 375 cells across the same datasets and model families, learner counts
 5/10/25/50/100, and seeds 0–4. It compares k=1 with auto-k for phantom path
 rate/mass, graph size, construction time, and enumeration exactness.
+All 375 cells completed successfully. Two auto-k rows are marked
+`enumeration_exact=False`; both reached the fixed 20,000-path budget exactly,
+so these are censored measurements rather than confirmed phantom-path
+failures. They remain a limitation of the audit metric and should not be
+interpreted as proof of a routing defect.
 
 E3 uses 300 cells over controlled synthetic S1–S4 datasets, varying only
 irrelevant-feature count and label noise, to test whether auto-k grows with
@@ -82,9 +87,11 @@ not be picked by which correlates best, or the comparison becomes circular.
 with `status=skipped_no_feature_importances` and graph-construction metrics
 still populated, never omitted. Status: runner implemented, unit- and
 cell-level tested, smoke-tested end to end on a 2-cell grid; the full
-225-cell grid is running on a separate output path
-(`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) now that E4 has
-released the machine, with two workers to limit memory pressure.
+225-cell grid completed successfully on the separate output path
+(`experiments/dpg_0_3_0/results/e5_lrc_alignment.csv`) with two workers to
+limit memory pressure. The audit contains 180 aligned rows and 45 expected
+`skipped_no_feature_importances` Bagging rows. Mean Spearman correlation for
+the shipped `sum` aggregation was 0.8468 at k=1 and 0.9320 at auto-k.
 
 E6 (regression scope) found that regression leaves (`"Pred <value>"`) are
 already treated as terminal sinks by `_context_node`, so DPG-k mechanically
