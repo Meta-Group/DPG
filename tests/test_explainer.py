@@ -925,3 +925,74 @@ class TestFaithfulnessEvaluation:
         assert details["n_successful"] == 2
         assert len(details["per_sample"]) == 3
         assert details["per_sample"]["error"].notna().sum() == 1
+
+
+# ---------------------------------------------------------------------------
+# PR #32 additions: explainer stays consistent across context orders, and
+# uses ``builder.get_node_ids_for_trace`` for local node-id mapping.
+# ---------------------------------------------------------------------------
+
+
+def _config(mode="execution_trace", context_order=1, decimal_threshold=6, perc_var=1e-9, n_jobs=1):
+    return {
+        "dpg": {
+            "default": {
+                "perc_var": perc_var,
+                "decimal_threshold": decimal_threshold,
+                "n_jobs": n_jobs,
+            },
+            "graph_construction": {
+                "mode": mode,
+                "context_order": context_order,
+            },
+        }
+    }
+
+
+class TestContextOrderIntegration:
+    """``DPGExplainer.explain_local`` must produce the same routing at any k."""
+
+    def test_local_node_ids_match_builder_helper(self):
+        """Each tree path's node ids must come from
+        ``builder.get_node_ids_for_trace`` (same length as labels)."""
+        from sklearn.datasets import load_iris
+
+        from dpg import DPGExplainer
+
+        iris = load_iris()
+        model = RandomForestClassifier(n_estimators=5, random_state=0, n_jobs=1).fit(
+            iris.data, iris.target
+        )
+        explainer = DPGExplainer(
+            model, iris.feature_names, dpg_config=_config(context_order=2)
+        )
+        explainer.fit(iris.data)
+
+        local = explainer.explain_local(iris.data[0], sample_id=0)
+        for tree_path in local.tree_paths:
+            node_ids = explainer.builder.get_node_ids_for_trace(tree_path.labels)
+            assert len(node_ids) == len(tree_path.labels)
+
+    def test_explain_local_returns_same_votes_across_context_order(self):
+        """Routing is independent of context order -- so local votes
+        (which depend on routing) must not change between k=1 and k=2."""
+        from sklearn.datasets import load_iris
+
+        from dpg import DPGExplainer
+
+        iris = load_iris()
+        model = RandomForestClassifier(n_estimators=5, random_state=0, n_jobs=1).fit(
+            iris.data, iris.target
+        )
+        sample = iris.data[0]
+        truth = {}
+
+        for k in (1, 2):
+            explainer = DPGExplainer(
+                model, iris.feature_names, dpg_config=_config(context_order=k)
+            )
+            explainer.fit(iris.data)
+            local = explainer.explain_local(sample, sample_id=0)
+            truth[k] = (local.majority_vote, dict(local.class_votes))
+
+        assert truth[1] == truth[2]

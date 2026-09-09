@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.datasets import load_iris, load_wine
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
 from dpg.core import DecisionPredicateGraph
@@ -375,3 +375,72 @@ class TestMetricsOnWine:
         assert len(bounds["Class 0"]) == 8
         assert len(bounds["Class 1"]) == 11
         assert len(bounds["Class 2"]) == 9
+
+
+# ---------------------------------------------------------------------------
+# PR #32 addition: extract_communities defensive guard against regression DPGs
+# ---------------------------------------------------------------------------
+
+
+class TestExtractCommunitiesClassifierGuard:
+    """``GraphMetrics.extract_communities`` must still work on classifiers
+    and raise a clear error on regression DPGs (which have only ``Pred ``
+    sinks, no ``Class `` sink)."""
+
+    def test_classifier_dpg_still_returns_communities(self):
+        from sklearn.datasets import load_iris
+
+        from dpg import DPGExplainer
+
+        iris = load_iris()
+        model = RandomForestClassifier(n_estimators=5, random_state=0, n_jobs=1).fit(
+            iris.data, iris.target
+        )
+        explainer = DPGExplainer(
+            model,
+            iris.feature_names,
+            target_names=["0", "1", "2"],
+            dpg_config=_config_for_test(),
+        )
+        explanation = explainer.explain_global(iris.data, communities=True)
+
+        assert explanation.communities is not None
+        assert "Clusters" in explanation.communities
+        assert "Probability" in explanation.communities
+        assert "Confidence Interval" in explanation.communities
+
+    def test_direct_call_on_regression_dpg_raises_clear_error(self):
+        """``GraphMetrics.extract_communities`` must raise a clear
+        ``ValueError`` instead of an opaque numpy LinAlgError when no
+        ``Class ...`` sink node is present."""
+        from sklearn.datasets import load_diabetes
+
+        from dpg.core import DecisionPredicateGraph
+
+        X, y = load_diabetes(return_X_y=True)
+        feature_names = [f"f_{i}" for i in range(X.shape[1])]
+        model = RandomForestRegressor(
+            n_estimators=3, max_depth=3, random_state=0, n_jobs=1
+        ).fit(X, y)
+
+        dpg = DecisionPredicateGraph(
+            model, feature_names, dpg_config=_config_for_test()
+        )
+        graph, nodes = dpg.to_networkx(dpg.fit(X))
+
+        df_node_metrics = pd.DataFrame(
+            {"Node": [nid for nid, _ in nodes], "Label": [lbl for _, lbl in nodes]}
+        )
+
+        with pytest.raises(ValueError, match="requires a classifier DPG"):
+            GraphMetrics.extract_communities(graph, df_node_metrics, nodes)
+
+
+def _config_for_test():
+    """Minimal dpg_config for CLI-style tests."""
+    return {
+        "dpg": {
+            "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+            "graph_construction": {"mode": "execution_trace", "context_order": 1},
+        }
+    }
