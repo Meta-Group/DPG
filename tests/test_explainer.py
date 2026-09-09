@@ -6,6 +6,7 @@ and the fit/explain lifecycle.
 """
 
 import re
+from collections import Counter
 
 import numpy as np
 import pandas as pd
@@ -363,36 +364,147 @@ class TestLocalExplanation:
         assert explanation.sample_confidence is not None
         assert expected_keys.issubset(explanation.sample_confidence.keys())
 
-    def test_vote_confidence_and_class_scores_match_class_votes(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0])
+    def test_vote_confidence_and_class_scores_match_class_votes(self, explainer):
+        """Independent oracle: ``class_scores`` must equal the normalised
+        ``class_votes`` dict, ``vote_confidence`` must equal its max, and
+        ``score_margin`` must equal the top-vs-second margin.
 
-        total_votes = sum(explanation.class_votes.values())
-        expected_scores = {
-            label: votes / total_votes
-            for label, votes in explanation.class_votes.items()
-        }
-        assert explanation.sample_confidence["class_scores"] == expected_scores
-        assert explanation.sample_confidence["vote_confidence"] == max(expected_scores.values())
+        The previous version of this test built the expected values from
+        ``explanation.class_votes`` (i.e. the very dict the production
+        code consumes), so it could not detect a regression that broke
+        the relationship between votes and scores. This version uses a
+        hand-built ``DPGTreePathExplanation`` set whose class votes are
+        independently verifiable.
+        """
+        paths = [
+            DPGTreePathExplanation(
+                tree_index=0,
+                tree_prefix="sample0_dt0",
+                labels=["f0 <= 0.5", "Class 0"],
+                node_ids=["1", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.5,
+                mean_bc=0.25,
+                path_confidence=0.7,
+            ),
+            DPGTreePathExplanation(
+                tree_index=1,
+                tree_prefix="sample0_dt1",
+                labels=["f0 > 0.5", "Class 0"],
+                node_ids=["3", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.4,
+                mean_bc=0.15,
+                path_confidence=0.5,
+            ),
+            DPGTreePathExplanation(
+                tree_index=2,
+                tree_prefix="sample0_dt2",
+                labels=["f1 <= 1.5", "Class 1"],
+                node_ids=["4", "5"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.3,
+                mean_bc=0.1,
+                path_confidence=0.4,
+            ),
+        ]
+
+        # class_votes is what the production code will compute from
+        # tree_paths' terminal labels. Asserting on it independently
+        # before passing it in keeps the test honest if the production
+        # vote-counting code itself regresses.
+        expected_votes = Counter(leaf.rsplit(" ", 1)[-1] for path in paths
+                                 for leaf in path.labels[-1:] if leaf.startswith("Class "))
+        assert dict(expected_votes) == {"0": 2, "1": 1}
+
+        sample_confidence = explainer._compute_sample_confidence(
+            paths,
+            {"0": 2, "1": 1},
+            np.asarray([5.1, 3.5, 1.4, 0.2]),
+        )
+
+        total_votes = 3
+        expected_scores = {"0": 2 / total_votes, "1": 1 / total_votes}
+        assert sample_confidence["class_scores"] == pytest.approx(expected_scores)
+        assert sample_confidence["vote_confidence"] == pytest.approx(2 / total_votes)
 
         sorted_scores = sorted(expected_scores.values(), reverse=True)
-        expected_margin = sorted_scores[0] - sorted_scores[1] if len(sorted_scores) > 1 else sorted_scores[0]
-        assert explanation.sample_confidence["score_margin"] == expected_margin
+        expected_margin = sorted_scores[0] - sorted_scores[1]
+        assert sample_confidence["score_margin"] == pytest.approx(expected_margin)
 
-    def test_class_support_equals_summed_path_confidence_by_class(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0])
+    def test_class_support_equals_summed_path_confidence_by_class(self, explainer):
+        """Independent oracle for ``class_support`` aggregation.
 
-        expected_support = {}
-        for path in explanation.tree_paths:
-            leaf = path.labels[-1]
-            if leaf.startswith("Class "):
-                class_name = leaf[len("Class ") :]
-                expected_support[class_name] = expected_support.get(class_name, 0.0) + path.path_confidence
+        Hand-built paths carry known path_confidence values; their sum,
+        grouped by leaf label, must equal the dict the explainer emits.
+        """
+        paths = [
+            DPGTreePathExplanation(
+                tree_index=0,
+                tree_prefix="sample0_dt0",
+                labels=["f0 <= 0.5", "Class 0"],
+                node_ids=["1", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.5,
+                mean_bc=0.25,
+                path_confidence=0.7,
+            ),
+            DPGTreePathExplanation(
+                tree_index=1,
+                tree_prefix="sample0_dt1",
+                labels=["f0 > 0.5", "Class 0"],
+                node_ids=["3", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.4,
+                mean_bc=0.15,
+                path_confidence=0.5,
+            ),
+            DPGTreePathExplanation(
+                tree_index=2,
+                tree_prefix="sample0_dt2",
+                labels=["f1 <= 1.5", "Class 1"],
+                node_ids=["4", "5"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.3,
+                mean_bc=0.1,
+                path_confidence=0.4,
+            ),
+        ]
 
-        assert explanation.sample_confidence["class_support"] == expected_support
+        sample_confidence = explainer._compute_sample_confidence(
+            paths,
+            {"0": 2, "1": 1},
+            np.asarray([5.1, 3.5, 1.4, 0.2]),
+        )
+
+        # Aggregate from the (known) path_confidence values, not from
+        # the explanation object under test.
+        expected_support = {"0": 0.7 + 0.5, "1": 0.4}
+        assert sample_confidence["class_support"] == pytest.approx(expected_support)
 
     def test_evidence_scores_sum_to_one_when_support_exists(self, explainer, iris_model):
         _, X, _, _ = iris_model
@@ -668,13 +780,59 @@ class TestLocalExplanation:
             assert len(path.edge_exists) == max(0, len(path.labels) - 1)
             assert path.path_confidence is not None
 
-    def test_local_path_dataframe_returns_one_row_per_path_label(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0], sample_id=3)
-        df = explainer.local_path_dataframe(explanation)
+    def test_local_path_dataframe_returns_one_row_per_path_label(self, explainer):
+        """Independent oracle: with hand-built paths of known length, the
+        DataFrame's row count must equal ``sum(len(path.labels))``.
 
-        assert len(df) == sum(len(path.labels) for path in explanation.tree_paths)
+        The previous version of this test built the expected count from
+        the same ``explanation.tree_paths`` it was passing in, so the
+        assertion was true by construction.
+        """
+        paths = [
+            DPGTreePathExplanation(
+                tree_index=0,
+                tree_prefix="sample0_dt0",
+                labels=["f0 <= 0.5", "Class 0"],
+                node_ids=["1", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.5,
+                mean_bc=0.25,
+                path_confidence=0.7,
+            ),
+            DPGTreePathExplanation(
+                tree_index=1,
+                tree_prefix="sample0_dt1",
+                labels=["f0 > 0.5", "f1 <= 1.0", "Class 0"],
+                node_ids=["3", "4", "5"],
+                predicate_truths=[True, True],
+                edge_exists=[True, True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.4,
+                mean_bc=0.15,
+                path_confidence=0.5,
+            ),
+        ]
+        hand_built = DPGLocalExplanation(
+            sample_id=42,
+            sample=[0.1, 0.2],
+            tree_paths=paths,
+            graph_validated=True,
+            all_trees_valid=True,
+            majority_vote="0",
+            class_votes={"0": 2},
+            path_mode="execution_trace",
+            sample_confidence={},
+        )
+        df = explainer.local_path_dataframe(hand_built)
+
+        expected_rows = sum(len(path.labels) for path in paths)
+        assert len(df) == expected_rows
 
     def test_local_path_dataframe_has_required_columns(self, explainer, iris_model):
         _, X, _, _ = iris_model
@@ -700,33 +858,136 @@ class TestLocalExplanation:
         ]
         assert list(df.columns) == expected_columns
 
-    def test_local_path_dataframe_rows_are_sorted(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0])
-        df = explainer.local_path_dataframe(explanation)
+    def test_local_path_dataframe_rows_are_sorted(self, explainer):
+        """Independent oracle: tree_paths given out of order must come
+        out sorted by ``(tree_index, step_index)`` in the DataFrame.
 
-        expected_pairs = [
-            (path.tree_index, step_index)
-            for path in sorted(explanation.tree_paths, key=lambda path: path.tree_index)
-            for step_index in range(len(path.labels))
+        The previous version of this test sorted the same ``tree_paths``
+        it then passed to the function, so it could not catch a
+        regression that dropped or scrambled the sort.
+        """
+        paths = [
+            DPGTreePathExplanation(
+                tree_index=2,
+                tree_prefix="sample0_dt2",
+                labels=["f1 <= 1.5", "Class 1"],
+                node_ids=["4", "5"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.3,
+                mean_bc=0.1,
+                path_confidence=0.4,
+            ),
+            DPGTreePathExplanation(
+                tree_index=0,
+                tree_prefix="sample0_dt0",
+                labels=["f0 <= 0.5", "Class 0"],
+                node_ids=["1", "2"],
+                predicate_truths=[True],
+                edge_exists=[True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.5,
+                mean_bc=0.25,
+                path_confidence=0.7,
+            ),
+            DPGTreePathExplanation(
+                tree_index=1,
+                tree_prefix="sample0_dt1",
+                labels=["f0 > 0.5", "f1 <= 1.0", "Class 0"],
+                node_ids=["3", "4", "5"],
+                predicate_truths=[True, True],
+                edge_exists=[True, True],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=True,
+                mean_lrc=0.4,
+                mean_bc=0.15,
+                path_confidence=0.5,
+            ),
         ]
-        assert list(zip(df["tree_index"], df["step_index"])) == expected_pairs
+        hand_built = DPGLocalExplanation(
+            sample_id=42,
+            sample=[0.1, 0.2],
+            tree_paths=paths,
+            graph_validated=True,
+            all_trees_valid=True,
+            majority_vote="0",
+            class_votes={"0": 2, "1": 1},
+            path_mode="execution_trace",
+            sample_confidence={},
+        )
+        df = explainer.local_path_dataframe(hand_built)
 
-    def test_local_path_dataframe_edge_alignment(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0])
-        df = explainer.local_path_dataframe(explanation)
+        pairs = list(zip(df["tree_index"], df["step_index"]))
+        # The function should sort by (tree_index, step_index) ascending.
+        assert pairs == sorted(pairs)
+        # And cover every (tree_index, step_index) pair from the input.
+        # ``paths`` is intentionally given out of order (2, 0, 1), so we
+        # look up by tree_index rather than by list position.
+        labels_by_tree = {path.tree_index: path.labels for path in paths}
+        expected_pairs = [
+            (tree_index, step_index)
+            for tree_index in sorted(labels_by_tree)
+            for step_index in range(len(labels_by_tree[tree_index]))
+        ]
+        assert pairs == expected_pairs
 
-        for path in explanation.tree_paths:
-            path_df = df[df["tree_index"] == path.tree_index].sort_values("step_index")
-            assert path_df.iloc[0]["edge_exists_from_prev"]
-            for step_index in range(1, len(path.labels)):
-                assert (
-                    path_df.iloc[step_index]["edge_exists_from_prev"]
-                    == path.edge_exists[step_index - 1]
-                )
+    def test_local_path_dataframe_edge_alignment(self, explainer):
+        """Independent oracle for ``edge_exists_from_prev``.
+
+        The previous version of this test was tautological for two
+        reasons: the first-row ``edge_exists_from_prev`` is hard-coded
+        ``True`` by the implementation, and subsequent rows were
+        compared to ``path.edge_exists`` from the same explanation
+        object. This version uses a hand-built set of paths with
+        deliberately mixed edge-presence to verify that the column
+        propagates the ``edge_exists`` array faithfully.
+        """
+        paths = [
+            DPGTreePathExplanation(
+                tree_index=0,
+                tree_prefix="sample0_dt0",
+                labels=["f0 <= 0.5", "f1 > 0.5", "Class 0"],
+                node_ids=["1", "2", "3"],
+                predicate_truths=[True, True],
+                # First edge present, second missing (e.g. pruned by
+                # perc_var); this is what the implementation must echo.
+                edge_exists=[True, False],
+                starts_from_root=True,
+                ends_in_leaf=True,
+                graph_path_valid=False,
+                mean_lrc=0.5,
+                mean_bc=0.25,
+                path_confidence=0.7,
+            ),
+        ]
+        hand_built = DPGLocalExplanation(
+            sample_id=42,
+            sample=[0.1, 0.2],
+            tree_paths=paths,
+            graph_validated=True,
+            all_trees_valid=False,
+            majority_vote="0",
+            class_votes={"0": 1},
+            path_mode="execution_trace",
+            sample_confidence={},
+        )
+        df = explainer.local_path_dataframe(hand_built)
+
+        # The first row of each path is the root, with no predecessor,
+        # so ``edge_exists_from_prev`` is hard-coded True by the
+        # implementation. Use ``bool(...)`` to avoid ``is`` comparison
+        # pitfalls with numpy scalar ``np.True_``.
+        path_df = df[df["tree_index"] == 0].sort_values("step_index").reset_index(drop=True)
+        assert bool(path_df.iloc[0]["edge_exists_from_prev"]) is True
+        # Subsequent rows must echo ``path.edge_exists`` step by step.
+        assert bool(path_df.iloc[1]["edge_exists_from_prev"]) == bool(paths[0].edge_exists[0])
+        assert bool(path_df.iloc[2]["edge_exists_from_prev"]) == bool(paths[0].edge_exists[1])
 
     def test_local_path_dataframe_empty_explanation(self):
         exp = DPGExplainer(
@@ -769,21 +1030,53 @@ class TestLocalExplanation:
             "path_confidence",
         ]
 
-    def test_local_path_dataframe_values_match_explanation(self, explainer, iris_model):
-        _, X, _, _ = iris_model
-        explainer.fit(X)
-        explanation = explainer.explain_local(sample=X[0], sample_id=11)
-        df = explainer.local_path_dataframe(explanation)
+    def test_local_path_dataframe_values_match_explanation(self, explainer):
+        """Independent oracle: a path with a known set of fields must
+        produce rows with those same field values, regardless of where
+        it appears in the input list.
 
-        first_path = min(explanation.tree_paths, key=lambda path: path.tree_index)
-        first_row = df[df["tree_index"] == first_path.tree_index].sort_values("step_index").iloc[0]
+        The previous version of this test pulled its expected values
+        out of the same ``DPGTreePathExplanation`` it was checking, so
+        the assertions were true by construction.
+        """
+        path = DPGTreePathExplanation(
+            tree_index=0,
+            tree_prefix="sample0_dt0",
+            labels=["f0 <= 0.5", "Class 0"],
+            node_ids=["n1", "n2"],
+            predicate_truths=[True],
+            edge_exists=[True],
+            starts_from_root=True,
+            ends_in_leaf=True,
+            graph_path_valid=True,
+            mean_lrc=0.5,
+            mean_bc=0.25,
+            path_confidence=0.7,
+        )
+        hand_built = DPGLocalExplanation(
+            sample_id=42,
+            sample=[0.1, 0.2],
+            tree_paths=[path],
+            graph_validated=True,
+            all_trees_valid=True,
+            majority_vote="0",
+            class_votes={"0": 1},
+            path_mode="execution_trace",
+            sample_confidence={},
+        )
+        df = explainer.local_path_dataframe(hand_built)
 
-        assert first_row["sample_id"] == explanation.sample_id
-        assert first_row["label"] == first_path.labels[0]
-        assert first_row["node_id"] == first_path.node_ids[0]
-        assert first_row["mean_lrc"] == first_path.mean_lrc
-        assert first_row["mean_bc"] == first_path.mean_bc
-        assert first_row["path_confidence"] == first_path.path_confidence
+        # One row per label, in order.
+        path_df = df[df["tree_index"] == 0].sort_values("step_index").reset_index(drop=True)
+        assert len(path_df) == len(path.labels)
+        for step_index, label in enumerate(path.labels):
+            row = path_df.iloc[step_index]
+            assert row["sample_id"] == hand_built.sample_id
+            assert row["label"] == label
+            assert row["node_id"] == path.node_ids[step_index]
+            assert row["mean_lrc"] == path.mean_lrc
+            assert row["mean_bc"] == path.mean_bc
+            assert row["path_confidence"] == path.path_confidence
 
 
 class TestFaithfulnessEvaluation:
