@@ -6,7 +6,7 @@
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/DPG.png" width="300" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/DPG.png" alt="DPG logo" width="300">
 </p>
 
 
