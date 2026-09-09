@@ -6,7 +6,7 @@
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" width="300" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/DPG.png" width="300" />
 </p>
 
 
@@ -21,7 +21,7 @@ towards facilitating comparisons between features and their associated values wh
 into the entire model. DPG provides descriptive metrics that enhance the understanding of the
 decisions inherent in the model, offering valuable insights.
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/image.png" width="600" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/image.png" width="600" />
 </p>
 
 ---
@@ -49,7 +49,7 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true" width="600" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example.png" width="600" />
 </p>
 
 ## Metrics
@@ -64,7 +64,7 @@ The graph-based nature of DPG provides significant enhancements in the direction
 
 |Constraints | Betweenness centrality | Local reaching centrality | Community|
 |------------|------------|--------------|--------------------|
-![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_constraints.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_bc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_lrc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_community.png) |
+![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_constraints.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_bc.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_lrc.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_community.png) |
 |Constraints(Class 1) = val3 < F1 ≤ val1, F2 ≤ val2 | BC(F2 ≤ val2) = 4/24 | LRC(F1 ≤ val1) = 6 / 7 | Community(Class 1) = F1 ≤ val1, F2 ≤ val2 |
 
 ---
@@ -348,18 +348,18 @@ Some examples can be appreciated in the `examples` folder: https://github.com/Me
 In particular, the following DPG is obtained by transforming a Random Forest with 5 base learners, trained on Iris dataset.
 The used command is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples`.
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
 </p>
 
 The following visualizations are obtained using the same parameters as the previous example, but they show two different metrics: _Community_ and _Betweenness centrality_.
 The used command for showing communities is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --communities`.
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
 </p>
 
 The used command for showing a specific property is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --attribute "Betweenness centrality" --class_flag`.
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
 </p>
 
 ***
