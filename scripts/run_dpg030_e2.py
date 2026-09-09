@@ -85,7 +85,7 @@ def _fit(builder, X):
 
 
 def run_task(task):
-    dataset_name, model_name, n_estimators, seed, commit = task
+    dataset_name, model_name, n_estimators, seed, commit, path_budget = task
     row = {"dataset": dataset_name, "model": model_name, "n_estimators": n_estimators, "seed": seed,
            "status": "error", "error": "", "k1_seconds": 0.0, "kauto_seconds": 0.0,
            "k1_nodes": 0, "kauto_nodes": 0, "node_ratio": 0.0, "kauto": "",
@@ -104,7 +104,7 @@ def run_task(task):
                                         dpg_config=_config(1))
         graph1, log1 = _fit(legacy, dataset.data)
         row["k1_seconds"] = time.perf_counter() - started
-        metrics1 = _phantom_metrics(legacy, graph1, log1)
+        metrics1 = _phantom_metrics(legacy, graph1, log1, budget=path_budget)
 
         started = time.perf_counter()
         contextual = DecisionPredicateGraph(model, dataset.feature_names,
@@ -112,7 +112,7 @@ def run_task(task):
                                              dpg_config=_config("auto"))
         graphk, logk = _fit(contextual, dataset.data)
         row["kauto_seconds"] = time.perf_counter() - started
-        metricsk = _phantom_metrics(contextual, graphk, logk)
+        metricsk = _phantom_metrics(contextual, graphk, logk, budget=path_budget)
         row.update({"status": "ok", "k1_nodes": graph1.number_of_nodes(), "kauto_nodes": graphk.number_of_nodes(),
                     "node_ratio": graphk.number_of_nodes() / max(1, graph1.number_of_nodes()),
                     "kauto": str(contextual.get_context_order()),
@@ -131,15 +131,27 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("experiments/dpg_0_3_0/results/e2_context_phantoms.csv"))
     parser.add_argument("--workers", type=int, default=int(os.environ.get("DPG_WORKERS", os.cpu_count() or 1)))
     parser.add_argument("--notify-every", type=int, default=25)
+    parser.add_argument("--path-budget", type=int, default=20000)
+    parser.add_argument("--datasets", default=",".join(DATASETS))
+    parser.add_argument("--models", default=",".join(MODELS))
+    parser.add_argument("--learners", default="5,10,25,50,100")
+    parser.add_argument("--seeds", default="0,1,2,3,4")
     args = parser.parse_args()
     try:
         import subprocess
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     except Exception:
         commit = "unknown"
-    tasks = [(dataset, model, learners, seed, commit)
-             for dataset in DATASETS for model in MODELS
-             for learners in (5, 10, 25, 50, 100) for seed in (0, 1, 2, 3, 4)]
+    datasets = [x.strip() for x in args.datasets.split(",") if x.strip()]
+    models = [x.strip() for x in args.models.split(",") if x.strip()]
+    learners_list = [int(x) for x in args.learners.split(",")]
+    seeds = [int(x) for x in args.seeds.split(",")]
+    unknown = (set(datasets) - set(DATASETS)) | (set(models) - set(MODELS))
+    if unknown or args.path_budget < 1:
+        raise SystemExit(f"Invalid E2 selection or path budget: {sorted(unknown)} / {args.path_budget}")
+    tasks = [(dataset, model, learners, seed, commit, args.path_budget)
+             for dataset in datasets for model in models
+             for learners in learners_list for seed in seeds]
     fields = ["dataset", "model", "n_estimators", "seed", "status", "error", "k1_seconds", "kauto_seconds",
               "k1_nodes", "kauto_nodes", "node_ratio", "kauto", "k1_phantom_rate", "k1_phantom_mass",
               "kauto_phantom_rate", "kauto_phantom_mass", "k1_enumeration_exact", "kauto_enumeration_exact",
