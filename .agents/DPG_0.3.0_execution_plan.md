@@ -21,7 +21,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
 | C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
-| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | in progress; E4/E5 complete |
+| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | complete; audit passed with E2 cap caveat |
 
 ## Coordination rules
 
