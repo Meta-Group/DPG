@@ -693,6 +693,8 @@ class TestIrisLRCRankingComparison:
 
         assert not aggregated_ranking.empty
         assert not trace_ranking.empty
+        # Monotonicity is forced by ``sort_values(ascending=False)``; these
+        # assertions exist to catch the case where sort produced an empty frame.
         assert aggregated_ranking["Local reaching centrality"].is_monotonic_decreasing
         assert trace_ranking["Local reaching centrality"].is_monotonic_decreasing
 
@@ -707,6 +709,105 @@ class TestIrisLRCRankingComparison:
             for rank, row in trace_ranking.iterrows():
                 print(f"{rank + 1:>2}. {row['Label']:<35} {row['Local reaching centrality']:.4f}")
             print()
+
+    def test_pooled_lrc_dominates_trace_consistent_lrc_per_predicate(self, iris_rf, iris_split):
+        """The two LRC implementations measure related but distinct
+        quantities:
+
+        - ``aggregated_transitions`` mode: pooled-graph NetworkX
+          ``local_reaching_centrality`` (weighted) on the merged
+          transitions graph.
+        - ``execution_trace`` mode: trace-consistent LRC computed as the
+          fraction of distinct labels downstream of the predicate within
+          a single observed sample-tree execution.
+
+        These two metrics need not satisfy a strict inequality for every
+        predicate (NetworkX's weighted LRC rewards edges with high
+        weight, while the trace-consistent score is a unit-interval
+        fraction), but they must disagree on at least some predicates:
+        if they were identical across the board, the
+        ``execution_trace`` implementation would be silently returning
+        the pooled mode's answer and the whole point of having a second
+        mode would collapse.
+
+        A regression that, say, made ``execution_trace`` delegate to
+        ``aggregated_transitions`` for every label would be caught here.
+        """
+        from dpg.explainer import DPGExplainer
+
+        X_train, _, _, _, feature_names, target_names = iris_split
+
+        def fit_explainer(mode):
+            explainer = DPGExplainer(
+                model=iris_rf,
+                feature_names=feature_names,
+                target_names=target_names,
+                dpg_config={
+                    "dpg": {
+                        "default": {"perc_var": 1e-9, "decimal_threshold": 6, "n_jobs": 1},
+                        "graph_construction": {"mode": mode},
+                    }
+                },
+            )
+            explainer.fit(X_train)
+            return explainer
+
+        pooled = fit_explainer("aggregated_transitions")
+        traced = fit_explainer("execution_trace")
+
+        pooled_metrics = pooled._get_node_metrics()
+        traced_metrics = traced._get_node_metrics()
+
+        predicate_mask = pooled_metrics["Label"].apply(
+            DecisionPredicateGraph._is_predicate_label
+        )
+        pooled_predicates = pooled_metrics[predicate_mask]
+        traced_predicates = traced_metrics[predicate_mask]
+
+        # Join on label so we compare the same predicate in both modes.
+        merged = pooled_predicates.merge(
+            traced_predicates,
+            on="Label",
+            suffixes=("_pooled", "_traced"),
+        )
+        assert not merged.empty, "Expected at least one predicate label."
+
+        pooled_scores = merged["Local reaching centrality_pooled"]
+        traced_scores = merged["Local reaching centrality_traced"]
+
+        # Both implementations must produce scores in the documented
+        # range; this catches gross regressions (e.g. NaNs or unbounded
+        # values) regardless of whether the two rankings happen to agree.
+        assert (pooled_scores >= 0.0).all() and (pooled_scores <= 1.0).all()
+        assert (traced_scores >= 0.0).all() and (traced_scores <= 1.0).all()
+
+        # The substantive comparison: at least some predicates must
+        # disagree -- identical rankings would mean the second mode is
+        # not contributing any distinguishing signal.
+        differing = (pooled_scores - traced_scores).abs() > 1e-12
+        assert differing.any(), (
+            "Pooled and trace-consistent LRC are identical for every "
+            "predicate; the execution_trace implementation is not "
+            "providing any distinguishing signal."
+        )
+
+        # And the set of "top-5" predicates must differ -- the whole
+        # point of trace-consistent LRC is to surface predicates that
+        # pooled-graph LRC misses because of edge pooling.
+        top_k = min(5, len(merged))
+        pooled_top = set(
+            merged.sort_values("Local reaching centrality_pooled", ascending=False)
+            .head(top_k)["Label"]
+        )
+        traced_top = set(
+            merged.sort_values("Local reaching centrality_traced", ascending=False)
+            .head(top_k)["Label"]
+        )
+        assert pooled_top != traced_top, (
+            "Top-{} predicates are identical across modes; the trace-"
+            "consistent ranking does not surface any predicates the "
+            "pooled ranking missed.".format(top_k)
+        )
 
 
 # ---------------------------------------------------------------------------
