@@ -21,7 +21,7 @@ Override with `DPG_WORKERS=N` when memory pressure or interactive work requires 
 | B | Claude Code | Independent review of context-order mathematics and edge cases | review notes; added tests only in `tests/test_context_order_review.py` | available |
 | C | Codex | Benchmark execution on full hardware and CSV integrity | `benchmark.csv`, log, failed-row audit | complete; 1125/1125 ok |
 | D | Claude Code | README, quickstart, changelog, API/docstring review | documentation diff + link check | available |
-| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | complete; audit passed with E2 cap caveat |
+| E | Codex + Claude Code | Integration/release audit | no unresolved blocker; final branch report | blocked by confirmed auto-k global-recombination defect |
 
 ## Coordination rules
 
@@ -61,6 +61,14 @@ All 375 cells completed successfully. Two auto-k rows are marked
 so these are censored measurements rather than confirmed phantom-path
 failures. They remain a limitation of the audit metric and should not be
 interpreted as proof of a routing defect.
+Follow-up reruns of those rows with a 200,000-path budget completed exactly
+and confirmed the defect: breast-cancer ExtraTrees (25 learners, seeds 3 and
+4) resolve to `k=1` with phantom rates/masses of 0.9821/0.8906 and
+0.9660/0.7978. Explicit `k=2` produces zero phantom paths in both cases.
+Root cause is that `resolve_context_order()` checks successor consistency only
+conditioned on the immediately preceding contextual node; it does not prove
+global root-to-sink path consistency after longer histories recombine. This
+is a release blocker for the documented auto-k phantom-path guarantee.
 
 E3 uses 300 cells over controlled synthetic S1–S4 datasets, varying only
 irrelevant-feature count and label noise, to test whether auto-k grows with
