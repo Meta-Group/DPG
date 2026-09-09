@@ -283,15 +283,21 @@ class TestDpgConfigPropagation:
     ``DecisionPredicateGraph``; otherwise the CLI's perc_var and
     decimal_threshold would silently be ignored."""
 
-    def test_decision_predicate_graph_receives_dpg_config(self, monkeypatch):
+    def test_test_dpg_propagates_dpg_config_to_decision_predicate_graph(self, monkeypatch):
+        """Spy on ``DecisionPredicateGraph.__init__`` and assert that the
+        ``dpg_config`` ``test_dpg`` builds internally (matching the CLI's
+        ``--pv`` / ``--t`` flags) is what reaches the constructor.
+
+        Earlier versions of this test only instantiated
+        ``DecisionPredicateGraph`` directly, which exercised the spy but
+        bypassed ``test_dpg`` entirely -- a regression in the latter would
+        not have been caught.
+        """
         from sklearn.datasets import load_iris
 
         from dpg.core import DecisionPredicateGraph
 
         iris = load_iris()
-        model = RandomForestClassifier(n_estimators=3, random_state=0, n_jobs=1).fit(
-            iris.data, iris.target
-        )
 
         captured_kwargs = {}
         original_init = DecisionPredicateGraph.__init__
@@ -302,8 +308,52 @@ class TestDpgConfigPropagation:
 
         monkeypatch.setattr(DecisionPredicateGraph, "__init__", spy_init)
 
-        # The constructor is called here, with the same dpg_config the
-        # CLI builds internally.
+        # These values intentionally differ from test_dpg's defaults
+        # (perc_var=1e-9, decimal_threshold=6); if test_dpg silently drops
+        # its own dpg_config or hard-codes the defaults, the spy will see
+        # the wrong values.
+        sklearn_dpg.test_dpg(
+            datasets="iris",
+            n_learners=3,
+            seed=0,
+            perc_var=1e-6,
+            decimal_threshold=4,
+            n_jobs=1,
+        )
+
+        assert "dpg_config" in captured_kwargs, (
+            "test_dpg must pass a dpg_config to DecisionPredicateGraph; "
+            "it called the constructor without one."
+        )
+        assert captured_kwargs["dpg_config"]["dpg"]["default"]["perc_var"] == 1e-6
+        assert (
+            captured_kwargs["dpg_config"]["dpg"]["default"]["decimal_threshold"] == 4
+        )
+
+    def test_decision_predicate_graph_constructor_accepts_dpg_config(self, monkeypatch):
+        """Smoke test that ``DecisionPredicateGraph`` itself accepts and
+        stores a user-supplied ``dpg_config``.  This is the unit-level
+        contract that ``TestDpgConfigPropagation::test_test_dpg_propagates_dpg_config_to_decision_predicate_graph``
+        relies on.
+        """
+        from dpg.core import DecisionPredicateGraph
+
+        captured_kwargs = {}
+        original_init = DecisionPredicateGraph.__init__
+
+        def spy_init(self, *args, **kwargs):
+            captured_kwargs.update(kwargs)
+            original_init(self, *args, **kwargs)
+
+        monkeypatch.setattr(DecisionPredicateGraph, "__init__", spy_init)
+
+        from sklearn.datasets import load_iris as _load_iris
+
+        iris = _load_iris()
+        model = RandomForestClassifier(n_estimators=3, random_state=0, n_jobs=1).fit(
+            iris.data, iris.target
+        )
+
         DecisionPredicateGraph(
             model,
             iris.feature_names,
