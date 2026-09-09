@@ -9,45 +9,50 @@ from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
 
-def test_import_dpg():
-    import dpg
+# Public symbols that must remain importable.  Keeping them in one place
+# makes it cheap to extend the surface area and easy to spot when a
+# rename slips through.
+PUBLIC_SYMBOLS = {
+    "dpg.core": ["DecisionPredicateGraph", "DPGError"],
+    "dpg.explainer": [
+        "DPGExplainer",
+        "DPGExplanation",
+        "DPGLocalExplanation",
+        "DPGTreePathExplanation",
+    ],
+    "dpg.sklearn_dpg": ["test_dpg", "select_dataset"],
+    "dpg.visualizer": ["plot_dpg", "plot_dpg_communities"],
+    "metrics.nodes": ["NodeMetrics"],
+    "metrics.edges": ["EdgeMetrics"],
+    "metrics.graph": ["GraphMetrics"],
+}
 
 
-def test_import_metrics():
-    import metrics
+def test_public_api_imports():
+    """Every documented public symbol must import without error.
+
+    A bare ``import dpg`` only proves the package is importable, not that
+    its public surface is intact.  This single test asserts the full
+    documented surface area so a renamed/removed symbol causes a single
+    targeted failure rather than silently passing.
+    """
+    import importlib
+
+    for module_name, symbols in PUBLIC_SYMBOLS.items():
+        module = importlib.import_module(module_name)
+        for symbol in symbols:
+            assert hasattr(module, symbol), (
+                f"Public symbol {symbol!r} missing from {module_name!r}"
+            )
+            assert callable(getattr(module, symbol)) or not callable(getattr(module, symbol)), (
+                f"Public symbol {symbol!r} from {module_name!r} is not accessible"
+            )
 
 
-def test_import_core_classes():
-    from dpg.core import DecisionPredicateGraph, DPGError
-
-
-def test_import_explainer():
-    from dpg.explainer import (
-        DPGExplainer,
-        DPGExplanation,
-        DPGLocalExplanation,
-        DPGTreePathExplanation,
-    )
-
-
-def test_import_node_metrics():
-    from metrics.nodes import NodeMetrics
-
-
-def test_import_edge_metrics():
-    from metrics.edges import EdgeMetrics
-
-
-def test_import_graph_metrics():
-    from metrics.graph import GraphMetrics
-
-
-def test_import_sklearn_dpg():
-    from dpg.sklearn_dpg import test_dpg, select_dataset
-
-
-def test_import_visualizer():
-    from dpg.visualizer import plot_dpg, plot_dpg_communities
+def test_top_level_packages_importable():
+    """The top-level ``dpg`` and ``metrics`` packages must import."""
+    import dpg  # noqa: F401
+    import metrics  # noqa: F401
 
 
 def test_local_explanation_public_workflow_smoke():

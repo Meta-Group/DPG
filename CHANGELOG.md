@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.3.0
+
+### Added
+
+- Strengthened `context_order="auto"` to validate global graph-path support
+  against observed execution traces, including longer-history recombinations;
+  added a regression test for pairwise-consistent phantom paths.
+- Added context-aware DPG construction through `context_order` in execution
+  trace mode. `context_order=1` preserves legacy predicate identity; integer
+  orders and `"auto"` split nodes by recent execution history.
+- Class outcomes are shared terminal sinks at every context order, and node
+  metadata exposes `predicate`, `context`, and `context_order`.
+- Added enumeration-free local context-order resolution with explicit
+  resolution history and failure reporting.
+- Execution-trace edge construction preserves within-case event order and no
+  longer applies an unstable sort to the constant case identifier.
+- Added exact sklearn `decision_path` routing. Threshold rounding now formats
+  predicate labels without changing the branch selected by the model.
+- Added `decimal_threshold="auto"`, which derives precision from the data and
+  warns when a tree threshold is off the derived grid.
+- Validated the context resolver's optional `max_k` bound so invalid or
+  insufficient caps fail explicitly instead of returning an unresolved order.
+
+### Benchmarking evidence
+
+- The post-fix E2 benchmark completed all 375/375 cells. `context_order="auto"`
+  resolved a mean order of 2.0373 and reported a zero phantom-path rate across
+  every tested classifier family; the corresponding k=1 execution-trace graphs
+  retained phantom paths in the pooled graph for Bagging, Gradient Boosting,
+  and Random Forest.
+- Across that grid, post-fix execution-trace k=1 averaged 7.0742 seconds and
+  886.8 graph nodes per cell, while auto-k averaged 7.2271 seconds and 1005.5
+  nodes: approximately 2.2% more runtime for trace-consistent graph structure.
+- In the E5 alignment benchmark, the shipped unweighted LRC aggregation reached
+  mean Spearman correlation 0.8525 at k=1 and 0.9360 at auto-k, with mean top-10
+  feature overlap increasing from 0.7574 to 0.8759.
+- On the reference ten-tree Random Forests for Iris, Wine, and Breast Cancer,
+  k=1 and auto-k contained exactly the same raw `(feature, operator, threshold)`
+  split predicates. Differences in class-boundary envelopes were caused by
+  contextual predicate/community assignments, not by changed learned splits.
+
+### Compatibility and limitations
+
+- The default remains `context_order=1`; DPG-k is opt-in so existing consumers
+  keep their graph shape. `context_order > 1` requires `execution_trace` mode.
+- `get_trace_consistent_lrc()` remains available for k=1 and is deprecated for
+  contextual graphs; k>1 aggregates ordinary unweighted node LRC by predicate.
+- The routing correction can change graph weights and labels at floating-point
+  boundaries. Residual off-grid behavior is reported by the auto-precision
+  warning rather than hidden.
+- **Regression sink semantics are out of scope for 0.3.0.** `context_order`
+  mechanically builds a graph for regressors (regression leaves are treated
+  as terminal sinks, like class leaves), but there is no "one sink per
+  output" guarantee: a regression sink is only as unique as the 2-decimal
+  rounded leaf value, so two leaves collide into one sink by coincidence of
+  rounding, not by any modeled notion of "output". A principled regression
+  sink policy is deferred to a future release. `class_boundaries` and
+  `communities` remain classifier-only features; calling
+  `DPGExplainer.explain_global(communities=True)` on a regressor now raises a
+  clear `ValueError` instead of an internal `numpy.linalg.LinAlgError`.
+
 ## 0.2.0
 
 ### Added

@@ -132,6 +132,15 @@ class DPGExplainer:
         config_file: str = "config.yaml",
         dpg_config: Optional[Dict[str, Any]] = None,
     ) -> None:
+        # Keep a reference to the original (un-normalized) model so that
+        # ``predict()`` still goes through sklearn's own predict path.
+        # ``DecisionPredicateGraph`` shallow-copies the model into a DPG-
+        # normalized variant for its own tree traversal; for
+        # ``GradientBoostingClassifier`` that normalized copy flattens
+        # ``estimators_`` from a 2D ndarray to a 1D list, which would
+        # break sklearn's internal ``self.estimators_[0, 0]`` indexing
+        # inside ``.predict()``.
+        self._original_model = model
         self._builder = DecisionPredicateGraph(
             model=model,
             feature_names=list(feature_names),
@@ -237,7 +246,6 @@ class DPGExplainer:
                 f"Sample has {sample_array.shape[0]} features, expected {expected_features}."
             )
 
-        node_lookup = {label: node_id for node_id, label in self._nodes}
         node_metrics_lookup = self._get_node_metrics_lookup()
 
         tree_paths = []
@@ -248,7 +256,6 @@ class DPGExplainer:
                 sample=sample_array,
                 sample_id=sample_id,
                 tree_index=tree_index,
-                node_lookup=node_lookup,
                 node_metrics_lookup=node_metrics_lookup,
                 validate_graph=validate_graph,
             )
@@ -486,9 +493,9 @@ class DPGExplainer:
                 true_label_normalized = self._normalize_prediction_label(y_true_seq[idx])
 
             if isinstance(X_eval, pd.DataFrame):
-                model_pred_raw = self._builder.model.predict(row_for_predict.to_frame().T)[0]
+                model_pred_raw = self._original_model.predict(row_for_predict.to_frame().T)[0]
             else:
-                model_pred_raw = self._builder.model.predict(np.asarray(row_values).reshape(1, -1))[0]
+                model_pred_raw = self._original_model.predict(np.asarray(row_values).reshape(1, -1))[0]
             model_pred = self._normalize_prediction_label(model_pred_raw)
 
             try:
@@ -624,7 +631,6 @@ class DPGExplainer:
         sample: np.ndarray,
         sample_id: int,
         tree_index: int,
-        node_lookup: Dict[str, str],
         node_metrics_lookup: Dict[str, Dict[str, Any]],
         validate_graph: bool,
     ) -> DPGTreePathExplanation:
@@ -633,39 +639,34 @@ class DPGExplainer:
             (RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor),
         )
         tree_ = tree.tree_
-        node_index = 0
+        sample_array = np.asarray(sample).reshape(1, -1)
+        indicator = tree.decision_path(sample_array)
+        path = indicator.indices[indicator.indptr[0] : indicator.indptr[1]]
+        leaf_id = int(tree.apply(sample_array)[0])
         tree_prefix = f"sample{sample_id}_dt{tree_index}"
         labels: List[str] = []
         predicate_truths: List[bool] = []
 
-        while True:
-            left = tree_.children_left[node_index]
-            right = tree_.children_right[node_index]
-            if left == right:
-                if is_regressor:
-                    pred = round(tree_.value[node_index][0][0], 2)
-                    labels.append(f"Pred {pred}")
-                else:
-                    labels.append(self._leaf_class_label(tree_index, tree_, node_index))
+        for position, node_index in enumerate(path):
+            if int(node_index) == leaf_id:
                 break
-
-            feature_index = tree_.feature[node_index]
-            threshold = round(tree_.threshold[node_index], self._builder.decimal_threshold)
+            feature_index = int(tree_.feature[node_index])
+            threshold = round(float(tree_.threshold[node_index]), self._builder.get_decimal_threshold())
             feature_name = self._builder.feature_names[feature_index]
-            sample_val = sample[feature_index]
-            if sample_val <= threshold:
-                labels.append(f"{feature_name} <= {threshold}")
-                predicate_truths.append(True)
-                node_index = left
-            else:
-                labels.append(f"{feature_name} > {threshold}")
-                predicate_truths.append(True)
-                node_index = right
+            went_left = int(path[position + 1]) == int(tree_.children_left[node_index])
+            labels.append(f"{feature_name} {'<=' if went_left else '>'} {threshold}")
+            predicate_truths.append(True)
 
-        native_node_ids = [self._label_to_node_id(label) for label in labels]
+        if is_regressor:
+            pred = round(float(tree_.value[leaf_id][0][0]), 2)
+            labels.append(f"Pred {pred}")
+        else:
+            labels.append(self._leaf_class_label(tree_index, tree_, leaf_id))
+
+        native_node_ids = self._builder.get_node_ids_for_trace(labels)
         node_ids = [
-            node_lookup.get(label) if validate_graph else native_node_id
-            for label, native_node_id in zip(labels, native_node_ids)
+            native_node_id if (not validate_graph or native_node_id in self._graph) else None
+            for native_node_id in native_node_ids
         ]
 
         edge_exists = []
@@ -743,8 +744,13 @@ class DPGExplainer:
     def _get_node_metrics(self) -> Any:
         if self._node_metrics is None:
             trace_lrc_by_label = None
-            if self._builder.graph_construction_mode == "execution_trace":
+            if (
+                self._builder.graph_construction_mode == "execution_trace"
+                and self._builder.get_context_order() == 1
+            ):
                 trace_lrc_by_label = self._builder.get_trace_consistent_lrc()
+            elif self._builder.get_context_order() > 1:
+                trace_lrc_by_label = self._builder.get_predicate_lrc(self._graph)
             self._node_metrics = NodeMetrics.extract_node_metrics(
                 self._graph, self._nodes, trace_lrc_by_label=trace_lrc_by_label
             )
@@ -997,38 +1003,33 @@ class DPGExplainer:
             (RandomForestRegressor, ExtraTreesRegressor, AdaBoostRegressor),
         )
         tree_ = tree.tree_
-        node_index = 0
+        sample_array = np.asarray(sample).reshape(1, -1)
+        indicator = tree.decision_path(sample_array)
+        path = indicator.indices[indicator.indptr[0] : indicator.indptr[1]]
+        leaf_id = int(tree.apply(sample_array)[0])
         labels: List[str] = []
 
-        while True:
-            left = tree_.children_left[node_index]
-            right = tree_.children_right[node_index]
-            if left == right:
-                if is_regressor:
-                    pred = round(tree_.value[node_index][0][0], 2)
-                    labels.append(f"Pred {pred}")
-                else:
-                    if tree_index is None:
-                        pred_class = int(tree_.value[node_index].argmax())
-                        if self._builder.target_names is not None:
-                            pred_class = self._builder.target_names[pred_class]
-                        elif hasattr(self._builder.model, "classes_"):
-                            pred_class = self._builder.model.classes_[pred_class]
-                        labels.append(f"Class {pred_class}")
-                    else:
-                        labels.append(self._leaf_class_label(tree_index, tree_, node_index))
+        for position, node_index in enumerate(path):
+            if int(node_index) == leaf_id:
                 break
-
-            feature_index = tree_.feature[node_index]
-            threshold = round(tree_.threshold[node_index], self._builder.decimal_threshold)
+            feature_index = int(tree_.feature[node_index])
+            threshold = round(float(tree_.threshold[node_index]), self._builder.get_decimal_threshold())
             feature_name = self._builder.feature_names[feature_index]
-            sample_val = sample[feature_index]
-            if sample_val <= threshold:
-                labels.append(f"{feature_name} <= {threshold}")
-                node_index = left
-            else:
-                labels.append(f"{feature_name} > {threshold}")
-                node_index = right
+            went_left = int(path[position + 1]) == int(tree_.children_left[node_index])
+            labels.append(f"{feature_name} {'<=' if went_left else '>'} {threshold}")
+
+        if is_regressor:
+            pred = round(float(tree_.value[leaf_id][0][0]), 2)
+            labels.append(f"Pred {pred}")
+        elif tree_index is None:
+            pred_class = int(tree_.value[leaf_id].argmax())
+            if self._builder.target_names is not None:
+                pred_class = self._builder.target_names[pred_class]
+            elif hasattr(self._builder.model, "classes_"):
+                pred_class = self._builder.model.classes_[pred_class]
+            labels.append(f"Class {pred_class}")
+        else:
+            labels.append(self._leaf_class_label(tree_index, tree_, leaf_id))
 
         return labels
 

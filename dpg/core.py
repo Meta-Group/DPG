@@ -3,6 +3,7 @@ pd.set_option("display.max_colwidth", 255)
 import re
 import math
 import os
+import warnings
 import numpy as np
 
 from tqdm import tqdm
@@ -32,6 +33,7 @@ from sklearn.ensemble import (
     GradientBoostingRegressor,
 )
 from dpg.sklearn_normalizer import SklearnEnsembleNormalizer
+from dpg.context_order import resolve_context_order
 
 DEFAULT_DPG_CONFIG = {
     "dpg": {
@@ -42,6 +44,9 @@ DEFAULT_DPG_CONFIG = {
         },
         "graph_construction": {
             "mode": "aggregated_transitions",
+            # Keep the 0.2.x graph as the default. DPG-k is opt-in through
+            # context_order="auto" or an explicit order > 1.
+            "context_order": 1,
         },
         "visualization": {},
     }
@@ -133,8 +138,8 @@ class DecisionPredicateGraph:
 
         # Initialize attributes
         self.model = model
-        self.feature_names = feature_names
-        self.target_names = target_names #TODO create "Class as class name"
+        self.feature_names = list(feature_names)
+        self.target_names = list(target_names) if target_names is not None else None
         
         # Get config values with defaults
         dpg_config_section = config.get('dpg', {})
@@ -148,12 +153,22 @@ class DecisionPredicateGraph:
             'mode',
             DEFAULT_DPG_CONFIG["dpg"]["graph_construction"]["mode"],
         )
+        self.context_order = graph_construction_config.get(
+            "context_order",
+            DEFAULT_DPG_CONFIG["dpg"]["graph_construction"]["context_order"],
+        )
 
         # Validate required config values
         if self.perc_var is None:
             raise DPGError("perc_var not found in DPG config")
         if self.decimal_threshold is None:
             raise DPGError("decimal_threshold not found in DPG config")
+        if self.decimal_threshold != "auto" and (
+            isinstance(self.decimal_threshold, bool)
+            or not isinstance(self.decimal_threshold, int)
+            or self.decimal_threshold < 0
+        ):
+            raise DPGError("decimal_threshold must be a non-negative integer or 'auto'")
         if self.n_jobs is None:
             raise DPGError("n_jobs not found in DPG config")
         if self.graph_construction_mode not in self.SUPPORTED_GRAPH_CONSTRUCTION_MODES:
@@ -162,13 +177,31 @@ class DecisionPredicateGraph:
                 f"Unsupported graph construction mode '{self.graph_construction_mode}'. "
                 f"Supported modes are: {supported_modes}"
             )
+        if self.context_order != "auto" and (
+            isinstance(self.context_order, bool)
+            or not isinstance(self.context_order, int)
+            or self.context_order <= 0
+        ):
+            raise DPGError("context_order must be a positive integer or 'auto'")
+        if (
+            (
+                self.context_order == "auto"
+                or (isinstance(self.context_order, int) and self.context_order > 1)
+            )
+            and self.graph_construction_mode != "execution_trace"
+        ):
+            raise DPGError(
+                "context_order='auto' or context_order > 1 requires "
+                "mode='execution_trace'"
+            )
 
         print(
             "DPG initialized with "
             f"perc_var={self.perc_var}, "
             f"decimal_threshold={self.decimal_threshold}, "
             f"n_jobs={self.n_jobs}, "
-            f"graph_construction_mode={self.graph_construction_mode}"
+            f"graph_construction_mode={self.graph_construction_mode}, "
+            f"context_order={self.context_order}"
         )
         # Store visualization config for use by utils
         self.visualization_config = dpg_config_section.get('visualization', DEFAULT_DPG_CONFIG["dpg"]["visualization"])
@@ -177,6 +210,13 @@ class DecisionPredicateGraph:
         self._trace_consistent_lrc: Dict[str, float] = {}
         self._trace_consistent_trc: Dict[str, Set[str]] = {}
         self._trace_signatures: List[TraceSignature] = []
+        self._resolved_decimal_threshold: Optional[int] = (
+            self.decimal_threshold if isinstance(self.decimal_threshold, int) else None
+        )
+        self._resolved_context_order: int | float = 1
+        self._context_order_history: Dict[int | float, int] = {}
+        self._node_context_by_id: Dict[str, Tuple[str, ...]] = {}
+        self._node_label_by_id: Dict[str, str] = {}
 
     def fit(self, X_train: Any) -> Any:
         """
@@ -199,6 +239,8 @@ class DecisionPredicateGraph:
         self._trace_consistent_lrc = {}
         self._trace_consistent_trc = {}
         self._trace_signatures = []
+        self._node_context_by_id = {}
+        self._node_label_by_id = {}
 
         log_df = self._extract_trace_log(X_train)
 
@@ -206,8 +248,22 @@ class DecisionPredicateGraph:
         print('Building DPG...')
         if self.graph_construction_mode == "execution_trace":
             self._build_trace_artifacts(log_df)
-            dfg = self.discover_dfg_execution_trace(log_df)
+            traces = self._trace_sequences(log_df)
+            if self.context_order == "auto":
+                self._resolved_context_order, self._context_order_history = resolve_context_order(traces)
+            else:
+                self._resolved_context_order = self.context_order
+                self._context_order_history = {
+                    k: self._local_context_violations(traces, k)
+                    for k in range(1, int(self.context_order) + 1)
+                }
+            if self._resolved_context_order == 1:
+                dfg = self.discover_dfg_execution_trace(log_df)
+            else:
+                dfg = self.discover_dfg_context(log_df, self._resolved_context_order)
         else:
+            self._resolved_context_order = 1
+            self._context_order_history = {1: 0}
             if self.perc_var > 0:
                 log_df = self.filter_log(log_df)
             dfg = self.discover_dfg(log_df)
@@ -225,18 +281,84 @@ class DecisionPredicateGraph:
         Returns:
             pd.DataFrame: Raw trace log with case id and event columns
         """
+        self._resolve_decimal_threshold(X_train)
+        X_array = np.asarray(X_train)
         # Extract decision paths (parallel or sequential)
         if self.n_jobs == 1:
             log = Parallel(n_jobs=self.n_jobs)(
-                delayed(self.tracing_ensemble)(i, sample) for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
+                delayed(self.tracing_ensemble)(i, sample) for i, sample in tqdm(list(enumerate(X_array)), total=len(X_array))
             )
         else:
             log = Parallel(n_jobs=self.n_jobs)(
-                delayed(self.tracing_ensemble_parallel)(i, sample) for i, sample in tqdm(list(enumerate(X_train)), total=len(X_train))
+                delayed(self.tracing_ensemble_parallel)(i, sample) for i, sample in tqdm(list(enumerate(X_array)), total=len(X_array))
             )
 
         log = [item for sublist in log for item in sublist]
         return pd.DataFrame(log, columns=["case:concept:name", "concept:name"])
+
+    @staticmethod
+    def _decimal_places(value: Any) -> int:
+        """Return decimal places represented by a finite input value."""
+        from decimal import Decimal
+
+        numeric = float(value)
+        if not np.isfinite(numeric):
+            return 0
+        if numeric.is_integer():
+            return 0
+        exponent = Decimal(str(numeric)).as_tuple().exponent
+        return max(0, -int(exponent)) if isinstance(exponent, int) else 0
+
+    def _resolve_decimal_threshold(self, X_train: Any) -> int:
+        """Resolve ``decimal_threshold='auto'`` from data precision and audit it."""
+        if self.decimal_threshold != "auto":
+            self._resolved_decimal_threshold = int(self.decimal_threshold)
+            return self._resolved_decimal_threshold
+
+        values = np.asarray(X_train)
+        precision = 0
+        for value in values.reshape(-1):
+            precision = max(precision, self._decimal_places(value))
+        resolved = precision + 1
+        self._resolved_decimal_threshold = resolved
+
+        offending_features = set()
+        for tree in self.model.estimators_:
+            tree_ = tree.tree_
+            for node, feature_index in enumerate(tree_.feature):
+                if feature_index < 0:
+                    continue
+                threshold = float(tree_.threshold[node])
+                if not np.isclose(threshold, round(threshold, resolved), rtol=0.0, atol=1e-12):
+                    offending_features.add(self.feature_names[feature_index])
+        if offending_features:
+            names = ", ".join(sorted(offending_features))
+            warnings.warn(
+                "decimal_threshold='auto' found thresholds off the data-derived "
+                f"{resolved}-decimal grid for feature(s): {names}; exact routing "
+                "is retained and only predicate labels are rounded.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        return resolved
+
+    def get_decimal_threshold(self) -> int:
+        """Return the effective precision used by the last trace extraction."""
+        if self._resolved_decimal_threshold is None:
+            raise DPGError("decimal_threshold='auto' is resolved when fit() is called")
+        return self._resolved_decimal_threshold
+
+    def _trace_sequences(self, log: Any) -> List[Tuple[str, ...]]:
+        return [
+            tuple(group["concept:name"].tolist())
+            for _, group in log.groupby("case:concept:name", sort=False)
+        ]
+
+    @staticmethod
+    def _local_context_violations(traces: List[Tuple[str, ...]], k: int) -> int:
+        from dpg.context_order import path_violations
+
+        return path_violations(traces, k)
 
     def _leaf_class_label(self, tree_index: int, tree_: Any, node_index: int) -> str:
         """Return the class label for a classifier leaf node."""
@@ -266,40 +388,14 @@ class DecisionPredicateGraph:
         Yields:
             List[str]: Path segments as [prefix, decision/prediction]
         """
-        is_regressor = isinstance(
-            self.model,
-            (
-                RandomForestRegressor,
-                ExtraTreesRegressor,
-                AdaBoostRegressor,
-                GradientBoostingRegressor,
-            ),
+        label_extractor = (
+            self._trace_tree_labels_legacy
+            if self.graph_construction_mode == "aggregated_transitions"
+            else self._trace_tree_labels
         )
-        sample = sample.reshape(-1)
         for i, tree in enumerate(self.model.estimators_):
-            tree_ = tree.tree_
-            node_index = 0
             prefix = f"sample{case_id}_dt{i}"
-            while True:
-                left = tree_.children_left[node_index]
-                right = tree_.children_right[node_index]
-                if left == right:
-                    if is_regressor:
-                        pred = round(tree_.value[node_index][0][0], 2)
-                        yield [prefix, f"Pred {pred}"]
-                    else:
-                        yield [prefix, self._leaf_class_label(i, tree_, node_index)]
-                    break
-                feature_index = tree_.feature[node_index]
-                threshold = round(tree_.threshold[node_index], self.decimal_threshold)
-                feature_name = self.feature_names[feature_index]
-                sample_val = sample[feature_index]
-                if sample_val <= threshold:
-                    condition = f"{feature_name} <= {threshold}"
-                    node_index = left
-                else:
-                    condition = f"{feature_name} > {threshold}"
-                    node_index = right
+            for condition in label_extractor(i, tree, sample):
                 yield [prefix, condition]
 
     def tracing_ensemble_parallel(self, case_id: int, sample: Any) -> List[List[str]]:
@@ -314,43 +410,86 @@ class DecisionPredicateGraph:
             List of ``[prefix, event]`` pairs representing the full decision path
             across all trees in the ensemble.
         """
-        is_regressor = isinstance(
-            self.model,
-            (
-                RandomForestRegressor,
-                ExtraTreesRegressor,
-                AdaBoostRegressor,
-                GradientBoostingRegressor,
-            ),
+        label_extractor = (
+            self._trace_tree_labels_legacy
+            if self.graph_construction_mode == "aggregated_transitions"
+            else self._trace_tree_labels
         )
-        sample = sample.reshape(-1)
         result = []
         for i, tree in enumerate(self.model.estimators_):
-            tree_ = tree.tree_
-            node_index = 0
             prefix = f"sample{case_id}_dt{i}"
-            while True:
-                left = tree_.children_left[node_index]
-                right = tree_.children_right[node_index]
-                if left == right:
-                    if is_regressor:
-                        pred = round(tree_.value[node_index][0][0], 2)
-                        result.append([prefix, f"Pred {pred}"])
-                    else:
-                        result.append([prefix, self._leaf_class_label(i, tree_, node_index)])
-                    break
-                feature_index = tree_.feature[node_index]
-                threshold = round(tree_.threshold[node_index], self.decimal_threshold)
-                feature_name = self.feature_names[feature_index]
-                sample_val = sample[feature_index]
-                if sample_val <= threshold:
-                    condition = f"{feature_name} <= {threshold}"
-                    node_index = left
-                else:
-                    condition = f"{feature_name} > {threshold}"
-                    node_index = right
+            for condition in label_extractor(i, tree, sample):
                 result.append([prefix, condition])
         return result
+
+    def _trace_tree_labels_legacy(
+        self, tree_index: int, tree: Any, sample: Any
+    ) -> List[str]:
+        """Return labels using the pre-0.3.0 rounded-threshold traversal.
+
+        The aggregated-transitions graph historically rounded each tree
+        threshold before selecting a child.  Keep that behavior for the
+        legacy path so its graph weights remain backward-compatible.  The
+        execution-trace path uses :meth:`_trace_tree_labels`, which follows
+        sklearn's native routing exactly.
+        """
+        sample_array = np.asarray(sample).reshape(-1)
+        tree_ = tree.tree_
+        node_index = 0
+        labels: List[str] = []
+        effective_decimal = self.get_decimal_threshold()
+
+        while True:
+            left = int(tree_.children_left[node_index])
+            right = int(tree_.children_right[node_index])
+            if left == right:
+                if is_regressor(self.model):
+                    pred = round(float(tree_.value[node_index][0][0]), 2)
+                    labels.append(f"Pred {pred}")
+                else:
+                    labels.append(self._leaf_class_label(tree_index, tree_, node_index))
+                return labels
+
+            feature_index = int(tree_.feature[node_index])
+            threshold = round(float(tree_.threshold[node_index]), effective_decimal)
+            feature_name = self.feature_names[feature_index]
+            if sample_array[feature_index] <= threshold:
+                labels.append(f"{feature_name} <= {threshold}")
+                node_index = left
+            else:
+                labels.append(f"{feature_name} > {threshold}")
+                node_index = right
+
+    def _trace_tree_labels(self, tree_index: int, tree: Any, sample: Any) -> List[str]:
+        """Return the executed labels using sklearn's native routing decisions.
+
+        Threshold rounding is deliberately applied only while formatting the
+        predicate.  The child branch comes from ``decision_path`` so a rounded
+        label can never change the recorded execution path.
+        """
+        sample_array = np.asarray(sample).reshape(1, -1)
+        tree_ = tree.tree_
+        decision_path = tree.decision_path(sample_array)
+        path = decision_path.indices[decision_path.indptr[0] : decision_path.indptr[1]]
+        leaf_id = int(tree.apply(sample_array)[0])
+        labels: List[str] = []
+        effective_decimal = self.get_decimal_threshold()
+
+        for position, node_index in enumerate(path):
+            if int(node_index) == leaf_id:
+                break
+            feature_index = int(tree_.feature[node_index])
+            threshold = round(float(tree_.threshold[node_index]), effective_decimal)
+            went_left = int(path[position + 1]) == int(tree_.children_left[node_index])
+            operator = "<=" if went_left else ">"
+            labels.append(f"{self.feature_names[feature_index]} {operator} {threshold}")
+
+        if is_regressor(self.model):
+            pred = round(float(tree_.value[leaf_id][0][0]), 2)
+            labels.append(f"Pred {pred}")
+        else:
+            labels.append(self._leaf_class_label(tree_index, tree_, leaf_id))
+        return labels
             
 
     def filter_log(self, log: Any) -> Any:
@@ -396,7 +535,10 @@ class DecisionPredicateGraph:
         grouped = log.groupby("case:concept:name", sort=False)
         
         for case, trace_df in tqdm(grouped, desc="Processing cases", total=len(cases)):
-            trace_df = trace_df.sort_values(by="case:concept:name")
+            # Rows within each case already follow execution order.  Sorting by
+            # the case identifier is both redundant and unsafe here: the key is
+            # constant within a group, and pandas' default sort is not stable,
+            # so long traces can be silently rearranged.
             concepts = trace_df["concept:name"].values
             for i in range(len(concepts) - 1):
                 key = (concepts[i], concepts[i + 1])
@@ -427,6 +569,101 @@ class DecisionPredicateGraph:
             edge: count for edge, count in dfg.items()
             if count >= min_count
         }
+
+    @staticmethod
+    def _context_node(label_sequence: Tuple[str, ...], index: int, k: int) -> Any:
+        label = label_sequence[index]
+        if str(label).startswith(("Class ", "Pred ")):
+            # Terminal outcomes are deliberately never contextualised.  A
+            # shared sink cannot create a new path because it has no outgoing
+            # edges, and keeps one sink per class/prediction invariant.
+            return ("sink", str(label))
+        return (
+            "ctx",
+            tuple(label_sequence[max(0, index - k + 1) : index + 1]),
+        )
+
+    @staticmethod
+    def _context_node_info(node: Any) -> Tuple[str, Tuple[str, ...]]:
+        kind, value = node
+        if kind == "sink":
+            return str(value), ()
+        context = tuple(value)
+        return context[-1], context
+
+    def discover_dfg_context(self, log: Any, context_order: int) -> Dict[Tuple[Any, Any], int]:
+        """Build a context-aware DFG from observed execution traces.
+
+        The graph is still pooled into one DPG.  Only non-terminal predicate
+        identity changes: it is the last ``context_order`` executed labels.
+        Class outcomes remain one shared sink per class.
+        """
+        if context_order <= 1:
+            return self.discover_dfg_execution_trace(log)
+
+        dfg: Dict[Tuple[Any, Any], int] = {}
+        for _, trace_df in log.groupby("case:concept:name", sort=False):
+            labels = tuple(trace_df["concept:name"].tolist())
+            nodes = [self._context_node(labels, i, context_order) for i in range(len(labels))]
+            for source, target in zip(nodes, nodes[1:]):
+                edge = (source, target)
+                dfg[edge] = dfg.get(edge, 0) + 1
+
+        if self.perc_var <= 0:
+            return dfg
+        min_count = log["case:concept:name"].nunique() * self.perc_var
+        return {edge: count for edge, count in dfg.items() if count >= min_count}
+
+    def get_context_order(self) -> int | float:
+        """Return the effective context order from the last ``fit`` call."""
+        return self._resolved_context_order
+
+    def get_context_order_history(self) -> Dict[int | float, int]:
+        """Return local recombination violations measured for each tested k."""
+        return dict(self._context_order_history)
+
+    def get_node_context(self, node: Any) -> Tuple[str, ...]:
+        """Return the predicate context associated with a graph node.
+
+        Sinks and all nodes in a k=1 graph return an empty tuple.  ``node`` is
+        the node identifier returned by :meth:`to_networkx`.
+        """
+        if hasattr(node, "__str__"):
+            return tuple(self._node_context_by_id.get(str(node), ()))
+        return ()
+
+    def get_node_ids_for_trace(self, labels: Iterable[str]) -> List[str]:
+        """Map one executed label sequence to fitted graph node identifiers."""
+        labels_tuple = tuple(labels)
+        k = self.get_context_order()
+        if k == 1:
+            keys = list(labels_tuple)
+        else:
+            keys = [
+                self._context_node(labels_tuple, index, int(k))
+                for index in range(len(labels_tuple))
+            ]
+        return [self._node_id_for_key(key) for key in keys]
+
+    def get_predicate_lrc(self, graph: Any) -> Dict[str, float]:
+        """Aggregate unweighted node LRC scores back to predicate labels.
+
+        At k>1 a predicate can occupy multiple contextual nodes.  The shipped
+        aggregation is a sum, so predicates receive credit for every context
+        in which they occur.
+        """
+        scores: Dict[str, float] = defaultdict(float)
+        for node, data in graph.nodes(data=True):
+            label = data.get("predicate")
+            if label is None or not self._is_predicate_label(label):
+                continue
+            scores[label] += float(nx.local_reaching_centrality(graph, node, weight=None))
+        return dict(scores)
+
+    @staticmethod
+    def _node_id_for_key(key: Any) -> str:
+        stable_key = key if isinstance(key, str) else repr(key)
+        return str(int(hashlib.sha1(stable_key.encode()).hexdigest(), 16))
 
     _PREDICATE_LABEL_RE = re.compile(
         r"^\s*(.+?)\s*(<=|>)\s*[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?\s*$"
@@ -508,6 +745,11 @@ class DecisionPredicateGraph:
         """
         Return trace-consistent local-reaching-centrality-like scores.
 
+        .. deprecated:: 0.3.0
+           For contextual graphs (``context_order > 1``), use
+           :meth:`get_predicate_lrc` on the fitted graph.  This getter remains
+           supported for legacy k=1 execution-trace graphs.
+
         For each predicate label, the score is the fraction (over all distinct
         labels observed across every trace) of labels found downstream of it
         within at least one single observed sample-tree execution. Unlike the
@@ -520,6 +762,13 @@ class DecisionPredicateGraph:
             LRC score. Empty before ``fit()`` or outside
             ``graph_construction_mode="execution_trace"``.
         """
+        if self.get_context_order() > 1:
+            warnings.warn(
+                "get_trace_consistent_lrc() is deprecated for context_order > 1; "
+                "use get_predicate_lrc(graph) instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         return dict(self._trace_consistent_lrc)
 
     def get_trace_consistent_trc(self) -> Dict[str, Tuple[str, ...]]:
@@ -552,7 +801,7 @@ class DecisionPredicateGraph:
         """
         return list(self._trace_signatures)
 
-    def generate_dot(self, dfg: Dict[Tuple[str, str], int]) -> Any:
+    def generate_dot(self, dfg: Dict[Tuple[Any, Any], int]) -> Any:
         """
         Convert frequency graph to Graphviz format.
         
@@ -601,21 +850,33 @@ class DecisionPredicateGraph:
             )
 
         added_nodes = set()
-        for k, v in sorted(dfg.items(), key=lambda item: item[1]):
-            for activity in k:
-                if activity not in added_nodes:
-                    dot.node(
-                        str(int(hashlib.sha1(activity.encode()).hexdigest(), 16)),
-                        label=_escape_dot_label(activity),
-                        style="filled",
-                        fontsize="20",
-                        fillcolor=default_fillcolor,
-                    )
-                    added_nodes.add(activity)
+        for edge, weight in sorted(dfg.items(), key=lambda item: item[1]):
+            source, target = edge
+            for node_key in (source, target):
+                node_id = self._node_id_for_key(node_key)
+                if node_id in added_nodes:
+                    continue
+                if isinstance(node_key, str):
+                    label, context = node_key, ()
+                else:
+                    label, context = self._context_node_info(node_key)
+                self._node_label_by_id[node_id] = label
+                self._node_context_by_id[node_id] = context
+                tooltip = " > ".join(context) if context else label
+                dot.node(
+                    node_id,
+                    label=_escape_dot_label(label),
+                    tooltip=_escape_dot_label(tooltip),
+                    dpg_context_order=str(self.get_context_order()),
+                    style="filled",
+                    fontsize="20",
+                    fillcolor=default_fillcolor,
+                )
+                added_nodes.add(node_id)
             dot.edge(
-                str(int(hashlib.sha1(k[0].encode()).hexdigest(), 16)),
-                str(int(hashlib.sha1(k[1].encode()).hexdigest(), 16)),
-                label=str(v),
+                self._node_id_for_key(source),
+                self._node_id_for_key(target),
+                label=str(weight),
                 penwidth="1",
                 fontsize="18"
             )
@@ -632,35 +893,43 @@ class DecisionPredicateGraph:
             Tuple[nx.DiGraph, List]: NetworkX graph and node metadata
         """
         networkx_graph = nx.DiGraph()
-        nodes_list = []
-        edges = []
-        weights = {}
-        for edge in graphviz_graph.body:
-            if "->" in edge:
-                src, dest = edge.split("->")
-                src = src.strip()
-                dest = dest.split(" [label=")[0].strip()
-                weight = None
-                if "[label=" in edge:
-                    attr = edge.split("[label=")[1].split("]")[0].split(" ")[0]
-                    weight = float(attr) if attr.replace(".", "").isdigit() else None
-                    weights[(src, dest)] = weight
-                edges.append((src, dest))
-            if "[label=" in edge:
-                id, desc = edge.split("[label=")
-                id = id.replace("\t", "").replace(" ", "")
-                # Extract label value safely, ignoring other attributes
-                m = re.search(r'label="([^"]*)"', edge)
-                if m:
-                    desc = m.group(1)
-                else:
-                    # Fallback for unquoted labels: label=VALUE (no spaces)
-                    m = re.search(r'label=([^\\s\\]]+)', edge)
-                    desc = m.group(1) if m else ""
-                nodes_list.append([id, desc])
+        nodes_list: List[List[str]] = []
+        edges: List[Tuple[str, str]] = []
+        weights: Dict[Tuple[str, str], float] = {}
+        node_records: Dict[str, Tuple[str, Tuple[str, ...]]] = {}
+
+        for line in graphviz_graph.body:
+            if "->" in line:
+                match = re.search(r"^\s*([^\s]+)\s*->\s*([^\s]+).*?label=([0-9.eE+-]+)", line)
+                if match:
+                    src, dest, weight = match.groups()
+                    edges.append((src, dest))
+                    weights[(src, dest)] = float(weight)
+                continue
+
+            match = re.search(r'^\s*([^\s]+)\s+\[label="(.*?)"(.*?)\]', line)
+            if not match:
+                continue
+            node_id, label, attributes = match.groups()
+            context = self._node_context_by_id.get(node_id, ())
+            order_match = re.search(r"dpg_context_order=([^,\]]+)", attributes)
+            order = self.get_context_order()
+            if order_match:
+                try:
+                    order = float(order_match.group(1).strip('"'))
+                    if order.is_integer():
+                        order = int(order)
+                except ValueError:
+                    pass
+            node_records[node_id] = (label, context)
+            nodes_list.append([node_id, label])
+            networkx_graph.add_node(
+                node_id,
+                predicate=label,
+                context=context,
+                context_order=order,
+            )
+
         for src, dest in edges:
-            if (src, dest) in weights:
-                networkx_graph.add_edge(src, dest, weight=weights[(src, dest)])
-            else:
-                networkx_graph.add_edge(src, dest)
+            networkx_graph.add_edge(src, dest, weight=weights[(src, dest)])
         return networkx_graph, sorted(nodes_list, key=lambda x: x[0])

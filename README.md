@@ -2,12 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
-[![PyPI](https://img.shields.io/pypi/v/dpg.svg)](https://pypi.org/project/dpg/)
 [![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
 <p align="center">
-  <img src="https://github.com/Meta-Group/DPG/blob/main/DPG.png" alt="DPG logo" width="300">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/DPG.png" alt="DPG logo" width="300">
 </p>
 
 
@@ -21,7 +20,9 @@ insightful points. DPG enables graph-based evaluations and the identification of
 towards facilitating comparisons between features and their associated values while offering insights
 into the entire model. DPG provides descriptive metrics that enhance the understanding of the
 decisions inherent in the model, offering valuable insights.
-![DPG overview](https://github.com/Meta-Group/DPG/blob/main/image.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/image.png" width="600" />
+</p>
 
 ---
 
@@ -47,7 +48,9 @@ The concept behind DPG is to convert a generic tree-based ensemble model for cla
 - Nodes represent predicates, i.e., the feature-value associations present in each node of every tree;
 - Edges denote the frequency with which these predicates are satisfied during the model training phase by the samples of the dataset.
 
-![DPG example](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example.png?raw=true)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example.png" width="600" />
+</p>
 
 ## Metrics
 The graph-based nature of DPG provides significant enhancements in the direction of a complete mapping of the ensemble structure.
@@ -61,7 +64,7 @@ The graph-based nature of DPG provides significant enhancements in the direction
 
 |Constraints | Betweenness centrality | Local reaching centrality | Community|
 |------------|------------|--------------|--------------------|
-![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_constraints.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_bc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_lrc.png) | ![](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/example_community.png) |
+![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_constraints.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_bc.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_lrc.png) | ![](https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/example_community.png) |
 |Constraints(Class 1) = val3 < F1 ≤ val1, F2 ≤ val2 | BC(F2 ≤ val2) = 4/24 | LRC(F1 ≤ val1) = 6 / 7 | Community(Class 1) = F1 ≤ val1, F2 ≤ val2 |
 
 ---
@@ -169,6 +172,7 @@ explainer = DPGExplainer(
             },
             "graph_construction": {
                 "mode": "execution_trace",  # or "aggregated_transitions"
+                "context_order": 1,           # 1, an integer > 1, or "auto"
             },
         }
     },
@@ -177,6 +181,31 @@ explainer = DPGExplainer(
 
 - `"aggregated_transitions"`: current default behavior; filters path variants first, then discovers the DPG.
 - `"execution_trace"`: builds directly from raw traces and filters edges instead of whole-path variants when `perc_var > 0`.
+
+`context_order` controls predicate identity in `execution_trace` mode. `1`
+preserves the legacy graph exactly; an order greater than one uses the last k
+executed predicates as context and keeps one sink per class. `"auto"` resolves
+the smallest order for which every pooled graph path is supported by an
+observed execution trace, including recombinations that only appear after
+multiple hops. Orders greater than one require `mode: "execution_trace"`.
+`context_order="auto"` also requires `execution_trace`; in
+`aggregated_transitions` mode context resolution is not applied.
+
+A phantom path is a multi-hop path assembled by pooling edges from different
+tree executions even though no single execution produced it. DPG-k removes
+these recombinations at the resolved context order while retaining one graph.
+The effective order and each node's context are available through
+`get_context_order()` and `get_node_context(node)`.
+
+**Regression scope (0.3.0):** `context_order` builds without raising for
+regressors (regression leaves, labeled `"Pred <value>"`, are treated as
+terminal sinks just like class leaves), but "one sink per output" is not a
+defined guarantee for regression the way it is for classification: two
+leaves collapse into the same sink only when their rounded values coincide,
+which is an artifact of label rounding, not a modeled invariant. A
+principled regression sink policy is deferred past 0.3.0. `class_boundaries`
+and `communities` remain classifier-only; calling `explain_global`
+with `communities=True` on a regressor raises a clear `ValueError`.
 
 #### Minimal local workflow
 
@@ -263,8 +292,8 @@ Important:
 
 ## CLI scripts
 The library contains two different scripts to apply DPG:
-- `run_dpg_standard.py`: with this script it is possible to test DPG on a standard classification dataset provided by `sklearn` such as `iris`, `digits`, `wine`, `breast cancer`, and `diabetes`.
-- `run_dpg_custom.py`: with this script it is possible to apply DPG to your classification dataset, specifying the target class.
+- `examples/run_dpg_standard.py`: with this script it is possible to test DPG on a standard classification dataset provided by `sklearn` such as `iris`, `digits`, `wine`, `breast cancer`, and `diabetes`.
+- `examples/run_dpg_custom.py`: with this script it is possible to apply DPG to your classification dataset, specifying the target class.
 
 ### Implementation notes
 The library also contains two other essential scripts:
@@ -272,14 +301,17 @@ The library also contains two other essential scripts:
 - `visualizer.py` contains the functions used to manage the visualization of DPG.
 
 ### Output
-The DPG output, through `run_dpg_standard.py` or `run_dpg_custom.py`, produces several files:
+The DPG output, through `examples/run_dpg_standard.py` or `examples/run_dpg_custom.py`, produces several files:
 - the visualization of DPG in a dedicated environment, which can be zoomed and saved;
 - a `.txt` file containing the DPG metrics;
 - a `.csv` file containing the information about all the nodes of the DPG and their associated metrics;
 - a `.txt` file containing the Random Forest statistics (accuracy, confusion matrix, classification report)
 
 ### CLI parameter reference
-Usage: `python run_dpg_standard.py --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
+Usage: `dpg --dataset <dataset_name> --n_learners <integer_number> --pv <threshold_value> --t <integer_number> --model_name <str_model_name> --dir <save_dir_path> --plot --save_plot_dir <save_plot_dir_path> --attribute <attribute> --communities --clusters --threshold_clusters <float> --class_flag --seed <int>`
+
+After installing DPG, the `dpg` command is the packaged equivalent of
+`python examples/run_dpg_standard.py`.
 Where:
 - `dataset` is the name of the standard classification `sklearn` dataset to be analyzed;
 - `n_learners` is the number of base learners for the ensemble model;
@@ -306,23 +338,29 @@ Where:
   
 Disclaimer: `attribute`, `communities`, and `clusters` are mutually exclusive: DPG supports just one visualization mode at a time.
 
-The usage of `run_dpg_custom.py` is similar, but it requires another parameter:
+The usage of `examples/run_dpg_custom.py` is similar, but it requires another parameter:
 - `target_column`, which is the name of the column to be used as the target variable;
 - while `ds` is the path of the directory where the dataset is.
 
-### Example `run_dpg_standard.py`
+### Example `examples/run_dpg_standard.py`
 Some examples can be appreciated in the `examples` folder: https://github.com/Meta-Group/DPG/tree/main/examples
 
 In particular, the following DPG is obtained by transforming a Random Forest with 5 base learners, trained on Iris dataset.
-The used command is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples`.
-![Iris DPG](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png)
+The used command is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples`.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2.png" width="800" />
+</p>
 
 The following visualizations are obtained using the same parameters as the previous example, but they show two different metrics: _Community_ and _Betweenness centrality_.
-The used command for showing communities is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --communities`.
-![Iris communities](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png)
+The used command for showing communities is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --communities`.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2_communities.png" width="800" />
+</p>
 
-The used command for showing a specific property is `python run_dpg_standard.py --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --attribute "Betweenness centrality" --class_flag`.
-![Iris betweenness centrality](https://github.com/Meta-Group/DPG/blob/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png)
+The used command for showing a specific property is `dpg --dataset iris --n_learners 5 --pv 0.001 --t 2 --dir examples --plot --save_plot_dir examples --attribute "Betweenness centrality" --class_flag`.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Meta-Group/DPG/main/dpg_image_examples/iris_bl5_perc0.001_dec2_Betweennesscentrality.png" width="800" />
+</p>
 
 ***
 ## Citation

@@ -8,6 +8,7 @@ and metric computation through the same entry point used by run_dpg_standard.py.
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
 import dpg.sklearn_dpg as sklearn_dpg
@@ -269,3 +270,106 @@ class TestTestDpgValidation:
     def test_zero_learners_raises(self):
         with pytest.raises(ValueError, match="positive"):
             sklearn_dpg.test_dpg(datasets="iris", n_learners=0)
+
+
+# ---------------------------------------------------------------------------
+# PR #32 addition: DecisionPredicateGraph must receive dpg_config from
+# sklearn_dpg.test_dpg so CLI perc_var and decimal_threshold take effect.
+# ---------------------------------------------------------------------------
+
+
+class TestDpgConfigPropagation:
+    """``sklearn_dpg.test_dpg`` must pass the user-supplied dpg_config to
+    ``DecisionPredicateGraph``; otherwise the CLI's perc_var and
+    decimal_threshold would silently be ignored."""
+
+    def test_test_dpg_propagates_dpg_config_to_decision_predicate_graph(self, monkeypatch):
+        """Spy on ``DecisionPredicateGraph.__init__`` and assert that the
+        ``dpg_config`` ``test_dpg`` builds internally (matching the CLI's
+        ``--pv`` / ``--t`` flags) is what reaches the constructor.
+
+        Earlier versions of this test only instantiated
+        ``DecisionPredicateGraph`` directly, which exercised the spy but
+        bypassed ``test_dpg`` entirely -- a regression in the latter would
+        not have been caught.
+        """
+        from sklearn.datasets import load_iris
+
+        from dpg.core import DecisionPredicateGraph
+
+        iris = load_iris()
+
+        captured_kwargs = {}
+        original_init = DecisionPredicateGraph.__init__
+
+        def spy_init(self, *args, **kwargs):
+            captured_kwargs.update(kwargs)
+            original_init(self, *args, **kwargs)
+
+        monkeypatch.setattr(DecisionPredicateGraph, "__init__", spy_init)
+
+        # These values intentionally differ from test_dpg's defaults
+        # (perc_var=1e-9, decimal_threshold=6); if test_dpg silently drops
+        # its own dpg_config or hard-codes the defaults, the spy will see
+        # the wrong values.
+        sklearn_dpg.test_dpg(
+            datasets="iris",
+            n_learners=3,
+            seed=0,
+            perc_var=1e-6,
+            decimal_threshold=4,
+            n_jobs=1,
+        )
+
+        assert "dpg_config" in captured_kwargs, (
+            "test_dpg must pass a dpg_config to DecisionPredicateGraph; "
+            "it called the constructor without one."
+        )
+        assert captured_kwargs["dpg_config"]["dpg"]["default"]["perc_var"] == 1e-6
+        assert (
+            captured_kwargs["dpg_config"]["dpg"]["default"]["decimal_threshold"] == 4
+        )
+
+    def test_decision_predicate_graph_constructor_accepts_dpg_config(self, monkeypatch):
+        """Smoke test that ``DecisionPredicateGraph`` itself accepts and
+        stores a user-supplied ``dpg_config``.  This is the unit-level
+        contract that ``TestDpgConfigPropagation::test_test_dpg_propagates_dpg_config_to_decision_predicate_graph``
+        relies on.
+        """
+        from dpg.core import DecisionPredicateGraph
+
+        captured_kwargs = {}
+        original_init = DecisionPredicateGraph.__init__
+
+        def spy_init(self, *args, **kwargs):
+            captured_kwargs.update(kwargs)
+            original_init(self, *args, **kwargs)
+
+        monkeypatch.setattr(DecisionPredicateGraph, "__init__", spy_init)
+
+        from sklearn.datasets import load_iris as _load_iris
+
+        iris = _load_iris()
+        model = RandomForestClassifier(n_estimators=3, random_state=0, n_jobs=1).fit(
+            iris.data, iris.target
+        )
+
+        DecisionPredicateGraph(
+            model,
+            iris.feature_names,
+            target_names=["0", "1", "2"],
+            dpg_config={
+                "dpg": {
+                    "default": {
+                        "perc_var": 1e-6,
+                        "decimal_threshold": 4,
+                        "n_jobs": 1,
+                    }
+                }
+            },
+        )
+
+        assert captured_kwargs["dpg_config"]["dpg"]["default"]["perc_var"] == 1e-6
+        assert (
+            captured_kwargs["dpg_config"]["dpg"]["default"]["decimal_threshold"] == 4
+        )
