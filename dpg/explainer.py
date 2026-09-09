@@ -132,6 +132,15 @@ class DPGExplainer:
         config_file: str = "config.yaml",
         dpg_config: Optional[Dict[str, Any]] = None,
     ) -> None:
+        # Keep a reference to the original (un-normalized) model so that
+        # ``predict()`` still goes through sklearn's own predict path.
+        # ``DecisionPredicateGraph`` shallow-copies the model into a DPG-
+        # normalized variant for its own tree traversal; for
+        # ``GradientBoostingClassifier`` that normalized copy flattens
+        # ``estimators_`` from a 2D ndarray to a 1D list, which would
+        # break sklearn's internal ``self.estimators_[0, 0]`` indexing
+        # inside ``.predict()``.
+        self._original_model = model
         self._builder = DecisionPredicateGraph(
             model=model,
             feature_names=list(feature_names),
@@ -484,9 +493,9 @@ class DPGExplainer:
                 true_label_normalized = self._normalize_prediction_label(y_true_seq[idx])
 
             if isinstance(X_eval, pd.DataFrame):
-                model_pred_raw = self._builder.model.predict(row_for_predict.to_frame().T)[0]
+                model_pred_raw = self._original_model.predict(row_for_predict.to_frame().T)[0]
             else:
-                model_pred_raw = self._builder.model.predict(np.asarray(row_values).reshape(1, -1))[0]
+                model_pred_raw = self._original_model.predict(np.asarray(row_values).reshape(1, -1))[0]
             model_pred = self._normalize_prediction_label(model_pred_raw)
 
             try:

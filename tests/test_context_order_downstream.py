@@ -148,21 +148,20 @@ def test_plot_dpg_and_communities_render_at_context_order(tmp_path, context_orde
     assert (tmp_path / f"dpg_k_{context_order}_communities_communities.png").exists()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Pre-existing bug, independent of context_order: SklearnEnsembleNormalizer "
-        "flattens GradientBoostingClassifier.estimators_ from a (n_stages, n_classes) "
-        "ndarray to a flat list for DPG's own traversal, and evaluate_faithfulness() "
-        "calls .predict() on that same normalized copy, so sklearn's internal "
-        "estimators_[0, 0] 2D indexing fails. Reproduces identically at k=1 with the "
-        "default aggregated_transitions mode; out of scope for E7 (context_order "
-        "compatibility), tracked here so it is not silently lost."
-    ),
-)
-def test_gradient_boosting_faithfulness_known_issue_reproduces_at_k1():
+def test_gradient_boosting_faithfulness_runs_at_k1():
+    """Regression: SklearnEnsembleNormalizer flattens
+    GradientBoostingClassifier.estimators_ from (n_stages, n_classes) to a
+    flat list for DPG's own traversal, and ``evaluate_faithfulness()``
+    used to call ``.predict()`` on that same normalized copy, breaking
+    sklearn's internal ``estimators_[0, 0]`` indexing. The explainer
+    now keeps the original model around for ``predict()``, so this code
+    path must run end-to-end at the k=1 default."""
     iris, target_names = _iris()
     model = GradientBoostingClassifier(n_estimators=10, random_state=0).fit(iris.data, iris.target)
     explainer = DPGExplainer(model, iris.feature_names, target_names=target_names)
     explainer.fit(iris.data)
-    explainer.evaluate_faithfulness(iris.data[:20], y_true=iris.target[:20], return_details=True)
+    details = explainer.evaluate_faithfulness(
+        iris.data[:20], y_true=iris.target[:20], return_details=True
+    )
+    assert 0.0 <= details["faithfulness_score"] <= 1.0
+    assert 0.0 <= details["output_fidelity"] <= 1.0
