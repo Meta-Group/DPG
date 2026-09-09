@@ -176,7 +176,16 @@ def test_dpg(datasets: str,
     dpg = DecisionPredicateGraph(
         model=model,
         feature_names=features,
-        target_names=np.unique(target).astype(str).tolist()
+        target_names=np.unique(target).astype(str).tolist(),
+        dpg_config={
+            "dpg": {
+                "default": {
+                    "perc_var": perc_var,
+                    "decimal_threshold": decimal_threshold,
+                    "n_jobs": n_jobs,
+                }
+            }
+        },
     )
     dot = dpg.fit(X_train)
     

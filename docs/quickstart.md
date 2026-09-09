@@ -43,7 +43,7 @@ print(explanation.node_metrics.head())
 print(explanation.edge_metrics.head())
 
 # 5. Visualise
-explainer.plot(explanation, save_dir="results/")
+explainer.plot("iris_dpg", explanation=explanation, save_dir="results/")
 ```
 
 ## What `DPGExplainer` returns
@@ -125,15 +125,16 @@ dpg = DecisionPredicateGraph(
 )
 dpg.fit(X)
 
-dpg.get_trace_consistent_lrc()   # {predicate_label: trace-consistent LRC score}
+dpg.get_trace_consistent_lrc()   # supported for legacy execution-trace k=1
 dpg.get_trace_consistent_trc()   # {predicate_label: set of labels observed downstream}
 dpg.get_trace_signatures()       # list[TraceSignature(signature, predicate_sequence, path_count)]
 ```
 
 - `get_trace_consistent_lrc()` scores each predicate by how much of the label
-  space it was observed to reach *within a single trace*, unlike the
-  pooled-graph NetworkX local reaching centrality, which can credit reach
-  that only exists after aggregating unrelated traces.
+  space it was observed to reach *within a single trace* for legacy k=1,
+  unlike the pooled-graph NetworkX local reaching centrality, which can credit
+  reach that only exists after aggregating unrelated traces. For contextual
+  graphs, use `get_predicate_lrc(graph)` instead.
 - `get_trace_consistent_trc()` returns each predicate's observed downstream
   label sets — every member is guaranteed to have co-occurred later in at
   least one real execution.
@@ -142,6 +143,11 @@ dpg.get_trace_signatures()       # list[TraceSignature(signature, predicate_sequ
 
 These getters return empty containers until `fit()` is called, and are reset
 on every refit. Outside `execution_trace` mode they remain empty.
+
+For contextual graphs (`context_order > 1`),
+`get_trace_consistent_lrc()` is deprecated; use the graph-based
+`get_predicate_lrc(graph)` aggregation instead. The explainer's node metrics
+already apply the appropriate contextual aggregation automatically.
 
 **`perc_var` does not filter trace artefacts.** In `execution_trace` mode,
 `perc_var` only filters infrequent *edges* out of the pooled visualisation

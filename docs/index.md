@@ -54,8 +54,9 @@ explainer = DPGExplainer(
     feature_names=X.columns.tolist(),
     target_names=["setosa", "versicolor", "virginica"],
 )
-explanation = explainer.fit(X.values)
-explainer.plot(explanation)
+explainer.fit(X.values)
+explanation = explainer.explain_global()
+explainer.plot("iris_dpg", explanation=explanation)
 ```
 
 ## Contents
