@@ -102,3 +102,24 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 dpg = "dpg.cli:main"
+
+# ---------------------------------------------------------------------------
+# Pytest configuration: silence third-party deprecation noise from
+# matplotlib, sklearn, numpy, pyparsing, and pytest's own deprecation
+# warnings about class-scoped fixtures (see TestTestDpgIris et al. for the
+# pre-existing pattern we do not refactor here).
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:pyparsing",
+    "ignore::DeprecationWarning:matplotlib",
+    "ignore::DeprecationWarning:sklearn",
+    "ignore:.*feature names.*:UserWarning:sklearn",
+    "ignore:.*Setting the shape on a NumPy array.*:DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::FutureWarning:sklearn",
+    # Pytest's own deprecation about class-scoped fixtures: keep as a
+    # warning (will become an error in pytest 10) but stop polluting
+    # test output until we refactor those fixtures.
+    "ignore::pytest.PytestRemovedIn10Warning",
+]

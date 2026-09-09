@@ -843,7 +843,11 @@ class TestResolveDecimalThreshold:
         dpg = DecisionPredicateGraph(
             model, ["a", "b"], dpg_config=_config(decimal_threshold="auto")
         )
-        dpg._resolve_decimal_threshold(X)
+        # The synthetic random forest will almost certainly learn thresholds
+        # that are off the data-derived 4-decimal grid -- this is the
+        # exact behaviour ``decimal_threshold='auto'`` is supposed to flag.
+        with pytest.warns(RuntimeWarning, match="off the data-derived"):
+            dpg._resolve_decimal_threshold(X)
         # 3 decimal places in data => precision 3, +1 = 4.
         assert dpg.get_decimal_threshold() == 4
 

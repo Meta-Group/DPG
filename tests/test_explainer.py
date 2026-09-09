@@ -242,7 +242,10 @@ class TestAdditionalExplainerApis:
     def test_plot_sample_using_bc_weights(self, explainer, explanation, iris_model, tmp_path):
         _, X, _, target_names = iris_model
         X_df = pd.DataFrame(X, columns=explainer.builder.feature_names)
-        y = explainer.builder.model.predict(X_df)
+        # ``iris_model`` is fitted on the bare ``iris.data`` numpy array
+        # (no feature names), so predict on the numpy view of the same
+        # shape to avoid the sklearn feature-name mismatch warning.
+        y = explainer.builder.model.predict(np.asarray(X_df))
         fig = explainer.plot_sample_using_bc_weights(
             X_df=X_df,
             y=y,
