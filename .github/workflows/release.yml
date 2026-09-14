@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.4.0
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Determine version
+        run: |
+          PREV_VERSION=$(poetry version --short)
+          VERSION="$PREV_VERSION"
+          BUMPED=false
+          COMMIT_MSG=$(git log -1 --format=%s)
+
+          # If commit message already contains the bump, use current version
+          if echo "$COMMIT_MSG" | grep -q "bump version to $PREV_VERSION"; then
+            echo "Determined by existing commit"
+          else
+            # No bump found — need to bump
+            poetry version patch
+            VERSION=$(poetry version --short)
+            BUMPED=true
+            echo "Bumped to: $VERSION"
+          fi
+
+          echo "PREV_VERSION=$PREV_VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "BUMPED=$BUMPED" >> $GITHUB_OUTPUT
+
+          # Check if tag already exists
+          git fetch --tags
+          if git tag | grep -q "^v$VERSION$"; then
+            echo "Tag v$VERSION already exists. Skipping publish."
+            echo "SKIP=true" >> $GITHUB_OUTPUT
+          else
+            echo "SKIP=false" >> $GITHUB_OUTPUT
+          fi
+        id: version
+
+      - name: Create version bump branch
+        if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          git checkout -b "chore/bump-version-to-${{ steps.version.outputs.VERSION }}"
+          git push origin "chore/bump-version-to-${{ steps.version.outputs.VERSION }}"
+
+      - name: Create tag
+        if: steps.version.outputs.SKIP == 'false'
+        run: |
+          git tag "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Publish to PyPI
+        if: steps.version.outputs.SKIP == 'false'
+        id: publish
+        run: poetry publish --build
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Install package + docs dependencies
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: pip install ".[docs]"
+
+      - name: Build Sphinx docs
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: |
+          sphinx-build -b html docs/ docs/_build/html 2>&1 | tee /tmp/sphinx_out.txt
+          SPHINX_EXIT=${PIPESTATUS[0]}
+          if [ $SPHINX_EXIT -ne 0 ]; then
+            echo "Sphinx exited with code $SPHINX_EXIT"
+            exit 1
+          fi
+          if grep -q "^WARNING:" /tmp/sphinx_out.txt; then
+            echo "Unexpected Sphinx warnings found:"
+            grep "^WARNING:" /tmp/sphinx_out.txt
+            exit 1
+          fi
+
+      - name: Upload HTML docs as artifact
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs
+          path: docs/_build/html/
+          retention-days: 7
+
+      - name: Revert version bump on publish failure
+        if: failure() && steps.publish.outcome == 'failure' && steps.version.outputs.BUMPED == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git tag | grep -q "^v${{ steps.version.outputs.VERSION }}$"; then
+            git tag -d "v${{ steps.version.outputs.VERSION }}"
+            git push origin ":refs/tags/v${{ steps.version.outputs.VERSION }}"
+          fi
+
+          git revert --no-edit HEAD
+          git push
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.SKIP == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          body: |
+            Docs: https://spectral-model-explainer.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
+            PyPI: https://pypi.org/project/spectral-model-explainer/${{ steps.version.outputs.VERSION }}/
