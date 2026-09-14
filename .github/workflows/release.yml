@@ -134,5 +134,5 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           body: |
-            Docs: https://spectral-model-explainer.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
-            PyPI: https://pypi.org/project/spectral-model-explainer/${{ steps.version.outputs.VERSION }}/
+            Docs: https://dpg.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
+            PyPI: https://pypi.org/project/dpg/${{ steps.version.outputs.VERSION }}/
