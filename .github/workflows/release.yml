@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches:
       - main
@@ -19,11 +21,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # 1) TESTS
+  #    Runs on every PR targeting main AND on every push to main.  This
+  #    replaces the standalone ci.yml workflow.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: |
+          pytest -q
+
+  # ---------------------------------------------------------------------------
+  # 2) RELEASE
+  #    Only runs on push to main (never on PRs).  Depends on `test`
+  #    succeeding across the full matrix — if any Python version fails
+  #    tests, we do not publish.
+  # ---------------------------------------------------------------------------
   release:
+    name: Publish release
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      released: ${{ steps.version.outputs.SKIP == 'false' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,16 +95,10 @@ jobs:
       # Rules (in order):
       #   1. If pyproject.toml's version is STRICTLY GREATER than the highest
       #      existing vX.Y.Z tag, treat it as a manual bump and use it as-is.
-      #      (Covers the case where the maintainer edited pyproject.toml by
-      #      hand — major or minor bump.)
       #   2. Otherwise (no tags yet, or pyproject.toml <= highest tag), the
       #      maintainer did not change the version, so patch-bump it to the
-      #      next patch above the highest released version.  This guarantees
-      #      that if the latest release was v0.3.0, the next one is v0.3.1
-      #      and not v0.3.0 again.
-      #   3. Set BUMPED=true only when we actually changed pyproject.toml.
-      #      This gates the "push bump back to main" and "revert on failure"
-      #      steps below.
+      #      next patch above the highest released version.
+      #   3. BUMPED=true only when we actually changed pyproject.toml.
       # ---------------------------------------------------------------------------
       - name: Determine version
         id: version
@@ -75,7 +113,6 @@ jobs:
           CUR_VERSION=$(poetry version --short)
           BUMPED=false
 
-          # Highest released version from existing tags.
           git fetch --tags --quiet
           HIGHEST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
                           | sed 's/^v//' \
@@ -88,21 +125,12 @@ jobs:
           echo "CUR_VERSION=$CUR_VERSION"
           echo "HIGHEST_TAG=$HIGHEST_TAG"
 
-          # Compare semantic versions using `sort -V`.  The larger of the
-          # two ends up at the top of the sorted list.
           LARGEST=$(printf '%s\n%s\n' "$CUR_VERSION" "$HIGHEST_TAG" | sort -V | tail -n 1)
 
           if [ "$LARGEST" = "$CUR_VERSION" ] && [ "$CUR_VERSION" != "$HIGHEST_TAG" ]; then
-            # CUR > HIGHEST_TAG → user manually bumped.  Use as-is.
             NEW_VERSION="$CUR_VERSION"
             echo "Manual bump detected ($CUR_VERSION > $HIGHEST_TAG). Using as-is."
           else
-            # CUR <= HIGHEST_TAG → user did NOT manually bump.
-            # Compute the patch bump above HIGHEST_TAG.  We do it by
-            # temporarily rewriting pyproject.toml to HIGHEST_TAG, running
-            # `poetry version patch`, capturing the result, then restoring.
-            # That keeps `poetry version patch` as the single source of
-            # truth for patch arithmetic.
             poetry version "${HIGHEST_TAG}" >/dev/null
             poetry version patch >/dev/null
             NEW_VERSION=$(poetry version --short)
@@ -115,7 +143,6 @@ jobs:
           echo "PREV_VERSION=$CUR_VERSION" >> "$GITHUB_OUTPUT"
           echo "BUMPED=$BUMPED" >> "$GITHUB_OUTPUT"
 
-          # Defense in depth: skip if the chosen tag already exists.
           if git tag --list "v$NEW_VERSION" | grep -q .; then
             echo "Tag v$NEW_VERSION already exists. Skipping publish."
             echo "SKIP=true" >> "$GITHUB_OUTPUT"
@@ -123,14 +150,9 @@ jobs:
             echo "SKIP=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # ---------------------------------------------------------------------------
-      # Push the bump back to main (only when we actually changed the version
-      # and we're not skipping the release).
-      #
-      # The push targets `main` directly.  The bump commit only touches
+      # Push the bump back to main.  The bump commit only touches
       # pyproject.toml, and the workflow's trigger uses paths-ignore for
       # that path, so this push does NOT re-trigger the workflow.
-      # ---------------------------------------------------------------------------
       - name: Push version bump to main
         if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true'
         run: |
@@ -154,21 +176,17 @@ jobs:
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
 
-      # ---------------------------------------------------------------------------
       # Build the versioned Sphinx docs as a GitHub Actions artifact so the
       # rendered HTML reflects this exact release (release/version are
       # passed via -D so they override docs/conf.py's defaults).
-      #
       # This does NOT modify any tracked file in the repo, so the workflow
       # does not re-trigger itself.
       #
-      # NOTE: the URL printed in the GitHub Release body still points at
-      # Read the Docs (https://dpg.readthedocs.io/en/vX.Y.Z/).  That URL
-      # is served by RTD independently and is unrelated to this artifact;
+      # The URL printed in the GitHub Release body still points at Read
+      # the Docs (https://dpg.readthedocs.io/en/vX.Y.Z/).  That URL is
+      # served by RTD independently and is unrelated to this artifact;
       # it will 404 unless the project's RTD automation rules activate
-      # tags (Settings → Automation Rules on readthedocs.org).  See the
-      # project README for the RTD-side setup.
-      # ---------------------------------------------------------------------------
+      # tags (Settings → Automation Rules on readthedocs.org).
       - name: Install system dependencies
         if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
         run: sudo apt-get install -y graphviz
@@ -177,14 +195,6 @@ jobs:
         if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
         run: pip install ".[docs]"
 
-      # -D release=VERSION → overrides docs/conf.py's default (which reads
-      # from pyproject.toml).  At the time this step runs, the bump commit
-      # has already been pushed to main, so conf.py would also read the
-      # right version — but -D is explicit and protects against the bump
-      # commit not yet being present in the checkout (this checkout uses
-      # the tag, which is at the post-bump SHA anyway).
-      # Fails on any WARNING line that is not the benign sphinx-autoapi
-      # "Unknown type: placeholder" — same exclusion docs.yml used.
       - name: Build Sphinx docs
         if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
         run: |
@@ -231,9 +241,89 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.version.outputs.SKIP == 'false'
+        id: gh_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           body: |
             Docs: https://dpg.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
             PyPI: https://pypi.org/project/dpg/${{ steps.version.outputs.VERSION }}/
+
+  # ---------------------------------------------------------------------------
+  # 3) NOTIFY
+  #    Single Telegram message at the very end with the outcome of every
+  #    job.  Always runs (if: always()) so failures and skipped releases
+  #    are reported too.
+  #
+  #    Only fires on push to main — PRs do not trigger a notify.
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Telegram notification
+    needs: [test, release]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and send Telegram message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPOSITORY: ${{ github.repository }}
+          AUTHOR: ${{ github.actor }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TEST_RESULT: ${{ needs.test.result }}
+          RELEASE_RESULT: ${{ needs.release.result }}
+          VERSION: ${{ needs.release.outputs.version }}
+          RELEASED: ${{ needs.release.outputs.released }}
+        run: |
+          set -euo pipefail
+
+          SHORT_SHA="$(printf '%s' "${COMMIT_SHA}" | cut -c1-7)"
+
+          # Per-job status icons.
+          status_icon() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              cancelled) echo "⚠️" ;;
+              skipped) echo "⏭️" ;;
+              *)        echo "❔" ;;
+            esac
+          }
+
+          TEST_ICON=$(status_icon "${TEST_RESULT}")
+          RELEASE_ICON=$(status_icon "${RELEASE_RESULT}")
+
+          # Overall outcome of the workflow.
+          if [ "${TEST_RESULT}" = "success" ] && [ "${RELEASE_RESULT}" = "success" ]; then
+            OUTCOME="✅ SUCCESS"
+          elif [ "${TEST_RESULT}" = "failure" ] || [ "${RELEASE_RESULT}" = "failure" ]; then
+            OUTCOME="❌ FAILED"
+          else
+            OUTCOME="⚠️ ${RELEASE_RESULT^^}"
+          fi
+
+          # Build the body with literal '\n' sequences (NOT real newlines)
+          # so we never break out of this YAML block scalar.  Telegram
+          # accepts %0A as the newline marker.
+          NL=$'\n'
+
+          RELEASE_LINE=""
+          if [ "${RELEASED}" = "true" ] && [ -n "${VERSION}" ]; then
+            HASH=$(printf '\043')
+            RELEASE_URL="${RUN_URL}${HASH}releases"
+            RELEASE_LINE="📦 Version: ${VERSION}${NL}🔗 Release: ${RELEASE_URL}"
+          elif [ "${VERSION}" = "" ]; then
+            RELEASE_LINE="📦 Version: (could not be determined)"
+          fi
+
+          BODY="${OUTCOME} on ${REPOSITORY}${NL}👤 Author: ${AUTHOR}${NL}🔖 Commit: ${SHORT_SHA}${NL}💬 Message: ${COMMIT_MESSAGE}${NL}${NL}${TEST_ICON} Tests${NL}${RELEASE_ICON} Release${NL}${RELEASE_LINE}${NL}${NL}🔍 Run: ${RUN_URL}"
+
+          # Replace real newlines with Telegram's %0A marker.
+          TEXT=$(printf '%s' "$BODY" | sed ':a;N;$!ba;s/\n/%0A/g')
+
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TEXT}" \
+            -d "disable_web_page_preview=true"
