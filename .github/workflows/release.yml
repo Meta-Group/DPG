@@ -154,10 +154,66 @@ jobs:
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
 
-      # Docs are NOT built in this workflow.  Read the Docs owns the docs
-      # build (see .readthedocs.yaml) and activates versioned URLs
-      # (https://dpg.readthedocs.io/en/vX.Y.Z/) automatically when the
-      # release workflow pushes the vX.Y.Z git tag.
+      # ---------------------------------------------------------------------------
+      # Build the versioned Sphinx docs as a GitHub Actions artifact so the
+      # rendered HTML reflects this exact release (release/version are
+      # passed via -D so they override docs/conf.py's defaults).
+      #
+      # This does NOT modify any tracked file in the repo, so the workflow
+      # does not re-trigger itself.
+      #
+      # NOTE: the URL printed in the GitHub Release body still points at
+      # Read the Docs (https://dpg.readthedocs.io/en/vX.Y.Z/).  That URL
+      # is served by RTD independently and is unrelated to this artifact;
+      # it will 404 unless the project's RTD automation rules activate
+      # tags (Settings → Automation Rules on readthedocs.org).  See the
+      # project README for the RTD-side setup.
+      # ---------------------------------------------------------------------------
+      - name: Install system dependencies
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: sudo apt-get install -y graphviz
+
+      - name: Install package + docs dependencies
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: pip install ".[docs]"
+
+      # -D release=VERSION → overrides docs/conf.py's default (which reads
+      # from pyproject.toml).  At the time this step runs, the bump commit
+      # has already been pushed to main, so conf.py would also read the
+      # right version — but -D is explicit and protects against the bump
+      # commit not yet being present in the checkout (this checkout uses
+      # the tag, which is at the post-bump SHA anyway).
+      # Fails on any WARNING line that is not the benign sphinx-autoapi
+      # "Unknown type: placeholder" — same exclusion docs.yml used.
+      - name: Build Sphinx docs
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          MAJOR_MINOR=$(echo "$VERSION" | awk -F. '{print $1"."$2}')
+          sphinx-build -b html \
+            -D "release=${VERSION}" \
+            -D "version=${MAJOR_MINOR}" \
+            docs/ docs/_build/html 2>&1 | tee /tmp/sphinx_out.txt
+          SPHINX_EXIT=${PIPESTATUS[0]}
+          if [ "$SPHINX_EXIT" -ne 0 ]; then
+            echo "Sphinx exited with code $SPHINX_EXIT"
+            exit 1
+          fi
+          if grep -v "Unknown type: placeholder" /tmp/sphinx_out.txt | grep -q "^WARNING:"; then
+            echo "Unexpected Sphinx warnings found:"
+            grep -v "Unknown type: placeholder" /tmp/sphinx_out.txt | grep "^WARNING:"
+            exit 1
+          fi
+
+      - name: Upload HTML docs as artifact
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs
+          path: docs/_build/html/
+          retention-days: 7
+
       - name: Revert version bump on publish failure
         if: failure() && steps.publish.outcome == 'failure' && steps.version.outputs.BUMPED == 'true'
         run: |
