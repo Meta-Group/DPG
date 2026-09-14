@@ -1,0 +1,183 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    # Ignore commits produced by this workflow itself (the bump commit and
+    # the revert commit) so the workflow does not recurse infinitely.
+    # The bump commit only ever touches pyproject.toml, so filtering on
+    # that path is sufficient and reliable.
+    paths-ignore:
+      - pyproject.toml
+
+# Serialize runs — if two pushes hit main in quick succession, the second
+# one waits instead of running in parallel and racing on tag creation /
+# pyproject.toml edits.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.4.0
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        run: poetry install
+
+      # ---------------------------------------------------------------------------
+      # Decide what version to publish.
+      #
+      # Rules (in order):
+      #   1. If pyproject.toml's version is STRICTLY GREATER than the highest
+      #      existing vX.Y.Z tag, treat it as a manual bump and use it as-is.
+      #      (Covers the case where the maintainer edited pyproject.toml by
+      #      hand — major or minor bump.)
+      #   2. Otherwise (no tags yet, or pyproject.toml <= highest tag), the
+      #      maintainer did not change the version, so patch-bump it to the
+      #      next patch above the highest released version.  This guarantees
+      #      that if the latest release was v0.3.0, the next one is v0.3.1
+      #      and not v0.3.0 again.
+      #   3. Set BUMPED=true only when we actually changed pyproject.toml.
+      #      This gates the "push bump back to main" and "revert on failure"
+      #      steps below.
+      # ---------------------------------------------------------------------------
+      - name: Determine version
+        id: version
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+
+          CUR_VERSION=$(poetry version --short)
+          BUMPED=false
+
+          # Highest released version from existing tags.
+          git fetch --tags --quiet
+          HIGHEST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
+                          | sed 's/^v//' \
+                          | sort -V \
+                          | tail -n 1 || true)
+          if [ -z "${HIGHEST_TAG:-}" ]; then
+            HIGHEST_TAG="0.0.0"
+          fi
+
+          echo "CUR_VERSION=$CUR_VERSION"
+          echo "HIGHEST_TAG=$HIGHEST_TAG"
+
+          # Compare semantic versions using `sort -V`.  The larger of the
+          # two ends up at the top of the sorted list.
+          LARGEST=$(printf '%s\n%s\n' "$CUR_VERSION" "$HIGHEST_TAG" | sort -V | tail -n 1)
+
+          if [ "$LARGEST" = "$CUR_VERSION" ] && [ "$CUR_VERSION" != "$HIGHEST_TAG" ]; then
+            # CUR > HIGHEST_TAG → user manually bumped.  Use as-is.
+            NEW_VERSION="$CUR_VERSION"
+            echo "Manual bump detected ($CUR_VERSION > $HIGHEST_TAG). Using as-is."
+          else
+            # CUR <= HIGHEST_TAG → user did NOT manually bump.
+            # Compute the patch bump above HIGHEST_TAG.  We do it by
+            # temporarily rewriting pyproject.toml to HIGHEST_TAG, running
+            # `poetry version patch`, capturing the result, then restoring.
+            # That keeps `poetry version patch` as the single source of
+            # truth for patch arithmetic.
+            poetry version "${HIGHEST_TAG}" >/dev/null
+            poetry version patch >/dev/null
+            NEW_VERSION=$(poetry version --short)
+            git checkout -- pyproject.toml
+            BUMPED=true
+            echo "Auto-bumping from highest released $HIGHEST_TAG -> $NEW_VERSION (current pyproject: $CUR_VERSION)"
+          fi
+
+          echo "VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "PREV_VERSION=$CUR_VERSION" >> "$GITHUB_OUTPUT"
+          echo "BUMPED=$BUMPED" >> "$GITHUB_OUTPUT"
+
+          # Defense in depth: skip if the chosen tag already exists.
+          if git tag --list "v$NEW_VERSION" | grep -q .; then
+            echo "Tag v$NEW_VERSION already exists. Skipping publish."
+            echo "SKIP=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "SKIP=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---------------------------------------------------------------------------
+      # Push the bump back to main (only when we actually changed the version
+      # and we're not skipping the release).
+      #
+      # The push targets `main` directly.  The bump commit only touches
+      # pyproject.toml, and the workflow's trigger uses paths-ignore for
+      # that path, so this push does NOT re-trigger the workflow.
+      # ---------------------------------------------------------------------------
+      - name: Push version bump to main
+        if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          git push origin HEAD:main
+
+      - name: Create tag
+        if: steps.version.outputs.SKIP == 'false'
+        run: |
+          git tag "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Publish to PyPI
+        if: steps.version.outputs.SKIP == 'false'
+        id: publish
+        run: poetry publish --build
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+
+      # Docs are NOT built in this workflow.  Read the Docs owns the docs
+      # build (see .readthedocs.yaml) and activates versioned URLs
+      # (https://dpg.readthedocs.io/en/vX.Y.Z/) automatically when the
+      # release workflow pushes the vX.Y.Z git tag.
+      - name: Revert version bump on publish failure
+        if: failure() && steps.publish.outcome == 'failure' && steps.version.outputs.BUMPED == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git tag --list "v${{ steps.version.outputs.VERSION }}" | grep -q .; then
+            git tag -d "v${{ steps.version.outputs.VERSION }}"
+            git push origin ":refs/tags/v${{ steps.version.outputs.VERSION }}"
+          fi
+
+          git revert --no-edit HEAD
+          git push origin HEAD:main
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.SKIP == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          body: |
+            Docs: https://dpg.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
+            PyPI: https://pypi.org/project/dpg/${{ steps.version.outputs.VERSION }}/
