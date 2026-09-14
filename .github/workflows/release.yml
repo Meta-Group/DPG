@@ -87,49 +87,10 @@ jobs:
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
 
-      # Docs are only built on a successful release (not on every PR/push —
-      # the separate docs.yml workflow that used to do that has been removed
-      # to enforce "docs get built and released only on pip release").
-      # graphviz is required by Sphinx extensions that introspect
-      # C-extension types referenced from the package.
-      - name: Install system dependencies
-        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
-        run: sudo apt-get install -y graphviz
-
-      - name: Install package + docs dependencies
-        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
-        run: pip install ".[docs]"
-
-      # -W  → warnings become errors, but exclude the known-benign autoapi
-      # placeholder warning that fires when astroid can't fully introspect
-      # C-extension types (pandas._libs, numpy C API, etc.).  We pipe
-      # through grep to fail on any OTHER unexpected warning.
-      # NOTE: we do NOT use --keep-going because extension errors cause
-      # Sphinx to exit with code 2 and produce partial output that the
-      # artifact upload would still capture, masking the real failure.
-      - name: Build Sphinx docs
-        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
-        run: |
-          sphinx-build -b html docs/ docs/_build/html 2>&1 | tee /tmp/sphinx_out.txt
-          SPHINX_EXIT=${PIPESTATUS[0]}
-          if [ $SPHINX_EXIT -ne 0 ]; then
-            echo "Sphinx exited with code $SPHINX_EXIT"
-            exit 1
-          fi
-          if grep -v "Unknown type: placeholder" /tmp/sphinx_out.txt | grep -q "^WARNING:"; then
-            echo "Unexpected Sphinx warnings found:"
-            grep -v "Unknown type: placeholder" /tmp/sphinx_out.txt | grep "^WARNING:"
-            exit 1
-          fi
-
-      - name: Upload HTML docs as artifact
-        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-docs
-          path: docs/_build/html/
-          retention-days: 7
-
+      # Docs are NOT built in this workflow.  Read the Docs owns the docs
+      # build (see .readthedocs.yaml) and activates versioned URLs
+      # (https://dpg.readthedocs.io/en/vX.Y.Z/) automatically when the
+      # release workflow pushes the vX.Y.Z git tag.
       - name: Revert version bump on publish failure
         if: failure() && steps.publish.outcome == 'failure' && steps.version.outputs.BUMPED == 'true'
         run: |
