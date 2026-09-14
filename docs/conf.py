@@ -2,11 +2,33 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
+import pathlib
 import sys
 
 # If the package is not installed, point Sphinx at the source tree so autoapi
 # can discover the modules without needing an editable install.
 sys.path.insert(0, os.path.abspath(".."))
+
+
+def _read_pyproject_version() -> str:
+    """Parse the project version out of ../pyproject.toml.
+
+    We use a tiny stdlib-only parser instead of tomllib (which is 3.11+) so
+    that the docs still build on Python 3.10 — the minimum version this
+    project supports.
+    """
+    pyproject = pathlib.Path(__file__).resolve().parent.parent / "pyproject.toml"
+    try:
+        text = pyproject.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "0.0.0"
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("version") and "=" in stripped and "tool.poetry" not in stripped:
+            _, _, value = stripped.partition("=")
+            return value.strip().strip('"').strip("'")
+    return "0.0.0"
+
 
 # ---------------------------------------------------------------------------
 # Project information
@@ -14,7 +36,11 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "DPG"
 copyright = "2024, Sylvio Barbon Junior, Leonardo Arrighi"
 author = "Sylvio Barbon Junior, Leonardo Arrighi"
-release = "0.3.0"
+# Read from pyproject.toml so the rendered version stays in sync with the
+# release workflow's auto-bump.  Can still be overridden on the command line
+# via `sphinx-build -D release=X.Y.Z ...`.
+release = _read_pyproject_version()
+version = release.split(".")[0] + "." + release.split(".")[1]
 
 # ---------------------------------------------------------------------------
 # General configuration
