@@ -1,5 +1,12 @@
 name: Release
 
+# The run-name appears in the Actions UI list and makes it obvious whether
+# a run is just tests (PRs / pushes that aren't merges to main) or an
+# actual release (push to main).  Without this, every run shows up as
+# "Release" and it is hard to tell at a glance which ones published.
+run-name: |
+  ${{ github.event_name == 'pull_request' && format('🧪 Tests — PR #{0}', github.event.pull_request.number) || format('🚀 Release — {0} @ {1}', github.event.head_commit.id, github.ref_name) }}
+
 on:
   pull_request:
     branches: [main]
