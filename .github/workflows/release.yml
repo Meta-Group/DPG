@@ -239,6 +239,87 @@ jobs:
           git revert --no-edit HEAD
           git push origin HEAD:main
 
+      - name: Extract changelog from merged PR
+        if: steps.version.outputs.SKIP == 'false'
+        id: changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Parse the PR number from the merge commit message.
+          # Supports both "Merge pull request #33 from ..." and squash merges
+          # of the form "#33" or "(#33)" in the subject line.
+          COMMIT_MSG=$(git log -1 --format=%s)
+          PR_NUMBER=""
+          if echo "$COMMIT_MSG" | grep -qE 'Merge pull request #[0-9]+'; then
+            PR_NUMBER=$(echo "$COMMIT_MSG" | grep -oE '#[0-9]+' | head -n 1 | tr -d '#')
+          elif echo "$COMMIT_MSG" | grep -qE '\(#([0-9]+)\)'; then
+            PR_NUMBER=$(echo "$COMMIT_MSG" | grep -oE '\(#[0-9]+\)' | head -n 1 | grep -oE '[0-9]+')
+          fi
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No PR number found in commit message (direct push?); skipping changelog."
+            echo "changelog=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Fetching PR #$PR_NUMBER body..."
+          PR_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+                      --jq '.body // ""')
+
+          if [ -z "$PR_BODY" ]; then
+            echo "PR body is empty; skipping changelog."
+            echo "changelog=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Extract the content under the '## Changelog' heading up to the
+          # next '## ' heading or end-of-body.  Use awk (not python) to keep
+          # this runnable on every Actions image without extra deps.
+          CHANGELOG=$(printf '%s\n' "$PR_BODY" | awk '
+            BEGIN { in_section = 0; buf = "" }
+            # Detect the "## Changelog" heading (case-insensitive, allow
+            # leading whitespace).  Skip to the next line and start capturing.
+            /^[[:space:]]*##[[:space:]]*[Cc]hangelog[[:space:]]*$/ {
+              in_section = 1
+              next
+            }
+            in_section == 1 {
+              # Stop on the next H2 (or shallower) heading.
+              if ($0 ~ /^[[:space:]]*##[[:space:]]+/) {
+                in_section = 0
+              } else {
+                buf = buf $0 "\n"
+              }
+            }
+            END {
+              # Trim trailing whitespace from the buffer.
+              sub(/[[:space:]]+$/, "", buf)
+              print buf
+            }
+          ')
+
+          # Strip the HTML comment block that the PR template ships with,
+          # so release notes don't include the instructions to contributors.
+          CHANGELOG=$(printf '%s\n' "$CHANGELOG" | sed '/<!--/,/-->/d')
+
+          # Trim leading/trailing blank lines.
+          CHANGELOG=$(printf '%s\n' "$CHANGELOG" | sed '1{/^$/d}; ${/^$/d}')
+
+          # If nothing remains after stripping, don't emit a header.
+          if [ -z "$(printf '%s' "$CHANGELOG" | tr -d '[:space:]')" ]; then
+            echo "PR body had no usable changelog content; skipping."
+            echo "changelog=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "changelog<<EOF"
+            printf '%s\n' "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         if: steps.version.outputs.SKIP == 'false'
         id: gh_release
@@ -246,6 +327,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           body: |
+            ${{ steps.changelog.outputs.changelog }}
             Docs: https://dpg.readthedocs.io/en/v${{ steps.version.outputs.VERSION }}/
             PyPI: https://pypi.org/project/dpg/${{ steps.version.outputs.VERSION }}/
 
