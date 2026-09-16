@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](pyproject.toml)
 [![Build Status](https://github.com/Meta-Group/DPG/actions/workflows/tests.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/tests.yml)
+[![Release](https://github.com/Meta-Group/DPG/actions/workflows/release.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/release.yml)
 [![Documentation Status](https://readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
 
 <p align="center">
