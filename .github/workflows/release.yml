@@ -30,50 +30,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # 1) TESTS
-  #    Runs on every PR targeting main AND on every push to main.  This
-  #    replaces the standalone ci.yml workflow.
-  # ---------------------------------------------------------------------------
-  test:
-    name: Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
-
-      - name: Run tests
-        run: |
-          pytest -q
-
-  # ---------------------------------------------------------------------------
-  # 2) RELEASE
-  #    Only runs on push to main (never on PRs).  Depends on `test`
-  #    succeeding across the full matrix — if any Python version fails
-  #    tests, we do not publish.
-  # ---------------------------------------------------------------------------
+  # Runs only after a PR has been merged to main. Pull-request tests are
+  # performed by tests.yml before merging and are intentionally not repeated.
   release:
     name: Publish release
-    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     outputs:
       version: ${{ steps.version.outputs.VERSION }}
       released: ${{ steps.version.outputs.SKIP == 'false' }}
@@ -164,18 +129,20 @@ jobs:
             echo "SKIP=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Push the bump back to main.  The bump commit only touches
-      # pyproject.toml, and the workflow's trigger uses paths-ignore for
-      # that path, so this push does NOT re-trigger the workflow.
-      - name: Push version bump to main
+      # Branch protection can reject direct pushes from GitHub Actions. Open a
+      # small PR instead. Because it changes only pyproject.toml, merging it
+      # matches paths-ignore and cannot start another release workflow run.
+      - name: Create version bump pull request
         if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true'
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml
-          git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }}"
-          git push origin HEAD:main
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/bump-version-to-${{ steps.version.outputs.VERSION }}
+          delete-branch: true
+          commit-message: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          title: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          body: |
+            Updates the project version after publishing v${{ steps.version.outputs.VERSION }}.
+          labels: automated
 
       - name: Create tag
         if: steps.version.outputs.SKIP == 'false'
@@ -346,7 +313,7 @@ jobs:
             PyPI: https://pypi.org/project/dpg/${{ steps.version.outputs.VERSION }}/
 
   # ---------------------------------------------------------------------------
-  # 3) NOTIFY
+  # 2) NOTIFY
   #    Single Telegram message at the very end with the outcome of every
   #    job.  Always runs (if: always()) so failures and skipped releases
   #    are reported too.
@@ -355,7 +322,7 @@ jobs:
   # ---------------------------------------------------------------------------
   notify:
     name: Telegram notification
-    needs: [test, release]
+    needs: release
     # Only send Telegram on full success.  Failures are surfaced via
     # GitHub's built-in Actions email notification, so no Telegram is
     # needed (and would be noisy) on failure.
@@ -371,7 +338,6 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_SHA: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          TEST_RESULT: ${{ needs.test.result }}
           RELEASE_RESULT: ${{ needs.release.result }}
           VERSION: ${{ needs.release.outputs.version }}
           RELEASED: ${{ needs.release.outputs.released }}
@@ -391,14 +357,11 @@ jobs:
             esac
           }
 
-          TEST_ICON=$(status_icon "${TEST_RESULT}")
           RELEASE_ICON=$(status_icon "${RELEASE_RESULT}")
 
           # Overall outcome of the workflow.
-          if [ "${TEST_RESULT}" = "success" ] && [ "${RELEASE_RESULT}" = "success" ]; then
+          if [ "${RELEASE_RESULT}" = "success" ]; then
             OUTCOME="✅ SUCCESS"
-          elif [ "${TEST_RESULT}" = "failure" ] || [ "${RELEASE_RESULT}" = "failure" ]; then
-            OUTCOME="❌ FAILED"
           else
             OUTCOME="⚠️ ${RELEASE_RESULT^^}"
           fi
@@ -417,7 +380,7 @@ jobs:
             RELEASE_LINE="📦 Version: (could not be determined)"
           fi
 
-          BODY="${OUTCOME} on ${REPOSITORY}${NL}👤 Author: ${AUTHOR}${NL}🔖 Commit: ${SHORT_SHA}${NL}💬 Message: ${COMMIT_MESSAGE}${NL}${NL}${TEST_ICON} Tests${NL}${RELEASE_ICON} Release${NL}${RELEASE_LINE}${NL}${NL}🔍 Run: ${RUN_URL}"
+          BODY="${OUTCOME} on ${REPOSITORY}${NL}👤 Author: ${AUTHOR}${NL}🔖 Commit: ${SHORT_SHA}${NL}💬 Message: ${COMMIT_MESSAGE}${NL}${NL}${RELEASE_ICON} Release${NL}${RELEASE_LINE}${NL}${NL}🔍 Run: ${RUN_URL}"
 
           # Replace real newlines with Telegram's %0A marker.
           TEXT=$(printf '%s' "$BODY" | sed ':a;N;$!ba;s/\n/%0A/g')

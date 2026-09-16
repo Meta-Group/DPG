@@ -1,15 +1,10 @@
 name: Tests
 
-# Runs pytest on every PR and on every push to main.  Lives in its own
-# workflow so the release pipeline (release.yml) is only triggered on
-# push to main — keeping the Actions UI clean: exactly one Release run
-# per merge, plus zero-or-more Test runs depending on PR activity.
+# Runs pytest for pull requests before they are merged. The release pipeline
+# runs after the merge and does not repeat this matrix.
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 concurrency:
   group: tests
