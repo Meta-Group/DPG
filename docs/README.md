@@ -74,7 +74,7 @@ No need to manually write API docs - just add proper docstrings to your Python c
 
 ## Publishing
 
-Documentation is automatically built and deployed to ReadTheDocs via the CI/CD pipeline (see `.github/workflows/docs.yml`) when changes are merged to the `main` branch.
+Documentation is automatically built and deployed to ReadTheDocs via the CI/CD pipeline (see `.github/workflows/release.yml`) when changes are merged to the `main` branch.
 
 ## Troubleshooting
 
