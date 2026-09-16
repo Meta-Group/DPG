@@ -8,8 +8,10 @@ run-name: |
   ${{ github.event_name == 'pull_request' && format('🧪 Tests — PR #{0}', github.event.pull_request.number) || format('🚀 Release — {0} @ {1}', github.event.head_commit.id, github.ref_name) }}
 
 on:
-  pull_request:
-    branches: [main]
+  # Only fires on push to main (i.e. when a PR is merged or a maintainer
+  # pushes directly).  PR-time testing lives in the separate tests.yml
+  # workflow so that opening a PR does NOT spawn a "Release" run in the
+  # Actions UI — there is exactly one workflow run per release.
   push:
     branches:
       - main
@@ -68,7 +70,7 @@ jobs:
   release:
     name: Publish release
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -141,7 +143,12 @@ jobs:
             poetry version "${HIGHEST_TAG}" >/dev/null
             poetry version patch >/dev/null
             NEW_VERSION=$(poetry version --short)
-            git checkout -- pyproject.toml
+            # NOTE: do NOT restore pyproject.toml here.  The bump from
+            # $HIGHEST_TAG -> $NEW_VERSION must persist to disk so that
+            # the subsequent "Push version bump to main" step has a real
+            # diff to commit.  (Earlier revisions of this step restored
+            # the file, which made the commit a no-op and caused the
+            # release to fail with "nothing to commit".)
             BUMPED=true
             echo "Auto-bumping from highest released $HIGHEST_TAG -> $NEW_VERSION (current pyproject: $CUR_VERSION)"
           fi
@@ -349,7 +356,10 @@ jobs:
   notify:
     name: Telegram notification
     needs: [test, release]
-    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only send Telegram on full success.  Failures are surfaced via
+    # GitHub's built-in Actions email notification, so no Telegram is
+    # needed (and would be noisy) on failure.
+    if: success() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Build and send Telegram message
