@@ -15,10 +15,8 @@ on:
   push:
     branches:
       - main
-    # Ignore commits produced by this workflow itself (the bump commit and
-    # the revert commit) so the workflow does not recurse infinitely.
-    # The bump commit only ever touches pyproject.toml, so filtering on
-    # that path is sufficient and reliable.
+    # The version-bump PR only changes pyproject.toml, so merging it must not
+    # trigger another release.
     paths-ignore:
       - pyproject.toml
 
@@ -108,12 +106,7 @@ jobs:
             poetry version "${HIGHEST_TAG}" >/dev/null
             poetry version patch >/dev/null
             NEW_VERSION=$(poetry version --short)
-            # NOTE: do NOT restore pyproject.toml here.  The bump from
-            # $HIGHEST_TAG -> $NEW_VERSION must persist to disk so that
-            # the subsequent "Push version bump to main" step has a real
-            # diff to commit.  (Earlier revisions of this step restored
-            # the file, which made the commit a no-op and caused the
-            # release to fail with "nothing to commit".)
+            # This persists in the checkout for the version-bump PR below.
             BUMPED=true
             echo "Auto-bumping from highest released $HIGHEST_TAG -> $NEW_VERSION (current pyproject: $CUR_VERSION)"
           fi
@@ -129,33 +122,32 @@ jobs:
             echo "SKIP=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Branch protection can reject direct pushes from GitHub Actions. Open a
-      # small PR instead. Because it changes only pyproject.toml, merging it
-      # matches paths-ignore and cannot start another release workflow run.
-      - name: Create version bump pull request
-        if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: chore/bump-version-to-${{ steps.version.outputs.VERSION }}
-          delete-branch: true
-          commit-message: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
-          title: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
-          body: |
-            Updates the project version after publishing v${{ steps.version.outputs.VERSION }}.
-          labels: automated
-
-      - name: Create tag
-        if: steps.version.outputs.SKIP == 'false'
-        run: |
-          git tag "v${{ steps.version.outputs.VERSION }}"
-          git push origin "v${{ steps.version.outputs.VERSION }}"
-
       - name: Publish to PyPI
         if: steps.version.outputs.SKIP == 'false'
         id: publish
         run: poetry publish --build
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Create tag
+        if: steps.version.outputs.SKIP == 'false' && steps.publish.outcome == 'success'
+        run: |
+          set -euo pipefail
+          git tag "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Create version bump pull request
+        if: steps.version.outputs.SKIP == 'false' && steps.version.outputs.BUMPED == 'true' && steps.publish.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/bump-version-to-${{ steps.version.outputs.VERSION }}
+          base: main
+          delete-branch: true
+          commit-message: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          title: "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          body: |
+            Updates the project version after publishing v${{ steps.version.outputs.VERSION }}.
+          labels: automated
 
       # Build the versioned Sphinx docs as a GitHub Actions artifact so the
       # rendered HTML reflects this exact release (release/version are
@@ -204,21 +196,6 @@ jobs:
           name: html-docs
           path: docs/_build/html/
           retention-days: 7
-
-      - name: Revert version bump on publish failure
-        if: failure() && steps.publish.outcome == 'failure' && steps.version.outputs.BUMPED == 'true'
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          if git tag --list "v${{ steps.version.outputs.VERSION }}" | grep -q .; then
-            git tag -d "v${{ steps.version.outputs.VERSION }}"
-            git push origin ":refs/tags/v${{ steps.version.outputs.VERSION }}"
-          fi
-
-          git revert --no-edit HEAD
-          git push origin HEAD:main
 
       - name: Extract changelog from merged PR
         if: steps.version.outputs.SKIP == 'false'
