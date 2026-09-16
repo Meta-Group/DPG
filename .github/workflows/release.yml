@@ -148,6 +148,7 @@ jobs:
           body: |
             Updates the project version after publishing v${{ steps.version.outputs.VERSION }}.
           labels: automated
+          add-paths: pyproject.toml
 
       # Build the versioned Sphinx docs as a GitHub Actions artifact so the
       # rendered HTML reflects this exact release (release/version are
@@ -257,6 +258,12 @@ jobs:
               print buf
             }
           ')
+
+          # Older PRs may predate the template or omit its heading. Preserve
+          # their meaningful PR body rather than dropping release notes.
+          if [ -z "$(printf '%s' "$CHANGELOG" | tr -d '[:space:]')" ]; then
+            CHANGELOG="$PR_BODY"
+          fi
 
           # Strip the HTML comment block that the PR template ships with,
           # so release notes don't include the instructions to contributors.
