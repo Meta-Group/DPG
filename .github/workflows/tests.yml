@@ -5,6 +5,8 @@ name: Tests
 
 on:
   pull_request:
+    paths-ignore:
+      - pyproject.toml
 
 concurrency:
   group: tests

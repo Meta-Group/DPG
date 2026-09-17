@@ -148,6 +148,7 @@ jobs:
           body: |
             Updates the project version after publishing v${{ steps.version.outputs.VERSION }}.
           labels: automated
+          add-paths: pyproject.toml
 
       # Build the versioned Sphinx docs as a GitHub Actions artifact so the
       # rendered HTML reflects this exact release (release/version are
@@ -258,6 +259,12 @@ jobs:
             }
           ')
 
+          # Older PRs may predate the template or omit its heading. Preserve
+          # their meaningful PR body rather than dropping release notes.
+          if [ -z "$(printf '%s' "$CHANGELOG" | tr -d '[:space:]')" ]; then
+            CHANGELOG="$PR_BODY"
+          fi
+
           # Strip the HTML comment block that the PR template ships with,
           # so release notes don't include the instructions to contributors.
           CHANGELOG=$(printf '%s\n' "$CHANGELOG" | sed '/<!--/,/-->/d')
@@ -343,9 +350,6 @@ jobs:
             OUTCOME="⚠️ ${RELEASE_RESULT^^}"
           fi
 
-          # Build the body with literal '\n' sequences (NOT real newlines)
-          # so we never break out of this YAML block scalar.  Telegram
-          # accepts %0A as the newline marker.
           NL=$'\n'
 
           RELEASE_LINE=""
@@ -359,10 +363,7 @@ jobs:
 
           BODY="${OUTCOME} on ${REPOSITORY}${NL}👤 Author: ${AUTHOR}${NL}🔖 Commit: ${SHORT_SHA}${NL}💬 Message: ${COMMIT_MESSAGE}${NL}${NL}${RELEASE_ICON} Release${NL}${RELEASE_LINE}${NL}${NL}🔍 Run: ${RUN_URL}"
 
-          # Replace real newlines with Telegram's %0A marker.
-          TEXT=$(printf '%s' "$BODY" | sed ':a;N;$!ba;s/\n/%0A/g')
-
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${TEXT}" \
+            --data-urlencode "text=${BODY}" \
             -d "disable_web_page_preview=true"
