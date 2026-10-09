@@ -1,0 +1,29 @@
+{
+  "dataset_name": "wine_quality",
+  "source": "openml",
+  "openml_id": 287,
+  "n_train": 5197,
+  "n_test": 1300,
+  "n_features": 11,
+  "n_classes": 7,
+  "class_counts_train": {
+    "0": 24,
+    "1": 173,
+    "2": 1710,
+    "3": 2269,
+    "4": 863,
+    "5": 154,
+    "6": 4
+  },
+  "class_counts_test": {
+    "0": 6,
+    "1": 43,
+    "2": 428,
+    "3": 567,
+    "4": 216,
+    "5": 39,
+    "6": 1
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

@@ -1,0 +1,23 @@
+{
+  "dataset_name": "vehicle",
+  "source": "openml",
+  "openml_id": 54,
+  "n_train": 676,
+  "n_test": 170,
+  "n_features": 18,
+  "n_classes": 4,
+  "class_counts_train": {
+    "0": 174,
+    "1": 170,
+    "2": 173,
+    "3": 159
+  },
+  "class_counts_test": {
+    "0": 44,
+    "1": 42,
+    "2": 44,
+    "3": 40
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

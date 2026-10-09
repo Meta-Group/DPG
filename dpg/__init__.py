@@ -6,6 +6,7 @@ from .explainer import (
     DPGLocalExplanation,
     DPGTreePathExplanation,
 )
+from .local_dpg import LocalDPG, LocalTrace, PivotPredicate, build_local_dpg, intervene
 from .themes import DPG_CLASS_PALETTE, DPG_COLORS, DPG_OLIVE_CLASS_PALETTE, resolve_theme_context
 from .visualizer import (
     class_feature_predicate_counts,
@@ -31,6 +32,11 @@ __all__ = [
     "DPGExplanation",
     "DPGLocalExplanation",
     "DPGTreePathExplanation",
+    "LocalDPG",
+    "LocalTrace",
+    "PivotPredicate",
+    "build_local_dpg",
+    "intervene",
     "DPG_COLORS",
     "DPG_CLASS_PALETTE",
     "DPG_OLIVE_CLASS_PALETTE",

@@ -1,0 +1,21 @@
+{
+  "dataset_name": "wine",
+  "source": "sklearn",
+  "openml_id": null,
+  "n_train": 142,
+  "n_test": 36,
+  "n_features": 13,
+  "n_classes": 3,
+  "class_counts_train": {
+    "0": 47,
+    "1": 57,
+    "2": 38
+  },
+  "class_counts_test": {
+    "0": 12,
+    "1": 14,
+    "2": 10
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

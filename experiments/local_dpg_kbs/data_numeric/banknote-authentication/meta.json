@@ -1,0 +1,19 @@
+{
+  "dataset_name": "banknote-authentication",
+  "source": "openml",
+  "openml_id": 1462,
+  "n_train": 1097,
+  "n_test": 275,
+  "n_features": 4,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 609,
+    "1": 488
+  },
+  "class_counts_test": {
+    "0": 153,
+    "1": 122
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

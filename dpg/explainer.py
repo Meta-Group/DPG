@@ -12,7 +12,8 @@ from sklearn.ensemble import (
     RandomForestRegressor,
 )
 
-from .core import DecisionPredicateGraph
+from .core import DecisionPredicateGraph, DPGError
+from .local_dpg import LocalDPG, build_local_dpg
 from .sklearn_normalizer import SklearnEnsembleNormalizer
 from .visualizer import (
     class_feature_predicate_counts,
@@ -369,6 +370,44 @@ class DPGExplainer:
             label_mode=label_mode,
             readability=readability,
             title=title,
+        )
+
+    def explain_local_dpg(
+        self,
+        sample: Any,
+        sample_id: Any = 0,
+        context_order: Any = "auto",
+        compute_pivots: bool = True,
+    ) -> LocalDPG:
+        """
+        Build a trace-indexed local DPG for one sample.
+
+        Unlike explain_local(), this does not consult the fitted global graph, so
+        fit() is only needed when decimal_threshold is "auto". The explained class
+        is always the model prediction; see dpg.local_dpg for details.
+
+        Args:
+            sample: One sample with the same feature dimension used to fit the model.
+            sample_id: Identifier to attach to the returned explanation.
+            context_order: "auto" for the smallest phantom-free local order, or a positive int.
+            compute_pivots: Whether to evaluate single-threshold crossings (critical predicate).
+        """
+        try:
+            decimal_threshold = self._builder.get_decimal_threshold()
+        except DPGError as exc:
+            raise ValueError(
+                "decimal_threshold='auto' is resolved by fit(); call fit(X) first "
+                "or configure an integer decimal_threshold."
+            ) from exc
+        return build_local_dpg(
+            self._original_model,
+            sample,
+            feature_names=self._builder.feature_names,
+            target_names=self._builder.target_names,
+            context_order=context_order,
+            decimal_threshold=decimal_threshold,
+            sample_id=sample_id,
+            compute_pivots=compute_pivots,
         )
 
     def local_path_dataframe(self, local_explanation: DPGLocalExplanation) -> Any:

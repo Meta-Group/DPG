@@ -59,3 +59,4 @@ experiments/results/
 experiments/local_explanation/results/
 wandb/
 .codex/
+!experiments/local_dpg_kbs/requirements.txt

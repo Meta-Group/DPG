@@ -1,0 +1,19 @@
+{
+  "dataset_name": "madelon",
+  "source": "openml",
+  "openml_id": 1485,
+  "n_train": 2080,
+  "n_test": 520,
+  "n_features": 500,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 1040,
+    "1": 1040
+  },
+  "class_counts_test": {
+    "0": 260,
+    "1": 260
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

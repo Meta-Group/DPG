@@ -1,0 +1,17 @@
+# Experiment environment for the KBS local-DPG study (Python 3.13).
+# Versions verified on 2026-10-09; the DPG package itself is installed from this checkout (pip install -e ../..).
+scikit-learn==1.8.0
+numpy==2.5.3
+pandas==3.0.6
+scipy==1.18.1
+networkx==3.7
+PyYAML==6.0.3
+graphviz==0.21
+matplotlib==3.11.2
+tqdm==4.70.1
+pytest==9.1.1
+# Baseline explainers (official implementations)
+shap==0.53.0
+lime==0.2.0.1
+anchor-exp==0.0.2.0
+lore-sa==1.1.3

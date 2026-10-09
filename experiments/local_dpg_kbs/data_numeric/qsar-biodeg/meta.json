@@ -1,0 +1,19 @@
+{
+  "dataset_name": "qsar-biodeg",
+  "source": "openml",
+  "openml_id": 1494,
+  "n_train": 844,
+  "n_test": 211,
+  "n_features": 41,
+  "n_classes": 2,
+  "class_counts_train": {
+    "0": 559,
+    "1": 285
+  },
+  "class_counts_test": {
+    "0": 140,
+    "1": 71
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

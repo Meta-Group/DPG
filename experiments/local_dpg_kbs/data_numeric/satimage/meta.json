@@ -1,0 +1,27 @@
+{
+  "dataset_name": "satimage",
+  "source": "openml",
+  "openml_id": 182,
+  "n_train": 5144,
+  "n_test": 1286,
+  "n_features": 36,
+  "n_classes": 6,
+  "class_counts_train": {
+    "0": 1225,
+    "1": 562,
+    "2": 1085,
+    "3": 500,
+    "4": 566,
+    "5": 1206
+  },
+  "class_counts_test": {
+    "0": 306,
+    "1": 141,
+    "2": 271,
+    "3": 125,
+    "4": 141,
+    "5": 302
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}

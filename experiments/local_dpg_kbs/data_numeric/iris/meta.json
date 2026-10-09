@@ -1,0 +1,21 @@
+{
+  "dataset_name": "iris",
+  "source": "sklearn",
+  "openml_id": null,
+  "n_train": 120,
+  "n_test": 30,
+  "n_features": 4,
+  "n_classes": 3,
+  "class_counts_train": {
+    "0": 40,
+    "1": 40,
+    "2": 40
+  },
+  "class_counts_test": {
+    "0": 10,
+    "1": 10,
+    "2": 10
+  },
+  "standardized": true,
+  "notes": "Numeric-only enforced; non-numeric datasets skipped. y label-encoded to 0..C-1."
+}
