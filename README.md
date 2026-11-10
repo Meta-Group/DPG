@@ -5,7 +5,7 @@
 [![Python Versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![Tests](https://github.com/Meta-Group/DPG/actions/workflows/tests.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/tests.yml)
 [![Release](https://github.com/Meta-Group/DPG/actions/workflows/release.yml/badge.svg)](https://github.com/Meta-Group/DPG/actions/workflows/release.yml)
-[![Documentation Status](https://app.readthedocs.org/projects/dpg/badge/?version=latest)](https://dpg.readthedocs.io/en/latest/)
+[![Documentation Status](https://img.shields.io/readthedocs/dpg)](https://dpg.readthedocs.io/en/latest/)
 [![Try the DPG sandbox](https://img.shields.io/badge/DPG%20sandbox-Try%20it%20in%20browser-4B5E27?logo=googlechrome&logoColor=white)](https://machinelearning.inginf.units.it/DPG_web/#how)
 
 <p align="center">
